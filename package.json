@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "@inquirer/prompts": "^7.8.1",
+    "@oclif/core": "^4.5.2"
+  },
+  "bin": {
+    "trg-devcontianer-cli": "./bin/run.js"
+  },
+  "oclif": {
+    "bin": "trg-devcontianer-cli",
+    "commands": "./dist/commands",
+    "dirname": "trg-devcontianer-cli",
+    "topicSeparator": ":"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.122",
+    "ts-node": "^10.9.2"
+  }
+}
