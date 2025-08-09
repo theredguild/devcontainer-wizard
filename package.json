@@ -4,13 +4,13 @@
     "@oclif/core": "^4.5.2"
   },
   "bin": {
-    "trg-devcontianer-cli": "./bin/run.js"
+    "web3-devcontainer-cli": "./bin/run.js"
   },
   "oclif": {
-    "bin": "trg-devcontianer-cli",
+    "bin": "web3-devcontainer-cli",
     "commands": "./dist/commands",
-    "dirname": "trg-devcontianer-cli",
-    "topicSeparator": ":"
+    "dirname": "web3-devcontainer-cli",
+    "topicSeparator": " "
   },
   "devDependencies": {
     "@types/node": "^18.19.122",
