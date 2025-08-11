@@ -1,4 +1,8 @@
 {
+  "name": "web3-devcontainer-cli",
+  "version": "0.1.0",
+  "description": "A CLI to setup a full equipped web3 dev container.",
+  "license": "MIT",
   "dependencies": {
     "@inquirer/prompts": "^7.8.1",
     "@oclif/core": "^4.5.2"
@@ -8,12 +12,24 @@
   },
   "oclif": {
     "bin": "web3-devcontainer-cli",
-    "commands": "./dist/commands",
+    "commands": "./src/commands",
+    "tsconfig": "./tsconfig.json",
     "dirname": "web3-devcontainer-cli",
     "topicSeparator": " "
   },
+  "files": [
+    "bin/",
+    "dist/",
+    "src/",
+    ".devcontainer/"
+  ],
+  "scripts": {
+    "dev": "node ./bin/dev.js"
+  },
   "devDependencies": {
     "@types/node": "^18.19.122",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.2"
   }
 }
