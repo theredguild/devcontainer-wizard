@@ -1,5 +1,6 @@
 import { select, Separator } from '@inquirer/prompts'
 import { devcontainerUp } from '@/shared/devcontainerUp'
+import { openIn } from '@/shared/openIn'
 
 export async function selectList() {
     const selected = await select({
@@ -39,13 +40,7 @@ export async function selectList() {
         }
     ]});
 
-    const openIn = await select({
-      message: 'Select an interface to attach to the devcontainer:',
-      choices: [
-        { name: 'Terminal', value: 'shell' },
-        { name: 'VS Code', value: 'code', disabled: true },
-      ],
-    })
+    const openInSelection = await openIn()
 
-    await devcontainerUp(selected, openIn)
+    await devcontainerUp(selected, openInSelection)
 }

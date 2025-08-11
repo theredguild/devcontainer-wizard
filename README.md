@@ -51,7 +51,7 @@
 ### Start prebuilt containers
 
 ```bash
-web3-devcontainer-cli select [CONTAINER]
+web3-devcontainer-cli prebuilt [CONTAINER]
 ```
 
 #### Github Codespaces

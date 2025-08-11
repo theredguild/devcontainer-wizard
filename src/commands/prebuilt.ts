@@ -2,6 +2,7 @@ import {Args, Command} from '@oclif/core'
 import { selectList } from '../shared/selectList'
 import { devcontainerUp } from '../shared/devcontainerUp'
 import { select } from '@inquirer/prompts'
+import { openIn } from '@/shared/openIn'
 
 export default class Prebuilt extends Command {
 
@@ -36,14 +37,8 @@ export default class Prebuilt extends Command {
       return;
     }
 
-    const openIn = await select({
-      message: 'Select an interface to attach to the devcontainer:',
-      choices: [
-        { name: 'Terminal', value: 'shell' },
-        { name: 'VS Code', value: 'code', disabled: true },
-      ],
-    });
+    const openInSelection = await openIn()
 
-    await devcontainerUp(containerConfig, openIn);
+    await devcontainerUp(containerConfig, openInSelection);
   }
 }
