@@ -1,5 +1,5 @@
-import {Args, Command, Flags} from '@oclif/core'
-import { prebuilt } from '../prebuilt'
+import {Args, Command} from '@oclif/core'
+import { prebuilt } from '../shared/prebuilt'
 
 export default class Select extends Command {
 
@@ -10,20 +10,10 @@ export default class Select extends Command {
   static override examples = [
     '<%= config.bin %> <%= command.id %>',
   ]
-  static override flags = {
-    // flag with no value (-f, --force)
-    force: Flags.boolean({char: 'f'}),
-    // flag with a value (-n, --name=VALUE)
-    name: Flags.string({char: 'n', description: 'name to print'}),
-  }
 
   public async run(): Promise<void> {
-    const {args, flags} = await this.parse(Select)
+    const {args} = await this.parse(Select)
 
     prebuilt();
-
-    if (args.file && flags.force) {
-      this.log(`you input --force and --file: ${args.file}`)
-    }
   }
 }

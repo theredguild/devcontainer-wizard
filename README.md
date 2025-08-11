@@ -18,8 +18,7 @@
     yarn global add @devcontainers/cli
     ```
 
-2. [VS Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed.
-
+2. For use with [VS Code](https://code.visualstudio.com/) you need to install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers). We recommend reading the [Dev Containers documentation](https://code.visualstudio.com/docs/devcontainers/containers) for more information.
 
 ### Full requirements to run Dev Containers
 

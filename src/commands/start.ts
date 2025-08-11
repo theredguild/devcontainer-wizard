@@ -1,5 +1,5 @@
 import {Command} from '@oclif/core'
-import { prebuilt } from '@/prebuilt'
+import { prebuilt } from '@/shared/prebuilt'
 import { select } from '@inquirer/prompts'
 //import { lotus } from '@/art/lotus'
 

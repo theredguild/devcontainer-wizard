@@ -7,6 +7,11 @@
         "ghcr.io/devcontainers/features/github-cli:1": {}
     },
     
+    "containerEnv": {
+        "SHELL": "/bin/bash",
+        "DEVCONTAINER_ID_LABEL": "minimal-web3-devcontainer"
+    },
+
     "customizations": {
         "vscode": {
             "extensions": [
@@ -22,7 +27,7 @@
     
     "forwardPorts": [3000, 8545],
     
-    "initializeCommand": "echo 'Initializing minimal development environment...'",
+    "initializeCommand": "echo 'Initializing minimal dev container...'",
     
     "postCreateCommand": "bash -c 'curl -L https://foundry.paradigm.xyz | bash && export PATH=\"$HOME/.foundry/bin:$PATH\" && foundryup && npm install -g hardhat && npm install @openzeppelin/contracts'",   
     
