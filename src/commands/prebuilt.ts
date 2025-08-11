@@ -1,7 +1,6 @@
 import {Args, Command} from '@oclif/core'
 import { selectList } from '../shared/selectList'
 import { devcontainerUp } from '../shared/devcontainerUp'
-import { select } from '@inquirer/prompts'
 import { openIn } from '@/shared/openIn'
 
 export default class Prebuilt extends Command {

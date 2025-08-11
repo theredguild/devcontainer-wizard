@@ -33,6 +33,39 @@
 - **Permissions**: Ability to run containers (e.g., membership in the `docker` group on Linux, or run with `sudo`).
 - **Network access**: To pull base images and extensions on first run.
 
+## Install
+
+```bash
+pnpm install -g TBD
+```
+
+```bash
+npm install -g TBD
+``` 
+
+```bash
+yarn global add TBD
+```
+
+## Usage
+
+### Create your own devcontainer
+
+```bash
+web3-devcontainer-cli create
+```
+
+### Start prebuilt containers
+
+```bash
+web3-devcontainer-cli prebuilt [CONTAINER]
+```
+
+#### Github Codespaces  
+
+You can also run prebuilt containers using GitHub Codespaces: 
+
+[![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&template_repository=theredguild/web3-devcontainer-cli)
 
 ## Pre-built containers
 
@@ -46,16 +79,3 @@
 
 ### Paranoid
 
-## Usage
-
-### Start prebuilt containers
-
-```bash
-web3-devcontainer-cli prebuilt [CONTAINER]
-```
-
-#### Github Codespaces
-
-You can also run our prebuilt containers using GitHub Codespaces: 
-
-[![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&template_repository=theredguild/web3-devcontainer-cli)

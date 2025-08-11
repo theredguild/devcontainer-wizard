@@ -9,13 +9,7 @@ export async function selectList() {
         {
           name: 'Minimal 🧶',
           value: ".devcontainer/minimal/devcontainer.json",
-          description: 'Contains a beginner friendly enviroment',
-          disabled: false
-        },
-        {
-          name: 'The Red Guild 🪷',
-          value: ".devcontainer/theredguild/devcontainer.json",
-          description: 'The Red Guild devcontainer',
+          description: 'Contains a beginner friendly enviroment.',
           disabled: false
         },
         {
@@ -23,6 +17,12 @@ export async function selectList() {
           value: ".devcontainer/auditor/devcontainer.json",
           description: 'Contains an audit-ready environment.',
           disabled: false,
+        },
+        {
+          name: 'The Red Guild 🪷',
+          value: ".devcontainer/theredguild/devcontainer.json",
+          description: 'The Red Guild\'s original devcontainer.',
+          disabled: false
         },
         new Separator(),
         // TODO: Add the following configurations
