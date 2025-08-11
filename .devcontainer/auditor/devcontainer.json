@@ -1,0 +1,42 @@
+{
+    "name": "Auditor",
+    "build": {
+        "dockerfile": "./Dockerfile"
+    },
+    
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers/features/docker-in-docker:1": {
+            "version": "latest",
+            "enableNonRootDocker": "true"
+        }
+    },
+    
+    "customizations": {
+        "vscode": {
+            "extensions": [ 
+                "NomicFoundation.hardhat-solidity",
+                "tintinweb.solidity-visual-auditor",
+                "tintinweb.solidity-metrics",
+                "trailofbits.weaudit",
+                "eamodio.gitlens",
+                "streetsidesoftware.code-spell-checker",
+                "ms-vscode.vscode-json"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "solidity-va.hover": true,
+                "solidity-va.diagnostics": true
+            }
+        }
+    },
+    
+    "remoteUser": "vscode",
+    
+    "mounts": [
+        "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
+    ],
+    
+    "workspaceFolder": "/workspace"
+}

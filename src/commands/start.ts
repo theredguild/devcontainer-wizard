@@ -1,5 +1,5 @@
 import {Command} from '@oclif/core'
-import { prebuilt } from '@/shared/prebuilt'
+import { selectList } from '@/shared/selectList'
 import { select } from '@inquirer/prompts'
 //import { lotus } from '@/art/lotus'
 
@@ -19,15 +19,15 @@ export default class Start extends Command {
     
 
     const selected = await select({
-      message: 'You can start with a pre-built container or create your own',
+      message: 'You can select a pre-built container or create your own',
       choices: [
         { name: 'Pre-built', value: 'pre-built' },
-        { name: 'Custom', value: 'custom', disabled: '(Coming soon)'},
+        { name: 'Create your own', value: 'custom', disabled: '(Coming soon)'},
       ],
     })
 
     if (selected === 'pre-built') {
-      await prebuilt()
+      await selectList()
     }
 
   }

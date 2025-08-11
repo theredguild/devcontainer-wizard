@@ -1,15 +1,14 @@
-import { spawn } from 'node:child_process'
 import { select, Separator } from '@inquirer/prompts'
 import { devcontainerUp } from '@/shared/devcontainerUp'
 
-export async function prebuilt() {
+export async function selectList() {
     const selected = await select({
     message: 'Select a pre-built container to start:',
     choices: [
         {
           name: 'Minimal 🧶',
           value: ".devcontainer/minimal/devcontainer.json",
-          description: 'Minimal configuration contains a beginner friendly enviroment',
+          description: 'Contains a beginner friendly enviroment',
           disabled: false
         },
         {
@@ -18,14 +17,14 @@ export async function prebuilt() {
           description: 'The Red Guild devcontainer',
           disabled: false
         },
-        new Separator(),
-        // TODO: Add the following configurations
         {
           name: 'Auditor 🔍',
           value: ".devcontainer/auditor/devcontainer.json",
-          description: 'Auditor devcontainer',
-          disabled: '(this configuration is not released yet)',
+          description: 'Contains an audit-ready environment.',
+          disabled: false,
         },
+        new Separator(),
+        // TODO: Add the following configurations
         {
           name: 'Hardened 🛡️',
           value: ".devcontainer/hardened/devcontainer.json",
