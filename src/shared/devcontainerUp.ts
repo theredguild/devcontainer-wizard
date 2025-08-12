@@ -1,17 +1,13 @@
 import { spawn } from 'node:child_process'
 
-/**
- * Brings up a dev container and optionally opens it in VS Code or attaches a shell.
- * @param devcontainerConfig - Path to the devcontainer.json file.
- * @param openIn - 'code' to open in VS Code, otherwise attaches a shell.
- */
+
 export async function devcontainerUp(devcontainerConfig: string, openIn: string) {
   // --- Step 1: Run 'devcontainer up' and capture its JSON output ---
   const { containerId } = await new Promise<{ containerId: string; }>((resolve, reject) => {
     const child = spawn(
       'devcontainer',
-      // Using --id-label to ensure we can find the container later if needed.
-      // The command will output a JSON object with details upon completion.
+          // Using --id-label to ensure we can find the container later if needed.
+          // The command will output a JSON object with details upon completion.
       ['up', '--config', devcontainerConfig, '--workspace-folder', '.']
     );
 
@@ -66,7 +62,14 @@ export async function devcontainerUp(devcontainerConfig: string, openIn: string)
     await new Promise<void>((resolve, reject) => {
       const exec = spawn(
         'devcontainer',
-        ['exec', '--container-id', containerId, 'bash', '-l'],
+        [
+          'exec',
+          '--container-id',
+          containerId,
+          'bash',
+          '-lc',
+          'cd /workspace && exec bash -l'
+        ],
         { stdio: 'inherit' }
       );
 

@@ -71,11 +71,10 @@ You can also run prebuilt containers using GitHub Codespaces:
 
 ### Minimal
 
-### The Red Guild
-
 ### Auditor
 
 ### Hardened
 
 ### Paranoid
 
+### The Red Guild
