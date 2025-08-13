@@ -1,7 +1,7 @@
-import { CheckBoxTheme } from "@/types";
+import { SelectTheme } from "@/types";
 import { brand, icons, spinner } from "@/styling/colors";
 
-export const checkboxStyle: CheckBoxTheme = {
+export const selectStyle: SelectTheme = {
   prefix: {
     idle: icons.prefixIdle,
     done: icons.prefixDone,
@@ -15,19 +15,14 @@ export const checkboxStyle: CheckBoxTheme = {
       return brand.primary(text);
     },
     error: (text) => brand.error(text),
-    defaultAnswer: (text) => brand.muted(text),
     help: (text) => brand.muted(text),
     highlight: (text) => brand.gold(brand.bold(text)),
-    key: (text) => brand.accent(text),
-    disabledChoice: (text) => brand.muted(text),
     description: (text) => brand.muted(text),
-    renderSelectedChoices: (selectedChoices) =>
-      `${brand.success('✔')} ${brand.bold(String(selectedChoices.length))} selected`,
+    disabled: (text) => brand.muted(text),
   },
   icon: {
-    checked: icons.checked,
-    unchecked: icons.unchecked,
     cursor: icons.cursor,
   },
   helpMode: 'auto',
+  indexMode: 'hidden',
 };

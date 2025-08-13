@@ -1,19 +1,28 @@
-import {Command} from '@oclif/core'
-import { languages } from '@/wizard/languages'
-import { frameworks } from '@/wizard/frameworks'
-import { fuzzingAndTesting } from '@/wizard/fuzzingTesting'
-import { securityTooling } from '@/wizard/securityTooling'
-import { systemHardening } from '@/wizard/systemHardening'
-import { vibeCoding } from '@/wizard/vibeCoding'
-import { vscodeExtensions } from '@/wizard/vscodeExtensions'
+import {Args, Command} from '@oclif/core'
+import {
+  languages,
+  frameworks,
+  fuzzingAndTesting,
+  securityTooling,
+  systemHardening,
+  vibeCoding,
+  vscodeExtensions,
+  savePath,
+  devcontainerName,
+} from '@/wizard'
 
 export default class Create extends Command {
+  static override args = {
+    name: Args.string({ description: 'Optional devcontainer name' }),
+  }
   static override description = 'Create a Solidity-focused devcontainer via an interactive wizard'
   static override examples = [
     '<%= config.bin %> <%= command.id %>'
   ]
 
   public async run(): Promise<void> {
+    const { args } = await this.parse(Create)
+    const selectedDevcontainerName = args.name ?? await devcontainerName()
     const selectedLanguages = await languages()
     const selectedFrameworks = await frameworks()
     const selectedFuzzingTesting = await fuzzingAndTesting()
@@ -21,8 +30,10 @@ export default class Create extends Command {
     const selectedSystemHardening = await systemHardening()
     const selectedVibeCoding = await vibeCoding()
     const selectedVscodeExtensions = await vscodeExtensions()
+    const selectedSavePath = await savePath()
 
     this.log(JSON.stringify({
+      name: selectedDevcontainerName,
       languages: selectedLanguages,
       frameworks: selectedFrameworks,
       fuzzingAndTesting: selectedFuzzingTesting,
@@ -30,6 +41,7 @@ export default class Create extends Command {
       systemHardening: selectedSystemHardening,
       vibeCoding: selectedVibeCoding,
       vscodeExtensions: selectedVscodeExtensions,
+      savePath: selectedSavePath,
     }, null, 2))
   }
 }

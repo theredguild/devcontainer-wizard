@@ -61,6 +61,14 @@ web3-devcontainer-cli create
 web3-devcontainer-cli prebuilt [CONTAINER]
 ```
 
+List available options:
+
+```bash
+web3-devcontainer-cli prebuilt --list
+# or
+web3-devcontainer-cli prebuilt -l
+```
+
 #### Github Codespaces  
 
 You can also run prebuilt containers using GitHub Codespaces: 

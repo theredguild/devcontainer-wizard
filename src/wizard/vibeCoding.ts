@@ -11,7 +11,7 @@ export async function vibeCoding() {
       { name: "Cursor Agent (CLI)", value: "cursor-agent", description: "Automatically installs: node, pnpm (package manager)" },
       { name: "Claude Code", value: "claude-code", description: "Automatically installs: node, pnpm (package manager)" },
       { name: "Gemini Code", value: "gemini-code", description: "Automatically installs: curl" },
-      { name: "Github Copilot (CLI)", value: "github-copilot", description: "Automatically installs: node, pnpm (package manager), curl" },
+      { name: "Github Copilot (VS Code extension)", value: "github-copilot", description: "Automatically installs: node, pnpm (package manager), curl" },
     ],
   });
 }

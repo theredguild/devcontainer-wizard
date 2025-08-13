@@ -2,35 +2,26 @@ import { checkbox, confirm, Separator } from "@inquirer/prompts";
 import { checkboxStyle } from "@/styling/checkboxStyle";
 
 const recommendedExtensions = [
-  // Solidity and Web3
-  "JuanBlanco.solidity",
-  "NomicFoundation.hardhat-solidity",
-  "tintinweb.solidity-visual-auditor",
-  // Python
-  "ms-python.python",
-  // JavaScript/TypeScript
-  "dbaeumer.vscode-eslint",
-  "esbenp.prettier-vscode",
-  // Git and utilities
-  "eamodio.gitlens",
-  "editorconfig.editorconfig",
-  // Dev containers and Docker
-  "ms-vscode-remote.remote-containers",
-  "ms-azuretools.vscode-docker",
+        "tintinweb.ethereum-security-bundle",
+        "tintinweb.vscode-ethover",
+        "trailofbits.weaudit",
+        "tintinweb.vscode-inline-bookmarks", 
+        "tintinweb.vscode-solidity-language",
+        "tintinweb.graphviz-interactive-preview",
+        "NomicFoundation.hardhat-solidity",
+        "Olympixai.olympix",
+        "trailofbits.contract-explorer",
+        "tintinweb.vscode-decompiler" // dependency for panoramix
 ];
 
 const additionalExtensions = [
-  // Testing, UX, extras
-  "streetsidesoftware.code-spell-checker",
-  "gruntfuggly.todo-tree",
-  "ms-vsliveshare.vsliveshare",
-  "tamasfe.even-better-toml",
-  "bierner.markdown-preview-github-styles",
+  "// Testing, UX, extras"
 ];
 
 export async function vscodeExtensions(): Promise<string[]> {
   const autoInstall = await confirm({
     message: "Do you want to automatically install recommended VS Code extensions?",
+    theme: checkboxStyle,
     default: true,
   });
 

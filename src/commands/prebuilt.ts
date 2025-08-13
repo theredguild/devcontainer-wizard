@@ -1,12 +1,20 @@
-import {Args, Command} from '@oclif/core'
+import {Args, Command, Flags} from '@oclif/core'
 import { selectList } from '../shared/selectList'
 import { devcontainerUp } from '../shared/devcontainerUp'
 import { openIn } from '@/shared/openIn'
+import { brand } from '@/styling/colors'
 
 export default class Prebuilt extends Command {
 
   static override args = {
     container: Args.string({description: 'Container name to start (minimal, theredguild, auditor)'}),
+  }
+  static override flags = {
+    list: Flags.boolean({
+      char: 'l',
+      description: 'List available pre-built containers and exit',
+      default: false,
+    }),
   }
   static override description = 'Select a pre-built development container'
   static override examples = [
@@ -23,16 +31,26 @@ export default class Prebuilt extends Command {
   }
 
   public async run(): Promise<void> {
-    const {args} = await this.parse(Prebuilt)
+    const {args, flags} = await this.parse(Prebuilt)
+
+    if (flags.list) {
+      this.log(brand.primary(brand.bold('Available pre-built devcontainers:')))
+      for (const key of Object.keys(this.containerMap)) {
+        const path = this.containerMap[key]
+        this.log(`  - ${brand.bold(key)} ${brand.muted(`(${path})`)}`)
+      }
+      return
+    }
 
     if (!args.container) {
+      this.log(brand.primary(brand.bold('Select a pre-built devcontainer')))
       await selectList();
       return;
     }
 
     const containerConfig = this.containerMap[args.container.toLowerCase()];
     if (!containerConfig) {
-      this.error(`Container "${args.container}" not found. Available containers: ${Object.keys(this.containerMap).join(', ')}`);
+      this.error(brand.error(`Container "${args.container}" not found. Available containers: ${Object.keys(this.containerMap).join(', ')}`));
       return;
     }
 
