@@ -52,7 +52,7 @@ yarn global add TBD
 ### Create your own devcontainer
 
 ```bash
-web3-devcontainer-cli create
+web3-devcontainer-cli create [NAME]
 ```
 
 ### Start prebuilt containers
@@ -83,6 +83,10 @@ You can also run prebuilt containers using GitHub Codespaces:
 
 ### Hardened
 
+-- WIP --
+
 ### Paranoid
+
+-- WIP --
 
 ### The Red Guild

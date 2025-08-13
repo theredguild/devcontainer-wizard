@@ -7,7 +7,7 @@
     "features": {
         "ghcr.io/devcontainers/features/git:1": {},
         "ghcr.io/devcontainers/features/github-cli:1": {},
-        "ghcr.io/devcontainers/features/docker-in-docker:1": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2.12.2": {
             "version": "latest",
             "enableNonRootDocker": "true"
         }
@@ -22,7 +22,8 @@
                 "trailofbits.weaudit",
                 "eamodio.gitlens",
                 "streetsidesoftware.code-spell-checker",
-                "ms-vscode.vscode-json"
+                "ms-vscode.vscode-json",
+                "tintinweb.chonky"
             ],
             "settings": {
                 "terminal.integrated.defaultProfile.linux": "bash",

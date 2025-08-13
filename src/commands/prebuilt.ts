@@ -54,8 +54,14 @@ export default class Prebuilt extends Command {
       return;
     }
 
+    console.log(`🚀 Starting ${args.container} devcontainer...`);
     const openInSelection = await openIn()
 
-    await devcontainerUp(containerConfig, openInSelection);
+    try {
+      await devcontainerUp(containerConfig, openInSelection);
+      console.log('✨ Devcontainer started successfully!');
+    } catch (error) {
+      this.error(`Failed to start devcontainer: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 }

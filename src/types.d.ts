@@ -63,3 +63,20 @@ export type CheckBoxTheme = {
     };
     helpMode: 'always' | 'never' | 'auto';
   };
+
+  export type Runtime = 'rust' | 'python' | 'go' | 'node' | 'uv' | 'asdf' | 'pnpm';
+
+  export type Selection = {
+    languages: string[];
+    frameworks: string[];
+    fuzzingAndTesting: string[];
+    securityTooling: string[];
+  };
+
+export type WizardState = Selection & {
+  name: string
+  vscodeExtensions: string[]
+  savePath: string
+  systemHardening: string[]
+}
+

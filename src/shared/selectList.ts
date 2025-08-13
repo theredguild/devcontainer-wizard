@@ -27,7 +27,6 @@ export async function selectList() {
           disabled: false
         },
         new Separator(),
-        // TODO: Add the following configurations
         {
           name: 'Hardened 🛡️',
           value: ".devcontainer/hardened/devcontainer.json",
@@ -42,7 +41,14 @@ export async function selectList() {
         }
     ]});
 
+    console.log('🚀 Starting selected devcontainer...');
     const openInSelection = await openIn()
 
-    await devcontainerUp(selected, openInSelection)
+    try {
+      await devcontainerUp(selected, openInSelection);
+      console.log('✨ Devcontainer started successfully!');
+    } catch (error) {
+      console.error('❌ Failed to start devcontainer:', error instanceof Error ? error.message : String(error));
+      throw error;
+    }
 }

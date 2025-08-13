@@ -11,11 +11,7 @@ const recommendedExtensions = [
         "NomicFoundation.hardhat-solidity",
         "Olympixai.olympix",
         "trailofbits.contract-explorer",
-        "tintinweb.vscode-decompiler" // dependency for panoramix
-];
-
-const additionalExtensions = [
-  "// Testing, UX, extras"
+        "tintinweb.vscode-decompiler" 
 ];
 
 export async function vscodeExtensions(): Promise<string[]> {
@@ -34,9 +30,7 @@ export async function vscodeExtensions(): Promise<string[]> {
     theme: checkboxStyle,
     choices: [
       new Separator("Recommended"),
-      ...recommendedExtensions.map((ext) => ({ name: ext, value: ext })),
-      new Separator("Additional"),
-      ...additionalExtensions.map((ext) => ({ name: ext, value: ext })),
+      ...recommendedExtensions.map((ext) => ({ name: ext, value: ext }))
     ],
   });
 
