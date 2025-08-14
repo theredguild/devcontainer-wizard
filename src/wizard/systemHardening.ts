@@ -8,6 +8,7 @@ export async function systemHardening() {
     choices: [
       { name: "Read-only file system", value: "readonly-fs", description: "Mounts the file system as read-only" },
       { name: "Workspace isolation", value: "workspace-isolation", description: "Uses tmpfs mount to isolate workspace from host" },
+      { name: "Workspace isolation (without writing access)", value: "workspace-isolation-nowrite", description: "Uses tmpfs mount to isolate workspace from host (no writing access)" },
       { name: "Secure temp directories", value: "secure-tmp", description: "Creates temp dirs with noexec, nosuid flags" },
       { name: "Drop all capabilities", value: "drop-caps", description: "Removes all Linux capabilities from container" },
       { name: "No new privileges", value: "no-new-privs", description: "Prevents privilege escalation through SUID/SGID" },

@@ -291,8 +291,11 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
 
   // Workspace mounting strategy
   if (selectedHardening.has('workspace-isolation')) {
-    devcontainerConfig.workspaceMount = "type=tmpfs,destination=/workspace";
+    devcontainerConfig.workspaceMount = "type=tmpfs,destination=/workspace,tmpfs-mode=1777";
     console.log('🔒 Applied workspace isolation (tmpfs mount)');
+  } else if (selectedHardening.has('workspace-isolation-nowrite')) {
+    devcontainerConfig.workspaceMount = "type=tmpfs,destination=/workspace";
+    console.log('🔒 Applied workspace isolation without writing (tmpfs mount)');
   } else if (selectedHardening.has('readonly-fs')) {
     devcontainerConfig.workspaceMount = "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached,readonly";
     console.log('🔒 Applied read-only workspace bind mount');
