@@ -56,8 +56,8 @@ RUN echo 'Echidna installed via multi-stage build' && \\
   ityfuzz: `
 # Install ItyFuzz
 RUN curl -fsSL https://ity.fuzz.land/ | zsh && \
-    echo 'export PATH=$HOME/.foundry/bin:$PATH"' >> ~/.zshrc && \
-    export PATH=$HOME/.foundry/bin:$PATH&& \
+    echo 'export "PATH=$HOME/.ityfuzz/bin:$PATH"' >> ~/.zshrc && \
+    export PATH=$HOME/.ityfuzz/bin:$PATH&& \
     ~/.ityfuzz/bin/ityfuzzup
   `,
   medusa: `
@@ -134,8 +134,7 @@ RUN uv tool install solc-select && \
 RUN /bin/zsh -c "curl -fsSL https://raw.githubusercontent.com/Cyfrin/up/main/install | zsh" && \
     echo 'export PATH="$HOME/.cyfrin/bin:$PATH"' >> ~/.zshrc
 ENV PATH="/home/vscode/.cyfrin/bin:$PATH"
-RUN /bin/zsh -c "source ~/.zshrc && (~/.cyfrin/bin/cyfrinup || cyfrinup)"p
-  `
+RUN /bin/zsh -c "source ~/.zshrc && (~/.cyfrin/bin/cyfrinup || cyfrinup)"`
 };
 
 export type ToolKey = keyof typeof INSTALL_COMMANDS;
