@@ -1,17 +1,19 @@
 import { checkbox, confirm, Separator } from "@inquirer/prompts";
 import { checkboxStyle } from "@/styling/checkboxStyle";
 
-const recommendedExtensions = [
-        "tintinweb.ethereum-security-bundle",
-        "tintinweb.vscode-ethover",
-        "trailofbits.weaudit",
-        "tintinweb.vscode-inline-bookmarks", 
-        "tintinweb.vscode-solidity-language",
-        "tintinweb.graphviz-interactive-preview",
-        "NomicFoundation.hardhat-solidity",
-        "Olympixai.olympix",
-        "trailofbits.contract-explorer",
-        "tintinweb.vscode-decompiler" 
+type VscodeExtension = { id: string; name: string };
+
+const recommendedExtensions: VscodeExtension[] = [
+  { id: "tintinweb.ethereum-security-bundle", name: "Tintin's Ethereum Security Bundle" },
+  { id: "tintinweb.vscode-ethover", name: "Tintin's EthOver" },
+  { id: "trailofbits.weaudit", name: "WeAudit" },
+  { id: "tintinweb.vscode-inline-bookmarks", name: "Tintin's Inline Bookmarks" },
+  { id: "tintinweb.vscode-solidity-language", name: "Tintin's Solidity Language Tools" },
+  { id: "tintinweb.graphviz-interactive-preview", name: "Tintin's Graphviz Interactive Preview" },
+  { id: "NomicFoundation.hardhat-solidity", name: "Nomic's Solidity + Hardhat" },
+  { id: "Olympixai.olympix", name: "Olympix" },
+  { id: "trailofbits.contract-explorer", name: "Trail of Bits Contract Explorer" },
+  { id: "tintinweb.vscode-decompiler", name: "Tintin's Smart Contract Decompiler" },
 ];
 
 export async function vscodeExtensions(): Promise<string[]> {
@@ -22,7 +24,7 @@ export async function vscodeExtensions(): Promise<string[]> {
   });
 
   if (autoInstall) {
-    return recommendedExtensions;
+    return recommendedExtensions.map((ext) => ext.id);
   }
 
   const selected = await checkbox({
@@ -30,7 +32,7 @@ export async function vscodeExtensions(): Promise<string[]> {
     theme: checkboxStyle,
     choices: [
       new Separator("Recommended"),
-      ...recommendedExtensions.map((ext) => ({ name: ext, value: ext }))
+      ...recommendedExtensions.map((ext) => ({ name: ext.name, value: ext.id })),
     ],
   });
 
