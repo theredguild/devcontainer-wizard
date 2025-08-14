@@ -6,20 +6,15 @@
 # TODO: "Ensure the base image uses a non latest version tag"
 FROM --platform=linux/amd64 ghcr.io/crytic/echidna/echidna:latest AS echidna
 
-# Grab at least python 3.12
-FROM python:3.12-slim as python-base
-
 # Base debian build (latest).
 FROM mcr.microsoft.com/vscode/devcontainers/base:debian
 
 # Switch to root (the default might be root anyway)
 USER root
 
-COPY --from=python-base /usr/local /usr/local
-
 # Super basic stuff to get everything started
 RUN apt-get update -y && apt-get install -y \
-    zsh python3-dev libpython3-dev build-essential vim curl git sudo pkg-config \
+    zsh python3-pip python3-venv python3-dev libpython3-dev build-essential vim curl git sudo pkg-config \
     --no-install-recommends
 
 # The base container usually has a “vscode” user. If not, create one here.
