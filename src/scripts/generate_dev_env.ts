@@ -121,7 +121,7 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   }
   
   dockerfileContent.push(
-    "# Base image: Ubuntu 24.04 ",
+    "# Base image: Debian 12",
     "FROM mcr.microsoft.com/vscode/devcontainers/base:bookworm",
     ""
   );
@@ -186,12 +186,11 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   
   for (const dep of coreRuntimeOrder) {
     if (requiredDeps.has(dep)) {
-      dockerfileContent.push(`# Install ${dep}`);
       dockerfileContent.push(INSTALL_COMMANDS[dep]);
       dockerfileContent.push("");
     }
   }
-  const alreadyInstalledTools = [...coreRuntimeOrder, 'python']; // Skip already installed tools
+  const alreadyInstalledTools = [...coreRuntimeOrder, 'python'];
   
   for (const tool of Array.from(requiredDeps)) {
     if (!alreadyInstalledTools.includes(tool)) {
