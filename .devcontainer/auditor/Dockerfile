@@ -35,9 +35,6 @@ ENV PIP_BREAK_SYSTEM_PACKAGES=1
 # Install uv package manager"
 RUN python3 -m pip install --no-cache-dir --upgrade uv
 
-# Set asdf manager version
-ENV ASDF_VERSION=v0.15.0
-
 # Set the default shell to zsh
 ENV SHELL=/usr/bin/zsh
 
@@ -45,7 +42,7 @@ ENV SHELL=/usr/bin/zsh
 SHELL ["/usr/bin/zsh", "-ic"]
 
 # Install golang's latest version through asdf
-RUN git clone https://github.com/asdf-vm/asdf.git $HOME/.asdf --branch ${ASDF_VERSION}  && \
+RUN git clone https://github.com/asdf-vm/asdf.git $HOME/.asdf --branch v0.15.0  && \
     echo '. $HOME/.asdf/asdf.sh' >> $HOME/.zshrc && \
     echo 'fpath=(${ASDF_DIR}/completions $fpath)' >> $HOME/.zshrc && \
     echo 'autoload -Uz compinit && compinit' >> $HOME/.zshrc && \
