@@ -72,9 +72,12 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
       requiredDeps.add(tool as ToolKey);
       // Add dependencies for specific tools
       if (['echidna', 'medusa'].includes(tool)) {
+        requiredDeps.add('go');
+      }
+      if (tool === 'ityfuzz' || tool === 'aderyn') {
         requiredDeps.add('rust');
       }
-      if (['halmos', 'slither'].includes(tool)) {
+      if (tool === 'halmos') {
         requiredDeps.add('python');
       }
     }
@@ -273,10 +276,7 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
         }
       }
     },
-    
-    // Disables mounting the host workspace into the container.
-    "workspaceMount": "type=tmpfs,destination=/workspace",
-    
+
     // Lifecycle commands
     initializeCommand: `echo 'Initializing ${projectName} dev container...'`,
     postCreateCommand: "echo '🎉 Dev container created successfully!'",
@@ -285,13 +285,75 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
     // Workspace configuration
     workspaceFolder: "/workspace"
   };
-  
+
   // Apply system hardening options
-  if (config.systemHardening?.includes('readonly-fs')) {
+  const selectedHardening = new Set(config.systemHardening || []);
+
+  // Workspace mounting strategy
+  if (selectedHardening.has('workspace-isolation')) {
+    devcontainerConfig.workspaceMount = "type=tmpfs,destination=/workspace";
+    console.log('🔒 Applied workspace isolation (tmpfs mount)');
+  } else if (selectedHardening.has('readonly-fs')) {
     devcontainerConfig.workspaceMount = "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached,readonly";
-    console.log('🔒 Applied read-only file system hardening');
+    console.log('🔒 Applied read-only workspace bind mount');
   } else {
     devcontainerConfig.workspaceMount = "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached";
+  }
+
+  // Docker run arguments for hardening
+  const runArgs: string[] = [];
+
+  // Capabilities
+  if (selectedHardening.has('drop-caps')) {
+    runArgs.push('--cap-drop=ALL');
+  } else if (selectedHardening.has('no-raw-packets')) {
+    runArgs.push('--cap-drop=NET_RAW');
+  }
+
+  // Security options
+  if (selectedHardening.has('no-new-privs')) {
+    runArgs.push('--security-opt', 'no-new-privileges:true');
+  }
+  if (selectedHardening.has('apparmor')) {
+    runArgs.push('--security-opt', 'apparmor=docker-default');
+  }
+  if (selectedHardening.has('seccomp')) {
+    runArgs.push('--security-opt', 'seccomp=default');
+  }
+
+  // Networking
+  if (selectedHardening.has('network-none')) {
+    runArgs.push('--network=none');
+  } else if (selectedHardening.has('disable-ipv6')) {
+    runArgs.push('--sysctl', 'net.ipv6.conf.all.disable_ipv6=1', '--sysctl', 'net.ipv6.conf.default.disable_ipv6=1');
+  }
+  if (selectedHardening.has('secure-dns')) {
+    runArgs.push('--dns=1.1.1.1', '--dns=1.0.0.1');
+  }
+
+  // Temporary directories
+  if (selectedHardening.has('secure-tmp')) {
+    runArgs.push('--tmpfs', '/tmp:rw,noexec,nosuid,size=64m', '--tmpfs', '/var/tmp:rw,noexec,nosuid,size=64m');
+  }
+
+  // Resource limits
+  if (selectedHardening.has('resource-limits')) {
+    runArgs.push('--memory=512m', '--cpus=2');
+  }
+
+  if (runArgs.length > 0) {
+    devcontainerConfig.runArgs = runArgs;
+  }
+
+  // VS Code security settings
+  if (selectedHardening.has('vscode-security')) {
+    devcontainerConfig.customizations.vscode.settings = {
+      ...devcontainerConfig.customizations.vscode.settings,
+      'task.autoDetect': 'off',
+      'task.allowAutomaticTasks': 'off',
+      'security.workspace.trust.enabled': false,
+      'telemetry.telemetryLevel': 'off',
+    };
   }
   
   // Write devcontainer.json
