@@ -4,20 +4,15 @@
 # Pull latest Echidna prebuilt image
 FROM --platform=linux/amd64 ghcr.io/crytic/echidna/echidna AS echidna
 
-# Grab at least Python 3.12
-FROM python:3.12-slim as python-base
-
-# Pull latest Debian build
-FROM mcr.microsoft.com/vscode/devcontainers/base:debian
+# Pull Debian 12 
+FROM mcr.microsoft.com/vscode/devcontainers/base:bookworm
 
 # Switch to root user
 USER root
 
-COPY --from=python-base /usr/local /usr/local
-
 # Super basic stuff to get everything started
 RUN apt-get update -y && apt-get install -y \
-    zsh python3-dev libpython3-dev build-essential vim curl git sudo pkg-config \
+    zsh python3-pip python3-venv python3-dev libpython3-dev build-essential vim curl git sudo pkg-config \
     --no-install-recommends
 
 # The base container usually has a “vscode” user. If not, create one here.
@@ -34,7 +29,10 @@ ENV LOCAL_BIN=${HOME}/.local/bin
 ENV PNPM_HOME=${HOME}/.local/share/pnpm
 ENV PATH=${PATH}:${USR_LOCAL_BIN}:${LOCAL_BIN}:${PNPM_HOME}
 
-# Install uv
+# Configure pip to allow system packages in container environment
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+
+# Install uv package manager"
 RUN python3 -m pip install --no-cache-dir --upgrade uv
 
 # Set asdf manager version
