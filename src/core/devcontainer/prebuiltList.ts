@@ -1,7 +1,7 @@
 import { select, Separator } from '@inquirer/prompts'
-import { selectStyle } from '@/styling/selectStyle'
-import { devcontainerUp } from '@/shared/devcontainerUp'
-import { openIn } from '@/shared/openIn'
+import { selectStyle } from '@/ui/styling/selectStyle'
+import { devcontainerUp } from '@/core/devcontainer/devcontainerUp'
+import { openIn } from '@/utils/openIn'
 
 export async function prebuiltList() {
     const selected = await select({

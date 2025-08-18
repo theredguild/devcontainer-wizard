@@ -10,10 +10,10 @@ import {
     savePath,
     devcontainerName,
     gitClone,
-} from '@/wizard'
+} from '@/core/wizard'
 import { WizardState } from '@/types'
 import { select } from '@inquirer/prompts'
-import { selectStyle } from '@/styling/selectStyle'
+import { selectStyle } from '@/ui/styling/selectStyle'
 
 export async function wizard(args: { name?: string }) {
   const selectedDevcontainerName = args.name !== undefined ? args.name : await devcontainerName()

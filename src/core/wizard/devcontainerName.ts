@@ -1,5 +1,5 @@
 import { input } from "@inquirer/prompts";
-import { inputStyle } from "@/styling/inputStyle";
+import { inputStyle } from "@/ui/styling/inputStyle";
 import * as path from "node:path";
 
 export async function devcontainerName(): Promise<string> {

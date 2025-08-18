@@ -1,9 +1,9 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { confirm } from '@inquirer/prompts';
-import { openIn } from '@/shared/openIn';
-import { devcontainerUp } from '@/shared/devcontainerUp';
-import { INSTALL_COMMANDS, ToolKey } from '@/scripts/install_commands';
+import { openIn } from '@/utils/openIn';
+import { devcontainerUp } from '@/core/devcontainer/devcontainerUp';
+import { INSTALL_COMMANDS, ToolKey } from '@/core/scripts/install_commands';
 import { WizardState } from "@/types";
 
 interface GenerationOptions {

@@ -1,5 +1,5 @@
 import { checkbox } from "@inquirer/prompts";
-import { checkboxStyle } from "@/styling/checkboxStyle";
+import { checkboxStyle } from "@/ui/styling/checkboxStyle";
 
 export async function securityTooling() {
   return await checkbox({

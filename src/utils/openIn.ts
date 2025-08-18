@@ -1,5 +1,5 @@
 import {select} from '@inquirer/prompts'
-import { selectStyle } from '@/styling/selectStyle'
+import { selectStyle } from '@/ui/styling/selectStyle'
 
 export async function openIn() {
     return await select({

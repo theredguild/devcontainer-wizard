@@ -1,6 +1,6 @@
 import { select, checkbox } from "@inquirer/prompts";
-import { selectStyle } from "@/styling/selectStyle";
-import { checkboxStyle } from "@/styling/checkboxStyle";
+import { selectStyle } from "@/ui/styling/selectStyle";
+import { checkboxStyle } from "@/ui/styling/checkboxStyle";
 
 export async function systemHardening() {
   const selectedOptions: string[] = [];

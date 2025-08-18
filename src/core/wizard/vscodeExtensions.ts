@@ -1,5 +1,5 @@
 import { checkbox, confirm, Separator } from "@inquirer/prompts";
-import { checkboxStyle } from "@/styling/checkboxStyle";
+import { checkboxStyle } from "@/ui/styling/checkboxStyle";
 
 type VscodeExtension = { id: string; name: string };
 

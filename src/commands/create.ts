@@ -1,8 +1,8 @@
 import {Args, Command} from '@oclif/core'
 import {
   wizard
-} from '@/wizard'
-import { generateDevEnvironment } from '@/scripts/generate_dev_env'
+} from '@/core/wizard'
+import { generateDevEnvironment } from '@/core/scripts/generate_dev_env'
 
 export default class Create extends Command {
   static override args = {

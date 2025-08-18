@@ -1,10 +1,10 @@
-import {Command} from '@oclif/core'
-import { select, confirm } from '@inquirer/prompts'
-import { prebuiltList } from '@/shared/prebuiltList'
-import {wizard} from '@/wizard'
-import { selectStyle } from '@/styling/selectStyle'
-import { brand } from '@/styling/colors'
-import { generateDevEnvironment } from '@/scripts/generate_dev_env'
+import { Command } from '@oclif/core'
+import { select } from '@inquirer/prompts'
+import { prebuiltList } from '@/core/devcontainer/prebuiltList'
+import {wizard} from '@/core/wizard'
+import { selectStyle } from '@/ui/styling/selectStyle'
+import { brand } from '@/ui/styling/colors'
+import { generateDevEnvironment } from '@/core/scripts/generate_dev_env'
 
 
 export default class Start extends Command {

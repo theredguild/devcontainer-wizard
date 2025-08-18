@@ -1,8 +1,8 @@
 import {Args, Command, Flags} from '@oclif/core'
-import { prebuiltList } from '../shared/prebuiltList'
-import { devcontainerUp } from '../shared/devcontainerUp'
-import { openIn } from '@/shared/openIn'
-import { brand } from '@/styling/colors'
+import { prebuiltList } from '../core/devcontainer/prebuiltList'
+import { devcontainerUp } from '../core/devcontainer/devcontainerUp'
+import { openIn } from '@/utils/openIn'
+import { brand } from '@/ui/styling/colors'
 
 export default class Prebuilt extends Command {
 

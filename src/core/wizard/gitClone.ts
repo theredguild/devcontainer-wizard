@@ -1,5 +1,5 @@
 import { input, confirm } from '@inquirer/prompts'
-import { inputStyle } from '@/styling/inputStyle'
+import { inputStyle } from '@/ui/styling/inputStyle'
 
 export interface GitRepositoryConfig {
   url: string
