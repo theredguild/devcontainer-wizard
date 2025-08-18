@@ -78,5 +78,10 @@ export type WizardState = Selection & {
   vscodeExtensions: string[]
   savePath: string
   systemHardening: string[]
+  gitRepository?: {
+    url: string
+    branch?: string
+    enabled: boolean
+  }
 }
 

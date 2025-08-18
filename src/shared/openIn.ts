@@ -7,7 +7,7 @@ export async function openIn() {
         theme: selectStyle,
         choices: [
             { name: 'Terminal', value: 'shell' },
-            { name: 'VS Code', value: 'code', disabled: '(coming soon)' },
+            { name: 'VS Code', value: 'code' },
         ],
     })
 }

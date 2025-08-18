@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process'
 
 
 export async function devcontainerUp(devcontainerConfig: string, openIn: string) {
-  // --- Step 1: Run 'devcontainer up' and capture its JSON output ---
+  
   const { containerId } = await new Promise<{ containerId: string; }>((resolve, reject) => {
     const child = spawn(
       'devcontainer',
@@ -14,14 +14,14 @@ export async function devcontainerUp(devcontainerConfig: string, openIn: string)
     let output = '';
     let errorOutput = '';
 
-    // Buffer stdout to capture the full JSON object
+    
     child.stdout.on('data', (data) => {
-      // We still write to the process stdout to show progress to the user
+      
       process.stdout.write(data);
       output += data.toString();
     });
 
-    // Buffer stderr for potential error messages
+    
     child.stderr.on('data', (data) => {
       process.stderr.write(data);
       errorOutput += data.toString();
@@ -83,6 +83,27 @@ export async function devcontainerUp(devcontainerConfig: string, openIn: string)
         }
         resolve();
       });
-    });
+    }); 
+  } else if (openIn === 'code') {
+      await new Promise<void>((resolve, reject) => {
+      const exec = spawn(
+        'code',
+        [
+          '.',
+        ],
+        { stdio: 'inherit' }
+      );
+
+      exec.on('error', (err) => {
+        reject(err);
+      });
+
+      exec.on('close', (code) => {
+        if (code !== 0) {
+          console.warn(`VS Code session exited with code ${code}.`);
+        }
+        resolve();
+      });
+    }); 
   }
 }

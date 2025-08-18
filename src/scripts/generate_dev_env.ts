@@ -29,8 +29,7 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
 
   console.log('🚀 Starting development environment generation...');
   
-  // --- Derive output directory and name ---
-  const savePath = config.savePath || '.';
+    const savePath = config.savePath || '.';
   const projectName = config.name || 'Web3 Dev Environment';
   const safeFolderName = projectName
     .toLowerCase()
@@ -41,12 +40,12 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   console.log(`💾 Save path: ${savePath}`);
   console.log(`📂 Folder name: ${safeFolderName}`);
 
-  // --- Generate Dockerfile ---
-  console.log('🐳 Generating Dockerfile...');
+    console.log('🐳 Generating Dockerfile...');
   
   const requiredDeps = new Set<ToolKey>();
   
   if (config.languages?.includes('solidity')) {
+    requiredDeps.add('python')
     requiredDeps.add('solc-select');
   }
   if (config.languages?.includes('vyper')) {
@@ -70,7 +69,6 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   config.fuzzingAndTesting?.forEach(tool => {
     if (tool in INSTALL_COMMANDS) {
       requiredDeps.add(tool as ToolKey);
-      // Add dependencies for specific tools
       if (['echidna', 'medusa'].includes(tool)) {
         requiredDeps.add('go');
       }
@@ -87,7 +85,6 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   config.securityTooling?.forEach(tool => {
     if (tool in INSTALL_COMMANDS) {
       requiredDeps.add(tool as ToolKey);
-      // Most security tools require Python
       if (['slither', 'mythril', 'crytic-compile', 'panoramix', 'slither-lsp', 'napalm-toolbox', 'semgrep', 'slitherin'].includes(tool)) {
         requiredDeps.add('python');
       }
@@ -97,13 +94,11 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
     }
   });
   
-  // Validation
   if (requiredDeps.size === 0) {
     console.log('⚠️  No tools selected - creating minimal environment');
   }
   
   console.log(`🔧 Installing ${requiredDeps.size} tools: ${Array.from(requiredDeps).join(', ')}`);
-  console.log(`👤 User creation: Creating user BEFORE switching to USER directive to prevent permission issues`);
 
   const dockerfileContent: string[] = [];
 
@@ -213,6 +208,16 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
       );
     }
 
+  // Add git repository cloning if configured
+  if (config.gitRepository?.enabled && config.gitRepository.url) {
+    dockerfileContent.push(
+      "# Clone git repository",
+      "RUN mkdir -p /home/vscode/repositories && \\",
+      `    git clone ${config.gitRepository.branch ? `--branch ${config.gitRepository.branch}` : ''} ${config.gitRepository.url} /home/vscode/repositories/project && \\`,
+      "    echo 'Repository cloned successfully!'"
+    );
+  }
+
   dockerfileContent.push(
     "# Final setup",
     
@@ -321,7 +326,7 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
     runArgs.push('--security-opt', 'apparmor=docker-default');
   }
   if (selectedHardening.has('seccomp')) {
-    runArgs.push('--security-opt', 'seccomp=default');
+    runArgs.push('--security-opt', 'seccomp=unconfined');
   }
 
   // Networking
@@ -336,12 +341,18 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
 
   // Temporary directories
   if (selectedHardening.has('secure-tmp')) {
-    runArgs.push('--tmpfs', '/tmp:rw,noexec,nosuid,size=64m', '--tmpfs', '/var/tmp:rw,noexec,nosuid,size=64m');
+    runArgs.push('--tmpfs', '/tmp:rw,noexec,nosuid,size=512m', '--tmpfs', '/var/tmp:rw,noexec,nosuid,size=512m');
   }
 
   // Resource limits
   if (selectedHardening.has('resource-limits')) {
     runArgs.push('--memory=512m', '--cpus=2');
+  } else if (selectedHardening.has('resource-limits-light')) {
+    runArgs.push('--memory=512m', '--cpus=2');
+  } else if (selectedHardening.has('resource-limits-standard')) {
+    runArgs.push('--memory=2g', '--cpus=4');
+  } else if (selectedHardening.has('resource-limits-heavy')) {
+    runArgs.push('--memory=4g', '--cpus=8');
   }
 
   if (runArgs.length > 0) {
@@ -383,35 +394,23 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   if (config.systemHardening?.length) {
     console.log(`   Security Hardening: ${config.systemHardening.join(', ')}`);
   }
-  if (requiredDeps.has('echidna')) {
-    console.log(`   🏗️ Multi-stage build: Enabled for Echidna optimization`);
+  if (config.gitRepository?.enabled && config.gitRepository.url) {
+    console.log(`   Git Repository: ${config.gitRepository.url}${config.gitRepository.branch ? ` (${config.gitRepository.branch})` : ''}`);
   }
   
-  console.log('\n🚀 Ready to use! Run the following to start your dev container:');
-  const relativeConfigPath = path.relative('.', devcontainerPath);
-  const devcontainerCommand = `devcontainer up --workspace-folder . --config ${relativeConfigPath}`;
-  console.log(`   ${devcontainerCommand}`);
-  
-  
+
+
   const shouldRun = await confirm({
     message: '🎯 Would you like to start the devcontainer now?',
     default: true
   });
   
   if (shouldRun) {
-    console.log('🚀 Starting your custom devcontainer...');
-    try {
       const openInSelection = await openIn();
-      await devcontainerUp(relativeConfigPath, openInSelection);
-      console.log('✨ Devcontainer started successfully!');
-    } catch (error) {
-      console.error('❌ Failed to start devcontainer:', error instanceof Error ? error.message : String(error));
-      console.log('💡 You can manually start it later with:');
-      console.log(`   ${devcontainerCommand}`);
-    }
+      await devcontainerUp(devcontainerPath, openInSelection);
   } else {
     console.log('📝 You can start it later with:');
-    console.log(`   ${devcontainerCommand}`);
+    console.log(`   devcontainer up --workspace-folder . --config ${devcontainerPath}`);
   }
 }
 

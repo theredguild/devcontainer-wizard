@@ -35,10 +35,6 @@
 
     "remoteUser": "node",
     
-    "mounts": [
-        "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
-    ],
-    
     "workspaceFolder": "/workspace",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
 }

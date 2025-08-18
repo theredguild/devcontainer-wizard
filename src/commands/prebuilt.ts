@@ -1,5 +1,5 @@
 import {Args, Command, Flags} from '@oclif/core'
-import { selectList } from '../shared/selectList'
+import { prebuiltList } from '../shared/prebuiltList'
 import { devcontainerUp } from '../shared/devcontainerUp'
 import { openIn } from '@/shared/openIn'
 import { brand } from '@/styling/colors'
@@ -44,7 +44,7 @@ export default class Prebuilt extends Command {
 
     if (!args.container) {
       this.log(brand.primary(brand.bold('Select a pre-built devcontainer')))
-      await selectList();
+      await prebuiltList();
       return;
     }
 

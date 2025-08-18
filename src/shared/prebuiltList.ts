@@ -3,7 +3,7 @@ import { selectStyle } from '@/styling/selectStyle'
 import { devcontainerUp } from '@/shared/devcontainerUp'
 import { openIn } from '@/shared/openIn'
 
-export async function selectList() {
+export async function prebuiltList() {
     const selected = await select({
     message: 'Select a pre-built container to start:',
     theme: selectStyle,
@@ -25,19 +25,6 @@ export async function selectList() {
           value: ".devcontainer/theredguild/devcontainer.json",
           description: 'The Red Guild\'s original devcontainer.',
           disabled: false
-        },
-        new Separator(),
-        {
-          name: 'Hardened 🛡️',
-          value: ".devcontainer/hardened/devcontainer.json",
-          description: '',
-          disabled: '(this configuration is not released yet)',
-        },
-        {
-          name: 'Paranoid ☣️',
-          value: ".devcontainer/paranoid/devcontainer.json",
-          description: '',
-          disabled: '(this configuration is not released yet)',
         }
     ]});
 

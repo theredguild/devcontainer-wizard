@@ -1,6 +1,6 @@
 ## web3-devcontainer-cli
 
-A CLI to set up a fully equipped Web3 dev container, with an interactive wizard to generate custom environments or launch pre-built ones.
+A comprehensive CLI tool to set up fully equipped Web3 development containers. Features an interactive wizard for creating custom environments with advanced security hardening, git integration, and pre-configured toolchains, or quickly launch pre-built containers for common workflows.
 
 ## Requirements
 
@@ -70,20 +70,89 @@ The wizard will prompt you for:
 - **Frameworks**: Foundry, Hardhat, Ape (ApeWorX).
 - **Fuzzing & testing**: Echidna, Medusa, Halmos, Ityfuzz, Aderyn.
 - **Security tooling**: Slither, Mythril, Crytic (crytic-compile), Panoramix, Semgrep, Heimdall.
-- **System hardening** (applied to `devcontainer.json`):
-  - Read-only file system
-  - Workspace isolation (tmpfs) [writeable or no-write]
-  - Secure temp directories
-  - Drop all capabilities / disable raw packets
-  - No new privileges
-  - AppArmor, Seccomp
-  - Disable IPv6, secure DNS
-  - Network none
-  - Resource limits
-- **VS Code extensions**: choose recommended or select your own.
+- **System hardening**: Choose between predefined security recipes or manual configuration:
+  - **Security Recipes**: Pre-configured security profiles for common use cases
+  - **Manual Configuration**: Fine-grained control over individual security options
+- **Git repository integration**: Automatically clone a repository during container build
+  - Repository URL validation
+  - Optional branch/tag specification
+- **VS Code extensions**: Choose from curated extension collections or select your own.
 - **Save path**: where `.devcontainer/<name>` will be created.
 
 When finished, the CLI writes `Dockerfile` and `devcontainer.json` to `.devcontainer/<name>` and offers to start it immediately. It also prints the exact `devcontainer up` command you can run later.
+
+#### Security Hardening Recipes (NEW)
+
+The wizard now includes predefined security recipes for common use cases:
+
+- **Airgapped ephemeral sandbox**: Maximum isolation without network or persistence
+- **Hardened online dev**: Day-to-day development with reduced attack surface
+- **Source-review only**: Read code and run linters without repository writes
+- **Training workshop lab**: Classroom use with predictable resource constraints
+- **Network restricted analysis**: API access and package installs without packet crafting
+- **CI-like local runner**: Mirrors CI behavior with immutable file system
+- **Forensics reader**: Inspect artifacts offline without altering evidence
+- **Package-install session**: Install packages while maintaining security guardrails
+- **Net-disabled build test**: Prove builds work without network access
+- **Security research with controlled net**: API testing without packet crafting capabilities
+
+Each recipe automatically configures appropriate security hardening options based on the intended use case.
+
+#### Manual Security Hardening Options
+
+When choosing manual configuration, you have fine-grained control over:
+
+**File System Security**:
+- Read-only file system
+- Secure temp directories (noexec, nosuid flags)
+
+**Workspace Isolation**:
+- Standard isolation (tmpfs mount)
+- Read-only isolation (tmpfs + no write access)
+
+**Container Security**:
+- Drop all capabilities
+- No new privileges (prevents SUID/SGID escalation)
+- AppArmor profile
+- Seccomp filtering
+
+**Network Configuration**:
+- Enhanced DNS security (Cloudflare DNS)
+- Complete network isolation
+- Disable IPv6
+- Disable raw packets (prevents packet crafting)
+
+**Application Security**:
+- VS Code security (disables auto-tasks, workspace trust, telemetry)
+
+**Resource Limits**:
+- Light (512MB, 2 cores)
+- Medium (2GB, 4 cores)  
+- Heavy (4GB, 8 cores)
+
+#### Git Repository Integration (NEW)
+
+The wizard can now automatically clone a git repository during container build:
+
+- **Repository URL**: Supports `https://`, `git@`, `ssh://`, and `git://` protocols
+- **Branch/Tag Selection**: Optionally specify a specific branch or tag to clone
+- **Validation**: Built-in URL validation ensures proper git repository format
+- **Build-time Integration**: Repository is cloned during the container build process
+
+This feature is particularly useful for:
+- Setting up development environments with existing codebases
+- Workshop environments with predefined project templates
+- Audit environments with specific contract repositories
+
+#### VS Code Extensions
+
+The wizard offers curated extension collections:
+
+- **Recommended** (default): Automatically installs Tintin's Ethereum Security Bundle
+- **Custom selection**: Choose from organized collections:
+  - **Tintin's Extensions**: Security-focused tools (Ethereum Security Bundle, EthOver, WeAudit, Inline Bookmarks, Solidity Language Tools, Graphviz Preview, Decompiler)
+  - **Nomic Foundation**: Hardhat + Solidity integration
+  - **Olympix**: AI-powered smart contract analysis
 
 ### Start pre-built containers
 
@@ -113,5 +182,3 @@ You can also run prebuilt containers using GitHub Codespaces:
 - **Minimal**: Beginner-friendly environment.
 - **Auditor**: Audit-ready environment with common security tooling.
 - **The Red Guild**: The Red Guild's original devcontainer.
-- **Hardened**: Coming soon.
-- **Paranoid**: Coming soon.

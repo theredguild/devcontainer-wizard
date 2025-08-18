@@ -57,7 +57,7 @@ RUN echo 'Echidna installed via multi-stage build' && \\
 # Install ItyFuzz
 RUN curl -fsSL https://ity.fuzz.land/ | zsh && \
     echo 'export "PATH=$HOME/.ityfuzz/bin:$PATH"' >> ~/.zshrc && \
-    export PATH=$HOME/.ityfuzz/bin:$PATH&& \
+    export PATH=$HOME/.ityfuzz/bin:$PATH && \
     ~/.ityfuzz/bin/ityfuzzup
   `,
   medusa: `

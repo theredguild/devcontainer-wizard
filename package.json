@@ -1,7 +1,7 @@
 {
   "name": "web3-devcontainer-cli",
-  "version": "0.1.0",
-  "description": "A CLI to setup a full equipped web3 dev container.",
+  "version": "1.0.0",
+  "description": "A comprehensive CLI tool to set up fully equipped Web3 development containers with advanced security hardening and git integration.",
   "license": "MIT",
   "dependencies": {
     "@inquirer/prompts": "^7.8.1",

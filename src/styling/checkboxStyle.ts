@@ -1,33 +1,12 @@
-import { CheckBoxTheme } from "@/types";
-import { brand, icons, spinner } from "@/styling/colors";
+/**
+ * Checkbox component theme configuration
+ * Uses the standard theme factory for consistency
+ */
 
-export const checkboxStyle: CheckBoxTheme = {
-  prefix: {
-    idle: icons.prefixIdle,
-    done: icons.prefixDone,
-  },
-  spinner: spinner.lotus,
-  style: {
-    answer: (text) => brand.success(brand.bold(text)),
-    message: (text, status) => {
-      if (status === 'loading') return brand.muted(text);
-      if (status === 'done') return brand.success(text);
-      return brand.primary(text);
-    },
-    error: (text) => brand.error(text),
-    defaultAnswer: (text) => brand.muted(text),
-    help: (text) => brand.muted(text),
-    highlight: (text) => brand.gold(brand.bold(text)),
-    key: (text) => brand.accent(text),
-    disabledChoice: (text) => brand.muted(text),
-    description: (text) => brand.muted(text),
-    renderSelectedChoices: (selectedChoices) =>
-      `${brand.success('✔')} ${brand.bold(String(selectedChoices.length))} selected`,
-  },
-  icon: {
-    checked: icons.checked,
-    unchecked: icons.unchecked,
-    cursor: icons.cursor,
-  },
-  helpMode: 'auto',
-};
+import { createCheckBoxTheme } from "@/styling/themeUtils";
+
+/**
+ * Default checkbox theme with standard styling
+ * Provides consistent appearance for checkbox/multi-select components
+ */
+export const checkboxStyle = createCheckBoxTheme();

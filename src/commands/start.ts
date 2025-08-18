@@ -1,10 +1,11 @@
 import {Command} from '@oclif/core'
-import { selectList } from '@/shared/selectList'
+import { selectList } from '@/shared/prebuiltList'
 import { select } from '@inquirer/prompts'
 import { selectStyle } from '@/styling/selectStyle'
 import { brand } from '@/styling/colors'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { Create } from '@/commands/create'
 
 export default class Start extends Command {
 
@@ -30,6 +31,8 @@ export default class Start extends Command {
 
     if (selected === 'pre-built') {
       await selectList()
-    } 
+    } else {
+      await Create.run()
+    }
   }
 }
