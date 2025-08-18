@@ -3,7 +3,7 @@
  * Uses the standard theme factory for consistency
  */
 
-import { createInputTheme } from "@/styling/themeUtils";
+import { createInputTheme } from "@/ui/styling/themeUtils";
 
 /**
  * Default input theme with standard styling

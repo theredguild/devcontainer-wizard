@@ -3,7 +3,7 @@
  * Uses the standard theme factory for consistency
  */
 
-import { createSelectTheme } from "@/styling/themeUtils";
+import { createSelectTheme } from "@/ui/styling/themeUtils";
 
 /**
  * Default select theme with standard styling

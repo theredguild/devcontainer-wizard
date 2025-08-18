@@ -3,7 +3,7 @@
  * Provides common patterns and factories for theme creation
  */
 
-import { brand, icons, spinner } from "@/styling/colors";
+import { brand, icons, spinner } from "@/ui/styling/colors";
 import type { SelectTheme, InputTheme, CheckBoxTheme } from "@/types";
 
 // =============================================================================

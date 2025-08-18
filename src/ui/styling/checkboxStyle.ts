@@ -3,7 +3,7 @@
  * Uses the standard theme factory for consistency
  */
 
-import { createCheckBoxTheme } from "@/styling/themeUtils";
+import { createCheckBoxTheme } from "@/ui/styling/themeUtils";
 
 /**
  * Default checkbox theme with standard styling
