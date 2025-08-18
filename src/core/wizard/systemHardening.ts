@@ -1,4 +1,4 @@
-import { select, checkbox } from "@inquirer/prompts";
+import { checkboxWithTopDescription, selectWithTopDescription } from "@/ui/components/";
 import { selectStyle } from "@/ui/styling/selectStyle";
 import { checkboxStyle } from "@/ui/styling/checkboxStyle";
 
@@ -6,7 +6,7 @@ export async function systemHardening() {
   const selectedOptions: string[] = [];
 
   // File System Security
-  const fsOptions = await checkbox({
+  const fsOptions = await checkboxWithTopDescription({
     message: "File System Security",
     theme: checkboxStyle,
     loop: false,
@@ -18,7 +18,7 @@ export async function systemHardening() {
   selectedOptions.push(...fsOptions);
 
   // Workspace Isolation (mutually exclusive options)
-  const workspaceIsolation = await select({
+  const workspaceIsolation = await selectWithTopDescription({
     message: "Workspace Isolation",
     theme: selectStyle,
     loop: false,
@@ -33,7 +33,7 @@ export async function systemHardening() {
   }
 
   // Container Security
-  const containerSecurity = await checkbox({
+  const containerSecurity = await checkboxWithTopDescription({
     message: "Container Security",
     theme: checkboxStyle,
     loop: false,
@@ -47,7 +47,7 @@ export async function systemHardening() {
   selectedOptions.push(...containerSecurity);
 
   // Network Security (with conflict detection)
-  const networkIsolation = await select({
+  const networkIsolation = await selectWithTopDescription({
     message: "Network Configuration",
     theme: selectStyle,
     loop: false,
@@ -62,7 +62,7 @@ export async function systemHardening() {
     selectedOptions.push("secure-dns");
     
     // Additional network security options
-    const additionalNetworkSecurity = await checkbox({
+    const additionalNetworkSecurity = await checkboxWithTopDescription({
       message: "Additional Network Security (compatible with DNS)",
       theme: checkboxStyle,
       loop: false,
@@ -77,7 +77,7 @@ export async function systemHardening() {
   }
 
   // Application Security
-  const appSecurity = await checkbox({
+  const appSecurity = await checkboxWithTopDescription    ({
     message: "Application Security",
     theme: checkboxStyle,
     loop: false,
@@ -88,7 +88,7 @@ export async function systemHardening() {
   selectedOptions.push(...appSecurity);
 
   // Resource Limits
-  const resourceLimits = await select({
+  const resourceLimits = await selectWithTopDescription({
     message: "Resource Limits",
     theme: selectStyle,
     loop: false,

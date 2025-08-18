@@ -5,6 +5,7 @@
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
+    "@inquirer/core": "^10.1.15",
     "@inquirer/prompts": "^7.8.1",
     "@oclif/core": "^4.5.2",
     "@oclif/plugin-help": "^6.0.0"
@@ -37,7 +38,7 @@
     "prepack": "npm run build && oclif manifest && oclif readme"
   },
   "devDependencies": {
-    "@oclif/prettier-config": "^0.2.1", 
+    "@oclif/prettier-config": "^0.2.1",
     "@types/node": "^18.19.122",
     "oclif": "^4.5.0",
     "ts-node": "^10.9.2",

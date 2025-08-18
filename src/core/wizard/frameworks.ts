@@ -1,8 +1,8 @@
-import { checkbox } from "@inquirer/prompts";
+import { checkboxWithTopDescription } from "@/ui/components/checkboxWithTopDescription"
 import { checkboxStyle } from "@/ui/styling/checkboxStyle";
 
 export async function frameworks() {
-  return await checkbox({
+  return await checkboxWithTopDescription({
     message: "Select frameworks",
     theme: checkboxStyle,
     choices: [

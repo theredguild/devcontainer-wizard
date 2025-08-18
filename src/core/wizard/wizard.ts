@@ -12,7 +12,7 @@ import {
     gitClone,
 } from '@/core/wizard'
 import { WizardState } from '@/types'
-import { select } from '@inquirer/prompts'
+import { selectWithTopDescription } from "@/ui/components/selectWithTopDescription";
 import { selectStyle } from '@/ui/styling/selectStyle'
 
 export async function wizard(args: { name?: string }) {
@@ -23,9 +23,8 @@ export async function wizard(args: { name?: string }) {
   const selectedSecurityTooling = await securityTooling()
  
 
-  const hardeningMethod = await select({
+  const hardeningMethod = await selectWithTopDescription({
     message: 'How would you like to configure security hardening?',
-    theme: selectStyle,
     choices: [
       { 
         name: 'Use security hardening recipes', 

@@ -1,8 +1,8 @@
-import { checkbox } from "@inquirer/prompts";
+import { checkboxWithTopDescription } from "@/ui/components/checkboxWithTopDescription";
 import { checkboxStyle } from "@/ui/styling/checkboxStyle";
 
 export async function languages() {
-  return await checkbox({
+  return await checkboxWithTopDescription({
     message: 'Select smart contract languages',
     theme: checkboxStyle,
     choices: [

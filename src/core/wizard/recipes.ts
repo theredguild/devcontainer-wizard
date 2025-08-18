@@ -1,4 +1,4 @@
-import { select } from "@inquirer/prompts";
+import { selectWithTopDescription } from "@/ui/components/selectWithTopDescription";
 import { selectStyle } from "@/ui/styling/selectStyle";
 
 // Recipe to security hardening mapping
@@ -156,7 +156,7 @@ const RECIPE_MAPPINGS = {
 } as const;
 
 export async function recipes() {
-  return await select({
+  return await selectWithTopDescription({
     message: "Select one hardening recipe:",
     theme: selectStyle,
     loop: false,

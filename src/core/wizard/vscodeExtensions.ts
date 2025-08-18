@@ -1,4 +1,5 @@
-import { checkbox, confirm, Separator } from "@inquirer/prompts";
+import { checkboxWithTopDescription } from "@/ui/components/checkboxWithTopDescription";
+import { confirm, Separator } from "@inquirer/prompts";
 import { checkboxStyle } from "@/ui/styling/checkboxStyle";
 
 type VscodeExtension = { id: string; name: string };
@@ -25,7 +26,6 @@ const Olympix: VscodeExtension[] = [
 export async function vscodeExtensions(): Promise<string[]> {
   const autoInstall = await confirm({
     message: "Do you want to automatically install recommended VS Code extensions?",
-    theme: checkboxStyle,
     default: true,
   });
 
@@ -33,7 +33,7 @@ export async function vscodeExtensions(): Promise<string[]> {
     return tintinExtensions.map((ext) => ext.id);
   }
 
-  const selected = await checkbox({
+  const selected = await checkboxWithTopDescription({
     message: "Select VS Code extensions to install",
     theme: checkboxStyle,
     loop: false,

@@ -1,8 +1,8 @@
-import { checkbox } from "@inquirer/prompts";
+import { checkboxWithTopDescription } from "@/ui/components/checkboxWithTopDescription";
 import { checkboxStyle } from "@/ui/styling/checkboxStyle";
 
 export async function fuzzingAndTesting() {
-  return await checkbox({
+  return await checkboxWithTopDescription ({
     message: "Select fuzzing and testing tools",
     theme: checkboxStyle,
     choices: [
