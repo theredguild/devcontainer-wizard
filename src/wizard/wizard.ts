@@ -16,6 +16,7 @@ import { select } from '@inquirer/prompts'
 import { selectStyle } from '@/styling/selectStyle'
 
 export async function wizard(args: { name?: string }) {
+  const selectedDevcontainerName = args.name !== undefined ? args.name : await devcontainerName()
   const selectedLanguages = await languages()
   const selectedFrameworks = await frameworks()
   const selectedFuzzingTesting = await fuzzingAndTesting()
@@ -62,7 +63,6 @@ export async function wizard(args: { name?: string }) {
   const selectedVscodeExtensions = await vscodeExtensions()
   const selectedGitRepository = await gitClone()
   const selectedSavePath = await savePath()
-  const selectedDevcontainerName = args.name !== undefined ? args.name : await devcontainerName()
 
   const wizardState: WizardState = {
     name: selectedDevcontainerName,

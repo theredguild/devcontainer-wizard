@@ -6,6 +6,7 @@ import { prebuiltList } from '@/shared/prebuiltList'
 import {wizard} from '@/wizard'
 import { selectStyle } from '@/styling/selectStyle'
 import { brand } from '@/styling/colors'
+import { generateDevEnvironment } from '@/scripts/generate_dev_env'
 
 
 export default class Start extends Command {
@@ -33,7 +34,18 @@ export default class Start extends Command {
     if (selected === 'pre-built') {
       await prebuiltList()
     } else {
-      await wizard({ name: undefined })
+      const wizardState = await wizard({ name: undefined })
+
+      try {
+
+        await generateDevEnvironment({ config: wizardState })
+        
+        console.log('\n✨ Devcontainer creation completed successfully!')
+        console.log('🎉 Your custom Web3 development environment is ready!')
+        
+      } catch (error) {
+        this.error(`Failed to create devcontainer: ${error instanceof Error ? error.message : String(error)}`)
+      }
     }
   }
 }

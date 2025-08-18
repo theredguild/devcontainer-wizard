@@ -159,6 +159,7 @@ export async function recipes() {
   return await select({
     message: "Select one hardening recipe:",
     theme: selectStyle,
+    loop: false,
     choices: [
       { 
         name: "Airgapped ephemeral sandbox", 
