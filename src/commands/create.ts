@@ -4,7 +4,7 @@ import {
 } from '@/wizard'
 import { generateDevEnvironment } from '@/scripts/generate_dev_env'
 
-export class Create extends Command {
+export default class Create extends Command {
   static override args = {
     name: Args.string({ description: 'Devcontainer name' }),
   }
@@ -14,6 +14,7 @@ export class Create extends Command {
   ]
 
   public async run(): Promise<void> {
+    try {
     const { args } = await this.parse(Create)
 
     const wizardState = await wizard(args)
@@ -28,5 +29,12 @@ export class Create extends Command {
     } catch (error) {
       this.error(`Failed to create devcontainer: ${error instanceof Error ? error.message : String(error)}`)
     }
+  } catch (error) {
+    if (error instanceof Error && (error.message === 'User force closed the prompt with SIGINT' || error.message === 'User force closed the prompt with SIGTERM')) {
+      this.log('You pressed CTRL+C 👋 Goodbye!')
+      process.exit(0)
+    } else {
+      this.error(`Failed to start wizard: ${error instanceof Error ? error.message : String(error)}`)
+    }
   }
-}
+}}

@@ -36,13 +36,13 @@ const truecolor = (r: number, g: number, b: number, text: string): string =>
  */
 const COLORS = {
   // Brand colors
-  crimson: [225, 29, 72] as const,     // #e11d48 - Primary brand color
-  pink: [244, 114, 182] as const,      // #f472b6 - Accent color
+  salmon: [239, 149, 157] as const,     // #EF959D- Primary brand color
+  pinkGlamour: [255, 118, 117] as const, // #FF7675 - Accent color
   amber: [234, 179, 8] as const,       // #eab308 - Warning/highlight color
   
   // Semantic colors
-  green: [34, 197, 94] as const,       // #22c55e - Success color
-  red: [239, 68, 68] as const,         // #ef4444 - Error color
+  emerald: [46, 204, 113] as const,       // #2ecc71 - Success color
+  alizarin: [231, 76, 60] as const,      // #e74c3c - Error color
   slate: [148, 163, 184] as const,     // #94a3b8 - Muted/secondary color
 } as const;
 
@@ -56,19 +56,19 @@ const COLORS = {
  */
 export const brand = {
   /** Primary brand color (crimson) - use for main actions and focus states */
-  primary: (s: string) => truecolor(...COLORS.crimson, s),
+  primary: (s: string) => truecolor(...COLORS.salmon, s),
   
   /** Accent color (pink) - use for secondary actions and highlights */
-  accent: (s: string) => truecolor(...COLORS.pink, s),
+  accent: (s: string) => truecolor(...COLORS.pinkGlamour, s),
   
   /** Gold/amber color - use for warnings, important highlights, and selected states */
   gold: (s: string) => truecolor(...COLORS.amber, s),
   
   /** Success color (green) - use for completed states and positive feedback */
-  success: (s: string) => truecolor(...COLORS.green, s),
+  success: (s: string) => truecolor(...COLORS.emerald, s),
   
   /** Error color (red) - use for errors and destructive actions */
-  error: (s: string) => truecolor(...COLORS.red, s),
+  error: (s: string) => truecolor(...COLORS.alizarin, s),
   
   /** Muted color (slate) - use for secondary text and disabled states */
   muted: (s: string) => truecolor(...COLORS.slate, s),
@@ -94,19 +94,19 @@ export const brand = {
  */
 export const icons = {
   /** Cursor/pointer icon for active selection */
-  cursor: brand.primary('❯'),
+  cursor: brand.primary('▸'),
   
-  /** Checkmark for completed/selected items */
-  checked: brand.primary('✔'),
+  /** Filled checkbox for completed/selected items */
+  checked: brand.primary('☑'),
   
   /** Empty checkbox for unselected items */
-  unchecked: brand.muted('◻'),
+  unchecked: brand.muted('☐'),
   
-  /** Diamond prefix for idle states */
-  prefixIdle: brand.accent('◆'),
+  /** Hyphen prefix for idle states */
+  prefixIdle: brand.accent('+'),
   
   /** Diamond prefix for completed states */
-  prefixDone: brand.success('◆'),
+  prefixDone: brand.accent('✓'),
 } as const;
 
 // =============================================================================

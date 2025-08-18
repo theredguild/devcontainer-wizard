@@ -3,19 +3,25 @@
   "version": "1.0.0",
   "description": "A comprehensive CLI tool to set up fully equipped Web3 development containers with advanced security hardening and git integration.",
   "license": "MIT",
+  "type": "commonjs",
   "dependencies": {
     "@inquirer/prompts": "^7.8.1",
-    "@oclif/core": "^4.5.2"
+    "@oclif/core": "^4.5.2",
+    "@oclif/plugin-help": "^6.0.0"
   },
   "bin": {
     "web3-devcontainer-cli": "./bin/run.js"
   },
   "oclif": {
     "bin": "web3-devcontainer-cli",
-    "commands": "./src/commands",
+    "commands": "./dist/commands",
     "tsconfig": "./tsconfig.json",
     "dirname": "web3-devcontainer-cli",
-    "topicSeparator": " "
+    "topicSeparator": " ",
+    "plugins": [
+      "@oclif/plugin-help"
+    ],
+    "devCommands": "./src/commands"
   },
   "files": [
     "bin/",
@@ -24,11 +30,18 @@
     ".devcontainer/"
   ],
   "scripts": {
-    "dev": "node ./bin/dev.js"
+    "build": "tsc && tsc-alias",
+    "dev": "node ./bin/dev.js",
+    "prod": "npm run build && node ./bin/run.js",
+    "postpack": "rm -f oclif.manifest.json",
+    "prepack": "npm run build && oclif manifest && oclif readme"
   },
   "devDependencies": {
+    "@oclif/prettier-config": "^0.2.1", 
     "@types/node": "^18.19.122",
+    "oclif": "^4.5.0",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.2"
   }

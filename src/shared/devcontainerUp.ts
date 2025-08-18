@@ -73,6 +73,8 @@ export async function devcontainerUp(devcontainerConfig: string, openIn: string)
         { stdio: 'inherit' }
       );
 
+
+
       exec.on('error', (err) => {
         reject(err);
       });

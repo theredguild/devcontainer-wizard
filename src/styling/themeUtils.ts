@@ -23,7 +23,10 @@ export const standardPrefix = {
  * Standard spinner configuration for loading states
  * Uses the lotus spinner pattern with consistent timing
  */
-export const standardSpinner = spinner.lotus;
+export const standardSpinner = {
+  interval: spinner.lotus.interval,
+  frames: [...spinner.lotus.frames],
+};
 
 /**
  * Common message styling function that handles different interaction states

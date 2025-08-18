@@ -31,6 +31,7 @@ export default class Prebuilt extends Command {
   }
 
   public async run(): Promise<void> {
+    try {
     const {args, flags} = await this.parse(Prebuilt)
 
     if (flags.list) {
@@ -61,7 +62,20 @@ export default class Prebuilt extends Command {
       await devcontainerUp(containerConfig, openInSelection);
       console.log('✨ Devcontainer started successfully!');
     } catch (error) {
-      this.error(`Failed to start devcontainer: ${error instanceof Error ? error.message : String(error)}`);
+      if (error instanceof Error && (error.message === 'User force closed the prompt with SIGINT' || error.message === 'User force closed the prompt with SIGTERM')) {
+        this.log('You pressed CTRL+C 👋 Goodbye!')
+        process.exit(0)
+      } else {
+        this.error(`Failed to start devcontainer: ${error instanceof Error ? error.message : String(error)}`)
+      }
+    }   
+  } catch (error) {
+    if (error instanceof Error && (error.message === 'User force closed the prompt with SIGINT' || error.message === 'User force closed the prompt with SIGTERM')) {
+      this.log('You pressed CTRL+C 👋 Goodbye!')
+      process.exit(0)
+    } else {
+      this.error(`Failed to start devcontainer: ${error instanceof Error ? error.message : String(error)}`)
     }
+  }
   }
 }

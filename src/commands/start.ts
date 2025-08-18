@@ -1,7 +1,5 @@
 import {Command} from '@oclif/core'
-import * as fs from 'node:fs'
-import * as path from 'node:path'
-import { select } from '@inquirer/prompts'
+import { select, confirm } from '@inquirer/prompts'
 import { prebuiltList } from '@/shared/prebuiltList'
 import {wizard} from '@/wizard'
 import { selectStyle } from '@/styling/selectStyle'
@@ -16,11 +14,13 @@ export default class Start extends Command {
   public async run(): Promise<void> {
 
     try {
-      const motdPath = path.resolve(__dirname, '..', 'art', 'motd')
-      const motd = fs.readFileSync(motdPath, 'utf8')
-      this.log(brand.primary(brand.bold(motd)))
-    } catch {}
-    this.log(brand.primary(brand.bold("Welcome to The Red Guild web3 devcontainer wizard")))    
+
+      this.log(brand.primary(brand.bold(`
+      ╭──────────────────────────╮
+      │    ✻ Welcome to TBD 🪷   │
+      ╰──────────────────────────╯
+      `)))    
+      
 
     const selected = await select({
       message: 'You can select a pre-built container or create your own',
@@ -47,5 +47,13 @@ export default class Start extends Command {
         this.error(`Failed to create devcontainer: ${error instanceof Error ? error.message : String(error)}`)
       }
     }
-  }
+  } catch (error) {
+    if (error instanceof Error && (error.message === 'User force closed the prompt with SIGINT' || error.message === 'User force closed the prompt with SIGTERM')) {
+      this.log('You pressed CTRL+C 👋 Goodbye!')
+      process.exit(0)
+    } else {
+      this.error(`Failed to start wizard: ${error instanceof Error ? error.message : String(error)}`)
+    }
+  }   
+}
 }
