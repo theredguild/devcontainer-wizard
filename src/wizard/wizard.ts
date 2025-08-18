@@ -62,7 +62,7 @@ export async function wizard(args: { name?: string }) {
   const selectedVscodeExtensions = await vscodeExtensions()
   const selectedGitRepository = await gitClone()
   const selectedSavePath = await savePath()
-  const selectedDevcontainerName = args.name || await devcontainerName()
+  const selectedDevcontainerName = args.name !== undefined ? args.name : await devcontainerName()
 
   const wizardState: WizardState = {
     name: selectedDevcontainerName,
