@@ -34,6 +34,9 @@ ENV LOCAL_BIN=${HOME}/.local/bin
 ENV PNPM_HOME=${HOME}/.local/share/pnpm
 ENV PATH=${PATH}:${USR_LOCAL_BIN}:${LOCAL_BIN}:${PNPM_HOME}
 
+# Configure pip to allow system packages in container environment
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+
 # Install uv
 RUN python3 -m pip install --no-cache-dir --upgrade uv
 
