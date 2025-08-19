@@ -62,7 +62,7 @@ export const selectWithTopDescription: any = createPrompt((config: PromptConfig,
       if (item.isSeparator) {
         return `  ${item.name}`;
       }
-      const pointer = isActive ? '>' : ' ';
+      const pointer = isActive ? '➤' : ' ';
       const name = item.name ?? String(item.value);
       const disabledTag = item.disabled ? ' (disabled)' : '';
       return `${pointer} ${name}${disabledTag}`;
@@ -107,12 +107,12 @@ export const selectWithTopDescription: any = createPrompt((config: PromptConfig,
   if (isDone) {
     process.stdout.write('\x1B[?25h');
     const selected = choices[index];
-    return `$ ${config.message ?? ''}\n ✓ ${selected.name}`;
+    return `• ${config.message ?? ''}\n ✓ ${selected.name}`;
   }
 
   const msg = config.message ?? '';
   const current = choices[index];
   const currentDesc = current?.description && !current.isSeparator ? `${current.description}\n` : '';
 
-  return `$ ${msg}\n\n${currentDesc}${pagination}`;
+  return `• ${msg}\n\n${currentDesc}${pagination}`;
 });

@@ -69,7 +69,7 @@ export const checkboxWithTopDescription: any = createPrompt((config: PromptConfi
       if (item.isSeparator) {
         return `     ${item.name}`;
       }
-      const pointer = isActive ? '>' : ' ';
+      const pointer = isActive ? '➤' : ' ';
       const box = item.disabled ? ' - ' : checkedSet.has(itemIndex) ? '[x]' : '[ ]';
       const name = item.name ?? String(item.value);
       const disabledTag = item.disabled ? ' (disabled)' : '';
@@ -128,12 +128,12 @@ export const checkboxWithTopDescription: any = createPrompt((config: PromptConfi
   if (isDone) {
     process.stdout.write('\x1B[?25h');
     const selectedCount = checkedSet.size;
-    return `$ ${config.message ?? ''}\n ✓ ${selectedCount} selected`;
+    return `• ${config.message ?? ''}\n ✓ ${selectedCount} selected`;
   }
 
   const msg = config.message ?? '';
   const current = choices[index];
   const currentDesc = current?.description && !current.isSeparator ? `${current.description}\n` : '';
 
-  return `$ ${msg}\n\n${currentDesc}${pagination}`;
+  return `• ${msg}\n\n${currentDesc}${pagination}`;
 });

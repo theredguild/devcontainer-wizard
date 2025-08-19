@@ -208,16 +208,6 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
       );
     }
 
-  // Add git repository cloning if configured
-  if (config.gitRepository?.enabled && config.gitRepository.url) {
-    dockerfileContent.push(
-      "# Clone git repository",
-      "RUN mkdir -p /home/vscode/repositories && \\",
-      `    git clone ${config.gitRepository.branch ? `--branch ${config.gitRepository.branch}` : ''} ${config.gitRepository.url} /home/vscode/repositories/project && \\`,
-      "    echo 'Repository cloned successfully!'"
-    );
-  }
-
   dockerfileContent.push(
     "# Final setup",
     
@@ -227,6 +217,22 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
     "",
     "WORKDIR /workspace"
   );
+
+  // Load selectedHardening
+  const selectedHardening = new Set(config.systemHardening || []);
+
+  // Git clone
+  if (config.gitRepository?.enabled && config.gitRepository.url) {
+      
+      const branchFlag = config.gitRepository.branch ? `--branch ${config.gitRepository.branch} ` : '';
+      
+      dockerfileContent.push(
+       `# Clone git repo
+        RUN mkdir -p /home/vscode/repos \
+        && git clone https://github.com/theredguild/devcontainer /home/vscode/repos/project \
+        && chown -R vscode:vscode /home/vscode/repos`
+      );
+  }
 
   // Create output directory
   const devcontainerDir = path.join(savePath, '.devcontainer', safeFolderName);
@@ -284,29 +290,26 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
 
     // Lifecycle commands
     initializeCommand: `echo 'Initializing ${projectName} dev container...'`,
-    postCreateCommand: "echo '🎉 Dev container created successfully!'",
     postStartCommand: "echo '🚀 Dev container is ready for Web3 development!'",
     
     // Workspace configuration
     workspaceFolder: "/workspace"
   };
 
-  // Apply system hardening options
-  const selectedHardening = new Set(config.systemHardening || []);
-
   // Workspace mounting strategy
-  if (selectedHardening.has('workspace-isolation')) {
+
+
+  if (selectedHardening.has('ephemeral-workspace')) {
     devcontainerConfig.workspaceMount = "type=tmpfs,destination=/workspace,tmpfs-mode=1777";
-    console.log('🔒 Applied workspace isolation (tmpfs mount)');
-  } else if (selectedHardening.has('workspace-isolation-nowrite')) {
-    devcontainerConfig.workspaceMount = "type=tmpfs,destination=/workspace";
-    console.log('🔒 Applied workspace isolation without writing (tmpfs mount)');
-  } else if (selectedHardening.has('readonly-fs')) {
-    devcontainerConfig.workspaceMount = "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached,readonly";
-    console.log('🔒 Applied read-only workspace bind mount');
-  } else {
+    console.log('🔒 Applied ephemeral workspace (tmpfs mount)');
+  }  else {
     devcontainerConfig.workspaceMount = "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached";
   }
+
+  if (config.gitRepository?.enabled && config.gitRepository.url) {
+    devcontainerConfig.postCreateCommand = 'cp -r /home/vscode/repos/project/* /workspace/repo'
+  }
+
 
   // Docker run arguments for hardening
   const runArgs: string[] = [];
@@ -316,6 +319,12 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
     runArgs.push('--cap-drop=ALL');
   } else if (selectedHardening.has('no-raw-packets')) {
     runArgs.push('--cap-drop=NET_RAW');
+  }
+
+  // Read-only
+
+  if (selectedHardening.has('readonly-os')) {
+    runArgs.push('--read-only')
   }
 
   // Security options

@@ -169,7 +169,7 @@ web3-devcontainer-cli prebuilt -l
 ```
 
 - **Available containers**: `minimal`, `theredguild`, `auditor`.
-- You will be prompted how to open it (Terminal; VS Code coming soon).
+- You will be prompted how to open it (Terminal or VS Code).
 
 #### GitHub Codespaces
 

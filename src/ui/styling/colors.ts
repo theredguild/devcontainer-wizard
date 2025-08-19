@@ -97,13 +97,13 @@ export const icons = {
   cursor: brand.primary('▸'),
   
   /** Filled checkbox for completed/selected items */
-  checked: brand.primary('☑'),
+  checked: brand.primary('[x]'),
   
   /** Empty checkbox for unselected items */
-  unchecked: brand.muted('☐'),
+  unchecked: brand.muted('[ ]'),
   
   /** Hyphen prefix for idle states */
-  prefixIdle: brand.accent('+'),
+  prefixIdle: brand.accent('•'),
   
   /** Diamond prefix for completed states */
   prefixDone: brand.accent('✓'),

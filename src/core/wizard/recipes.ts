@@ -7,8 +7,8 @@ const RECIPE_MAPPINGS = {
     description: "Sealed box without network or persistence for maximum isolation.",
     caveat: "Extensions and package managers will not work.",
     choices: [
-      "readonly-fs",
-      "workspace-isolation-nowrite",
+      "readonly-os",
+      "ephemeral-workspace",
       "secure-tmp",
       "drop-caps",
       "no-new-privs",
@@ -38,8 +38,8 @@ const RECIPE_MAPPINGS = {
     description: "For reading code and running linters without writing to the repository.",
     caveat: "Compilers and formatters that write will fail.",
     choices: [
-      "readonly-fs",
-      "workspace-isolation",
+      "readonly-os",
+      "ephemeral-workspace",
       "secure-tmp",
       "drop-caps",
       "no-new-privs",
@@ -54,7 +54,7 @@ const RECIPE_MAPPINGS = {
     description: "For classroom or public workshops with predictable resource usage.",
     caveat: "Memory-hungry builds may OOM at 512 MB.",
     choices: [
-      "workspace-isolation",
+      "ephemeral-workspace",
       "secure-tmp",
       "drop-caps",
       "no-new-privs",
@@ -69,7 +69,7 @@ const RECIPE_MAPPINGS = {
     description: "For web APIs, git, and package installs without packet crafting capabilities.",
     caveat: "Packet-crafting tools will not work.",
     choices: [
-      "workspace-isolation",
+      "ephemeral-workspace",
       "secure-tmp",
       "drop-caps",
       "no-new-privs",
@@ -84,8 +84,8 @@ const RECIPE_MAPPINGS = {
     description: "Mirrors CI behavior locally with immutable file system.",
     caveat: "Cache writes will not persist across runs.",
     choices: [
-      "readonly-fs",
-      "workspace-isolation",
+      "readonly-os",
+      "ephemeral-workspace",
       "secure-tmp",
       "drop-caps",
       "no-new-privs",
@@ -99,8 +99,8 @@ const RECIPE_MAPPINGS = {
     description: "Inspect artifacts offline without altering evidence.",
     caveat: "No network access or persistence.",
     choices: [
-      "readonly-fs",
-      "workspace-isolation-nowrite",
+      "readonly-os",
+      "ephemeral-workspace-nowrite",
       "secure-tmp",
       "drop-caps",
       "no-new-privs",
@@ -114,7 +114,7 @@ const RECIPE_MAPPINGS = {
     description: "Allows installing packages while keeping guardrails in place.",
     caveat: "Omit drop-caps if installs fail unexpectedly.",
     choices: [
-      "workspace-isolation",
+      "ephemeral-workspace",
       "secure-tmp",
       "no-new-privs",
       "apparmor",
@@ -128,7 +128,7 @@ const RECIPE_MAPPINGS = {
     description: "Prove builds succeed without network access.",
     caveat: "Build steps requiring downloads will fail.",
     choices: [
-      "workspace-isolation",
+      "ephemeral-workspace",
       "secure-tmp",
       "drop-caps",
       "no-new-privs",
@@ -143,7 +143,7 @@ const RECIPE_MAPPINGS = {
     description: "For API testing and collectors without packet crafting capability.",
     caveat: "Packet-crafting tools will not work.",
     choices: [
-      "workspace-isolation",
+      "ephemeral-workspace",
       "secure-tmp",
       "drop-caps",
       "no-new-privs",

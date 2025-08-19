@@ -11,26 +11,12 @@ export async function systemHardening() {
     theme: checkboxStyle,
     loop: false,
     choices: [
-      { name: "Read-only file system", value: "readonly-fs", description: "Mounts the file system as read-only" },
+      { name: "Read-only file system", value: "readonly-os", description: "Mounts the file system as read-only" },
       { name: "Secure temp directories", value: "secure-tmp", description: "Creates temp dirs with noexec, nosuid flags" },
+      { name: "Ephemeral workspace", value: "ephemeral-workspace", description: "Uses tmpf mount to create a ephemeral workpsace"}
     ],
   });
   selectedOptions.push(...fsOptions);
-
-  // Workspace Isolation (mutually exclusive options)
-  const workspaceIsolation = await selectWithTopDescription({
-    message: "Workspace Isolation",
-    theme: selectStyle,
-    loop: false,
-    choices: [
-      { name: "None", value: "none", description: "No workspace isolation" },
-      { name: "Standard isolation", value: "workspace-isolation", description: "Uses tmpfs mount to isolate workspace from host" },
-      { name: "Read-only isolation", value: "workspace-isolation-nowrite", description: "Uses tmpfs mount to isolate workspace from host (no writing access)" },
-    ],
-  });
-  if (workspaceIsolation !== "none") {
-    selectedOptions.push(workspaceIsolation);
-  }
 
   // Container Security
   const containerSecurity = await checkboxWithTopDescription({
