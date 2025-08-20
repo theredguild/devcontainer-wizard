@@ -1,12 +1,10 @@
 import { select, Separator } from '@inquirer/prompts'
-import { selectStyle } from '@/ui/styling/selectStyle'
 import { devcontainerUp } from '@/core/devcontainer/devcontainerUp'
 import { openIn } from '@/utils/openIn'
 
 export async function prebuiltList() {
     const selected = await select({
     message: 'Select a pre-built container to start:',
-    theme: selectStyle,
     choices: [
         {
           name: 'Minimal 🧶',

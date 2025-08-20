@@ -94,7 +94,7 @@ export const brand = {
  */
 export const icons = {
   /** Cursor/pointer icon for active selection */
-  cursor: brand.primary('▸'),
+  cursor: brand.primary('➤'),
   
   /** Filled checkbox for completed/selected items */
   checked: brand.primary('[x]'),
