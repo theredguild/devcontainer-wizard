@@ -5,11 +5,11 @@ on:
     branches: [ main, develop ]
     paths:
       - '.devcontainer/**'
-      - '.github/workflows/devcontainer-test.yml'
+      - '.github/workflows/main.yml'
   pull_request:
     paths:
       - '.devcontainer/**'
-      - '.github/workflows/devcontainer-test.yml'
+      - '.github/workflows/main.yml'
   workflow_dispatch:
 
 jobs:
@@ -26,14 +26,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check devcontainer folder exists
+      - name: Check devcontainer config exists
         id: check
         run: |
-          if [ -d "${{ matrix.subFolder }}" ]; then
+          if [ -f "${{ matrix.subFolder }}/devcontainer.json" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
-            echo "Skipping: ${{ matrix.subFolder }} does not exist."
+            echo "Skipping: ${{ matrix.subFolder }}/devcontainer.json does not exist."
           fi
 
       - name: Build and run devcontainer
@@ -41,7 +41,8 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           subFolder: ${{ matrix.subFolder }}
-          # Simple smoke test command executed inside the running devcontainer
+          configFile: ${{ matrix.subFolder }}/devcontainer.json
+          
           runCmd: echo "Devcontainer OK in ${{ matrix.subFolder }}" && uname -a
           push: never
 
