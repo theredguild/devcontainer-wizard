@@ -1,0 +1,47 @@
+name: Prebuilt Dev Containers - Build & Smoke Test
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '.devcontainer/**'
+      - '.github/workflows/devcontainer-test.yml'
+  pull_request:
+    paths:
+      - '.devcontainer/**'
+      - '.github/workflows/devcontainer-test.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        subFolder:
+          - .devcontainer/auditor
+          - .devcontainer/minimal
+          - .devcontainer/legacy-theredguild
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check devcontainer folder exists
+        id: check
+        run: |
+          if [ -d "${{ matrix.subFolder }}" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Skipping: ${{ matrix.subFolder }} does not exist."
+          fi
+
+      - name: Build and run devcontainer
+        if: steps.check.outputs.exists == 'true'
+        uses: devcontainers/ci@v0.3
+        with:
+          subFolder: ${{ matrix.subFolder }}
+          # Simple smoke test command executed inside the running devcontainer
+          runCmd: echo "Devcontainer OK in ${{ matrix.subFolder }}" && uname -a
+          push: never
+
