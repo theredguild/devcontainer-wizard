@@ -79,3 +79,11 @@ jobs:
           runCmd: echo "Devcontainer OK in ${{ matrix.subFolder }}" && uname -a
           push: never
 
+      - name: Purge Docker cache and resources (on success)
+        if: success() && steps.check.outputs.exists == 'true' && steps.changed.outputs.changed == 'true'
+        run: |
+          echo "Pruning Docker resources to free memory and disk..."
+          docker system prune -af --volumes || true
+          docker builder prune -af || true
+          docker system df || true
+
