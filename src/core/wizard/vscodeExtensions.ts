@@ -1,6 +1,5 @@
 import { checkboxWithTopDescription } from "@/ui/components/checkboxWithTopDescription";
 import { confirm, Separator } from "@inquirer/prompts";
-import { checkboxStyle } from "@/ui/styling/checkboxStyle";
 
 type VscodeExtension = { id: string; name: string };
 
@@ -35,7 +34,6 @@ export async function vscodeExtensions(): Promise<string[]> {
 
   const selected = await checkboxWithTopDescription({
     message: "Select VS Code extensions to install",
-    theme: checkboxStyle,
     loop: false,
     choices: [
       new Separator("Tintin's Extensions"),

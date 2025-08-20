@@ -1,5 +1,4 @@
 import { input, confirm } from '@inquirer/prompts'
-import { inputStyle } from '@/ui/styling/inputStyle'
 
 export interface GitRepositoryConfig {
   url: string
@@ -22,7 +21,6 @@ export async function gitClone(): Promise<GitRepositoryConfig> {
 
   const repoUrl = await input({
     message: 'Enter the git repository URL to clone:',
-    theme: inputStyle,
     validate: (input: string) => {
       if (!input.trim()) {
         return 'Repository URL cannot be empty'
@@ -48,7 +46,6 @@ export async function gitClone(): Promise<GitRepositoryConfig> {
   if (shouldSpecifyBranch) {
     branch = await input({
       message: 'Enter the branch or tag name:',
-      theme: inputStyle,
       default: 'main',
       validate: (input: string) => {
         if (!input.trim()) {

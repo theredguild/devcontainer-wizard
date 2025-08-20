@@ -1,5 +1,4 @@
 import { selectWithTopDescription } from "@/ui/components/selectWithTopDescription";
-import { selectStyle } from "@/ui/styling/selectStyle";
 
 // Recipe to security hardening mapping
 const RECIPE_MAPPINGS = {
@@ -158,7 +157,6 @@ const RECIPE_MAPPINGS = {
 export async function recipes() {
   return await selectWithTopDescription({
     message: "Select one hardening recipe:",
-    theme: selectStyle,
     loop: false,
     choices: [
       { 

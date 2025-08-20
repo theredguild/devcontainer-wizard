@@ -112,7 +112,7 @@ export const selectWithTopDescription: any = createPrompt((config: PromptConfig,
 
   const msg = config.message ?? '';
   const current = choices[index];
-  const currentDesc = current?.description && !current.isSeparator ? `${current.description}\n` : '';
+  const currentDesc = current?.description && !current.isSeparator ? `${current.description}\n\n` : '';
 
   return `• ${msg}\n\n${currentDesc}${pagination}`;
 });

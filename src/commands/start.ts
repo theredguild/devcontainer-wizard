@@ -2,7 +2,6 @@ import { Command } from '@oclif/core'
 import { select } from '@inquirer/prompts'
 import { prebuiltList } from '@/core/devcontainer/prebuiltList'
 import {wizard} from '@/core/wizard'
-import { selectStyle } from '@/ui/styling/selectStyle'
 import { brand } from '@/ui/styling/colors'
 import { generateDevEnvironment } from '@/core/scripts/generate_dev_env'
 
@@ -24,10 +23,9 @@ export default class Start extends Command {
 
     const selected = await select({
       message: 'You can select a pre-built container or create your own',
-      theme: selectStyle,
       choices: [
-        { name: 'Pre-built', value: 'pre-built' },
-        { name: 'Create your own', value: 'custom'},
+        { name: 'Create a custom container', value: 'custom'},
+        { name: 'Use a pre-built container', value: 'pre-built' },
       ],
     })
 

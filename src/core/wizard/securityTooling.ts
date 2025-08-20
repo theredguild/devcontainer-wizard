@@ -4,7 +4,6 @@ import { checkboxStyle } from "@/ui/styling/checkboxStyle";
 export async function securityTooling() {
   return await checkboxWithTopDescription({
     message: "Select security tooling",
-    theme: checkboxStyle,
     choices: [
       { name: "Slither", value: "slither", description: "Automatically installs: Python, uv (package manager)" },
       { name: "Mythril", value: "mythril", description: "Automatically installs: Python, uv (package manager)" },

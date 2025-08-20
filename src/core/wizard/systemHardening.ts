@@ -1,6 +1,4 @@
 import { checkboxWithTopDescription, selectWithTopDescription } from "@/ui/components/";
-import { selectStyle } from "@/ui/styling/selectStyle";
-import { checkboxStyle } from "@/ui/styling/checkboxStyle";
 
 export async function systemHardening() {
   const selectedOptions: string[] = [];
@@ -8,7 +6,6 @@ export async function systemHardening() {
   // File System Security
   const fsOptions = await checkboxWithTopDescription({
     message: "File System Security",
-    theme: checkboxStyle,
     loop: false,
     choices: [
       { name: "Read-only file system", value: "readonly-os", description: "Mounts the file system as read-only" },
@@ -21,7 +18,6 @@ export async function systemHardening() {
   // Container Security
   const containerSecurity = await checkboxWithTopDescription({
     message: "Container Security",
-    theme: checkboxStyle,
     loop: false,
     choices: [
       { name: "Drop all capabilities", value: "drop-caps", description: "Removes all Linux capabilities from container" },
@@ -35,7 +31,6 @@ export async function systemHardening() {
   // Network Security (with conflict detection)
   const networkIsolation = await selectWithTopDescription({
     message: "Network Configuration",
-    theme: selectStyle,
     loop: false,
     choices: [
       { name: "Normal networking", value: "normal", description: "Standard container networking" },
@@ -50,7 +45,6 @@ export async function systemHardening() {
     // Additional network security options
     const additionalNetworkSecurity = await checkboxWithTopDescription({
       message: "Additional Network Security (compatible with DNS)",
-      theme: checkboxStyle,
       loop: false,
       choices: [
         { name: "Disable IPv6", value: "disable-ipv6", description: "Disables IPv6 networking to reduce attack surface" },
@@ -65,7 +59,6 @@ export async function systemHardening() {
   // Application Security
   const appSecurity = await checkboxWithTopDescription    ({
     message: "Application Security",
-    theme: checkboxStyle,
     loop: false,
     choices: [
       { name: "VS Code security", value: "vscode-security", description: "Disables auto-tasks, workspace trust, and telemetry" },
@@ -76,7 +69,6 @@ export async function systemHardening() {
   // Resource Limits
   const resourceLimits = await selectWithTopDescription({
     message: "Resource Limits",
-    theme: selectStyle,
     loop: false,
     choices: [
       { name: "No limits", value: "none", description: "No resource constraints" },

@@ -1,12 +1,10 @@
 import { input } from "@inquirer/prompts";
-import { inputStyle } from "@/ui/styling/inputStyle";
 import * as path from "node:path";
 import * as fs from "node:fs/promises";
 
 export async function savePath(): Promise<string> {
   const answer = await input({
     message: "Select a directory to save the devcontainer files",
-    theme: inputStyle,
     default: process.cwd(),
     validate: async (value: string) => {
       try {

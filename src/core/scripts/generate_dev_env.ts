@@ -91,6 +91,9 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
       if (tool === 'heimdall') {
         requiredDeps.add('rust');
       }
+      if (tool === 'panoramix') {
+        requiredDeps.add('tintinweb.vscode-decompiler');
+      }
     }
   });
   
@@ -296,6 +299,11 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
     workspaceFolder: "/workspace"
   };
 
+  // Add Tintin's Decompiler to VS Code extensions if it's required but not already in the config
+  if (requiredDeps.has('tintinweb.vscode-decompiler') && !config.vscodeExtensions?.includes('tintinweb.vscode-decompiler')) {
+    devcontainerConfig.customizations.vscode.extensions.push('tintinweb.vscode-decompiler');
+  }
+
   // Workspace mounting strategy
 
 
@@ -307,7 +315,7 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   }
 
   if (config.gitRepository?.enabled && config.gitRepository.url) {
-    devcontainerConfig.postCreateCommand = 'cp -r /home/vscode/repos/project/* /workspace/repo'
+    devcontainerConfig.postCreateCommand = 'mkdir -p /workspace/repo && cp -r /home/vscode/repos/project/* /workspace/repo'
   }
 
 

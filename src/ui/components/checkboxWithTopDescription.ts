@@ -133,7 +133,7 @@ export const checkboxWithTopDescription: any = createPrompt((config: PromptConfi
 
   const msg = config.message ?? '';
   const current = choices[index];
-  const currentDesc = current?.description && !current.isSeparator ? `${current.description}\n` : '';
+  const currentDesc = current?.description && !current.isSeparator ? `${current.description}\n\n` : '';
 
   return `• ${msg}\n\n${currentDesc}${pagination}`;
 });
