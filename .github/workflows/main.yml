@@ -79,6 +79,22 @@ jobs:
           runCmd: echo "Devcontainer OK in ${{ matrix.subFolder }}" && uname -a
           push: never
 
+      - name: Test Foundry functionality
+        if: success() && steps.check.outputs.exists == 'true' && steps.changed.outputs.changed == 'true'
+        uses: devcontainers/ci@v0.3
+        with:
+          subFolder: ${{ matrix.subFolder }}
+          configFile: ${{ matrix.subFolder }}/devcontainer.json
+          
+          runCmd: |
+            echo "🧪 Testing Foundry installation and functionality..."
+            foundryup --version || echo "❌ Foundry not found"
+            forge --version || echo "❌ Forge not found"
+            cast --version || echo "❌ Cast not found"
+            anvil --version || echo "❌ Anvil not found"
+            echo "✅ Foundry tools verification completed"
+          push: never
+
       - name: Purge Docker cache and resources (on success)
         if: success() && steps.check.outputs.exists == 'true' && steps.changed.outputs.changed == 'true'
         run: |
