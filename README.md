@@ -85,7 +85,7 @@ The wizard will prompt you for:
 
 When finished, the CLI writes `Dockerfile` and `devcontainer.json` to `.devcontainer/<name>` and offers to start it immediately. It also prints the exact `devcontainer up` command you can run later.
 
-#### Security Hardening Recipes (NEW)
+#### Security Hardening Recipes
 
 The wizard now includes predefined security recipes for common use cases:
 
@@ -111,8 +111,7 @@ When choosing manual configuration, you have fine-grained control over:
 - Secure temp directories (noexec, nosuid flags)
 
 **Workspace Isolation**:
-- Standard isolation (tmpfs mount)
-- Read-only isolation (tmpfs + no write access)
+- Ephemeral workspace (tmpfs mount)
 
 **Container Security**:
 - Drop all capabilities
@@ -131,17 +130,17 @@ When choosing manual configuration, you have fine-grained control over:
 
 **Resource Limits**:
 - Light (512MB, 2 cores)
-- Medium (2GB, 4 cores)  
+- Standard (2GB, 4 cores)  
 - Heavy (4GB, 8 cores)
 
-#### Git Repository Integration (NEW)
+#### Git Repository Integration
 
 The wizard can now automatically clone a git repository during container build:
 
 - **Repository URL**: Supports `https://`, `git@`, `ssh://`, and `git://` protocols
 - **Branch/Tag Selection**: Optionally specify a specific branch or tag to clone
 - **Validation**: Built-in URL validation ensures proper git repository format
-- **Build-time Integration**: Repository is cloned during the container build process
+- **Build-time Integration**: Repository is cloned into `/home/vscode/repos` during the image build and copied into `/workspace` on first start
 
 This feature is particularly useful for:
 - Setting up development environments with existing codebases
