@@ -1,10 +1,8 @@
 import { Command } from '@oclif/core'
-import { select } from '@inquirer/prompts'
 import { prebuiltList } from '@/core/devcontainer/prebuiltList'
-import {wizard} from '@/core/wizard'
-import { brand } from '@/ui/styling/colors'
+import { wizard } from '@/core/wizard'
 import { generateDevEnvironment } from '@/core/scripts/generate_dev_env'
-
+import { selectWithTopDescription } from '@/ui/components/selectWithTopDescription'
 
 export default class Start extends Command {
 
@@ -14,14 +12,14 @@ export default class Start extends Command {
 
     try {
 
-      this.log(brand.primary(brand.bold(`
-      ╭──────────────────────────╮
-      │    ✻ Welcome to TBD 🪷   │
-      ╰──────────────────────────╯
-      `)))    
+      this.log(`
+      ╭───────────────────────────────────────────╮
+      │    ✻ Welcome to devcontainer-wizard 🪷    │
+      ╰───────────────────────────────────────────╯
+      `)    
       
 
-    const selected = await select({
+    const selected = await selectWithTopDescription({
       message: 'You can select a pre-built container or create your own',
       choices: [
         { name: 'Create a custom container', value: 'custom'},

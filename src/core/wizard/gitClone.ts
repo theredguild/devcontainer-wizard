@@ -1,4 +1,6 @@
-import { input, confirm } from '@inquirer/prompts'
+import { confirm } from '@inquirer/prompts'
+import { confirmTheme } from '@/ui/styling/confirm'
+import { inputWithSymbols as input} from '@/ui/components'
 
 export interface GitRepositoryConfig {
   url: string
@@ -8,6 +10,7 @@ export interface GitRepositoryConfig {
 
 export async function gitClone(): Promise<GitRepositoryConfig> {
   const shouldClone = await confirm({
+    theme: confirmTheme,
     message: 'Would you like to automatically clone a git repository during build?',
     default: false
   })
@@ -37,6 +40,7 @@ export async function gitClone(): Promise<GitRepositoryConfig> {
   })
 
   const shouldSpecifyBranch = await confirm({
+    theme: confirmTheme,
     message: 'Would you like to specify a specific branch/tag to clone?',
     default: false
   })

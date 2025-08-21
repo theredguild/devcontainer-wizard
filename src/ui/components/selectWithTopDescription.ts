@@ -9,6 +9,7 @@ import {
   usePagination,
 } from '@inquirer/core';
 import { Separator } from '@inquirer/prompts';
+import { symbols } from '@/ui/styling/symbols';
 
 type RawChoice<T = any> =
   | string
@@ -60,9 +61,9 @@ export const selectWithTopDescription: any = createPrompt((config: PromptConfig,
     active: index,
     renderItem: ({ item, isActive }) => {
       if (item.isSeparator) {
-        return `  ${item.name}`;
+        return `${symbols.separatorIndent}${item.name}`;
       }
-      const pointer = isActive ? '➤' : ' ';
+      const pointer = isActive ? symbols.pointer : ' ';
       const name = item.name ?? String(item.value);
       const disabledTag = item.disabled ? ' (disabled)' : '';
       return `${pointer} ${name}${disabledTag}`;
@@ -107,12 +108,12 @@ export const selectWithTopDescription: any = createPrompt((config: PromptConfig,
   if (isDone) {
     process.stdout.write('\x1B[?25h');
     const selected = choices[index];
-    return `• ${config.message ?? ''}\n ✓ ${selected.name}`;
+    return `${symbols.bullet} ${config.message ?? ''}\n ${symbols.check} ${selected.name}`;
   }
 
   const msg = config.message ?? '';
   const current = choices[index];
   const currentDesc = current?.description && !current.isSeparator ? `${current.description}\n\n` : '';
 
-  return `• ${msg}\n\n${currentDesc}${pagination}`;
+  return `${symbols.bullet} ${msg}\n\n${currentDesc}${pagination}`;
 });

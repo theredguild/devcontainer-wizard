@@ -1,5 +1,5 @@
 {
-  "name": "web3-devcontainer-cli",
+  "name": "devcontainer-wizard",
   "version": "1.0.0",
   "description": "A comprehensive CLI tool to set up fully equipped Web3 development containers with advanced security hardening and git integration.",
   "license": "MIT",
@@ -11,13 +11,13 @@
     "@oclif/plugin-help": "^6.0.0"
   },
   "bin": {
-    "web3-devcontainer-cli": "./bin/run.js"
+    "devcontainer-wizard": "./bin/run.js"
   },
   "oclif": {
-    "bin": "web3-devcontainer-cli",
+    "bin": "devcontainer-wizard",
     "commands": "./dist/commands",
     "tsconfig": "./tsconfig.json",
-    "dirname": "web3-devcontainer-cli",
+    "dirname": "devcontainer-wizard",
     "topicSeparator": " ",
     "plugins": [
       "@oclif/plugin-help"

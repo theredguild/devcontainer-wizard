@@ -1,5 +1,6 @@
 import { checkboxWithTopDescription } from "@/ui/components/checkboxWithTopDescription";
 import { confirm, Separator } from "@inquirer/prompts";
+import { confirmTheme } from "@/ui/styling/confirm";
 
 type VscodeExtension = { id: string; name: string };
 
@@ -24,6 +25,7 @@ const Olympix: VscodeExtension[] = [
 
 export async function vscodeExtensions(): Promise<string[]> {
   const autoInstall = await confirm({
+    theme: confirmTheme,
     message: "Do you want to automatically install recommended VS Code extensions?",
     default: true,
   });

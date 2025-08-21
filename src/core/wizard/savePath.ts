@@ -1,4 +1,4 @@
-import { input } from "@inquirer/prompts";
+import { inputWithSymbols as input } from "@/ui/components";
 import * as path from "node:path";
 import * as fs from "node:fs/promises";
 

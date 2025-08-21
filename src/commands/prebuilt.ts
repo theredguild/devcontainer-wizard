@@ -2,7 +2,7 @@ import {Args, Command, Flags} from '@oclif/core'
 import { prebuiltList } from '../core/devcontainer/prebuiltList'
 import { devcontainerUp } from '../core/devcontainer/devcontainerUp'
 import { openIn } from '@/utils/openIn'
-import { brand } from '@/ui/styling/colors'
+import { copyPrebuiltContainer } from '@/core/devcontainer/resolvePrebuiltPath'
 
 export default class Prebuilt extends Command {
 
@@ -26,7 +26,7 @@ export default class Prebuilt extends Command {
 
   private containerMap: Record<string, string> = {
     'minimal': '.devcontainer/minimal/devcontainer.json',
-    'theredguild': '.devcontainer/theredguild/devcontainer.json',
+    'theredguild': '.devcontainer/legacy-theredguild/devcontainer.json',
     'auditor': '.devcontainer/auditor/devcontainer.json'
   }
 
@@ -35,31 +35,33 @@ export default class Prebuilt extends Command {
     const {args, flags} = await this.parse(Prebuilt)
 
     if (flags.list) {
-      this.log(brand.primary(brand.bold('Available pre-built devcontainers:')))
+      this.log('Available pre-built devcontainers:')
       for (const key of Object.keys(this.containerMap)) {
         const path = this.containerMap[key]
-        this.log(`  - ${brand.bold(key)} ${brand.muted(`(${path})`)}`)
+        this.log(`  - ${key} ${`(${path})`}`)
       }
       return
     }
 
     if (!args.container) {
-      this.log(brand.primary(brand.bold('Select a pre-built devcontainer')))
+      this.log('Select a pre-built devcontainer')
       await prebuiltList();
       return;
     }
 
     const containerConfig = this.containerMap[args.container.toLowerCase()];
     if (!containerConfig) {
-      this.error(brand.error(`Container "${args.container}" not found. Available containers: ${Object.keys(this.containerMap).join(', ')}`));
+      this.error(`Container "${args.container}" not found. Available containers: ${Object.keys(this.containerMap).join(', ')}`);
       return;
     }
 
-    console.log(`🚀 Starting ${args.container} devcontainer...`);
+    console.log(`📋 Copying ${args.container} devcontainer to current directory...`);
     const openInSelection = await openIn()
 
     try {
-      await devcontainerUp(containerConfig, openInSelection);
+      const localConfigPath = await copyPrebuiltContainer(containerConfig)
+      console.log(`🚀 Starting ${args.container} devcontainer...`);
+      await devcontainerUp(localConfigPath, openInSelection);
       console.log('✨ Devcontainer started successfully!');
     } catch (error) {
       if (error instanceof Error && (error.message === 'User force closed the prompt with SIGINT' || error.message === 'User force closed the prompt with SIGTERM')) {

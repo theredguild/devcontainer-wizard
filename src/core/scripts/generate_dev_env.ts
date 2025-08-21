@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { confirm } from '@inquirer/prompts';
+import { confirmTheme } from '@/ui/styling/confirm';
 import { openIn } from '@/utils/openIn';
 import { devcontainerUp } from '@/core/devcontainer/devcontainerUp';
 import { INSTALL_COMMANDS, ToolKey } from '@/core/scripts/install_commands';
@@ -418,6 +419,7 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
 
 
   const shouldRun = await confirm({
+    theme: confirmTheme,
     message: '🎯 Would you like to start the devcontainer now?',
     default: true
   });

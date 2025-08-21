@@ -10,6 +10,7 @@ import {
   usePagination,
 } from '@inquirer/core';
 import { Separator } from '@inquirer/prompts';
+import { symbols } from '@/ui/styling/symbols';
 
 type RawChoice<T = any> =
   | string
@@ -67,10 +68,10 @@ export const checkboxWithTopDescription: any = createPrompt((config: PromptConfi
     active: index,
     renderItem: ({ item, isActive, index: itemIndex }) => {
       if (item.isSeparator) {
-        return `     ${item.name}`;
+        return `${symbols.separatorIndent.repeat(3)}${item.name}`;
       }
-      const pointer = isActive ? '➤' : ' ';
-      const box = item.disabled ? ' - ' : checkedSet.has(itemIndex) ? '[x]' : '[ ]';
+      const pointer = isActive ? symbols.pointer : ' ';
+      const box = item.disabled ? symbols.checkbox.disabled : checkedSet.has(itemIndex) ? symbols.checkbox.checked : symbols.checkbox.unchecked;
       const name = item.name ?? String(item.value);
       const disabledTag = item.disabled ? ' (disabled)' : '';
       return `${pointer} ${box} ${name}${disabledTag}`;
@@ -128,12 +129,12 @@ export const checkboxWithTopDescription: any = createPrompt((config: PromptConfi
   if (isDone) {
     process.stdout.write('\x1B[?25h');
     const selectedCount = checkedSet.size;
-    return `• ${config.message ?? ''}\n ✓ ${selectedCount} selected`;
+    return `${symbols.bullet} ${config.message ?? ''}\n ${symbols.check} ${selectedCount} selected`;
   }
 
   const msg = config.message ?? '';
   const current = choices[index];
   const currentDesc = current?.description && !current.isSeparator ? `${current.description}\n\n` : '';
 
-  return `• ${msg}\n\n${currentDesc}${pagination}`;
+  return `${symbols.bullet} ${msg}\n\n${currentDesc}${pagination}`;
 });

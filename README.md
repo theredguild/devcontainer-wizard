@@ -1,4 +1,4 @@
-## web3-devcontainer-cli
+# DevContainer Wizard
 
 A comprehensive CLI tool to set up fully equipped Web3 development containers. Features an interactive wizard for creating custom environments with advanced security hardening, git integration, and pre-configured toolchains, or quickly launch pre-built containers for common workflows.
 
@@ -36,15 +36,15 @@ A comprehensive CLI tool to set up fully equipped Web3 development containers. F
 ## Install
 
 ```bash
-pnpm install -g web3-devcontainer-cli
+pnpm install -g devcontainer-wizard
 ```
 
 ```bash
-npm install -g web3-devcontainer-cli
+npm install -g devcontainer-wizard
 ```
 
 ```bash
-yarn global add web3-devcontainer-cli
+yarn global add devcontainer-wizard
 ```
 
 ## Usage
@@ -52,7 +52,7 @@ yarn global add web3-devcontainer-cli
 ### Quick start
 
 ```bash
-web3-devcontainer-cli start
+devcontainer-wizard start
 ```
 
 - Select a pre-built container or create your own via the wizard.
@@ -60,7 +60,7 @@ web3-devcontainer-cli start
 ### Create your own devcontainer
 
 ```bash
-web3-devcontainer-cli create [NAME]
+devcontainer-wizard create [NAME]
 ```
 
 The wizard will prompt you for:
@@ -157,15 +157,15 @@ The wizard offers curated extension collections:
 ### Start pre-built containers
 
 ```bash
-web3-devcontainer-cli prebuilt [CONTAINER]
+devcontainer-wizard prebuilt [CONTAINER]
 ```
 
 - **List available options**:
 
 ```bash
-web3-devcontainer-cli prebuilt --list
+devcontainer-wizard prebuilt --list
 # or
-web3-devcontainer-cli prebuilt -l
+devcontainer-wizard prebuilt -l
 ```
 
 - **Available containers**: `minimal`, `theredguild`, `auditor`.
@@ -175,10 +175,11 @@ web3-devcontainer-cli prebuilt -l
 
 You can also run prebuilt containers using GitHub Codespaces: 
 
-[![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&template_repository=theredguild/web3-devcontainer-cli)
+[![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&template_repository=theredguild/devcontainer)
 
 ## Pre-built containers
 
 - **Minimal**: Beginner-friendly environment.
 - **Auditor**: Audit-ready environment with common security tooling.
-- **The Red Guild**: The Red Guild's original devcontainer.
+- **Legacy The Red Guild**: The Red Guild's original devcontainer.
+- **Legacy Minimal**: The Red Guild's original minimal devcontainer.

@@ -1,10 +1,10 @@
-import { input } from "@inquirer/prompts";
+import { inputWithSymbols as input } from "@/ui/components";
 import * as path from "node:path";
 
 export async function devcontainerName(): Promise<string> {
   const defaultName = path.basename(process.cwd()) || "Solidity Dev Environment";
   const name = await input({
-    message: "Name your devcontainer",
+    message: "Name your devcontainer:",
     default: defaultName,
     validate: (value: string) => {
       const trimmed = (value ?? "").trim();
