@@ -2,7 +2,7 @@ import * as path from 'path'
 import * as fs from 'fs/promises'
 import { execSync } from 'child_process'
 
-const PREBUILT_REPO = 'https://github.com/d4rm5/devcontainer.git'
+const PREBUILT_REPO = 'https://github.com/theredguild/devcontainer.git'
 const PREBUILT_CACHE_DIR = path.join(process.env.HOME || process.env.USERPROFILE || '', '.devcontainer-wizard', 'prebuilt-cache')
 
 // Ensure the cache directory exists
