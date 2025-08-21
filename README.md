@@ -2,6 +2,8 @@
 
 A comprehensive CLI tool to set up fully equipped Web3 development containers. Features an interactive wizard for creating custom environments with advanced security hardening, git integration, and pre-configured toolchains, or quickly launch pre-built containers for common workflows.
 
+![DevContainer Wizard](./assets/home.gif)
+
 ## Requirements
 
 1. [Dev Containers CLI (`@devcontainers/cli`)](https://github.com/devcontainers/cli/) installed globally:
@@ -47,7 +49,7 @@ npm install -g devcontainer-wizard
 yarn global add devcontainer-wizard
 ```
 
-## Usage
+## How to use
 
 ### Quick start
 
@@ -62,6 +64,8 @@ devcontainer-wizard start
 ```bash
 devcontainer-wizard create [NAME]
 ```
+
+![DevContainer Wizard](./assets/create.gif)
 
 The wizard will prompt you for:
 
@@ -159,6 +163,8 @@ The wizard offers curated extension collections:
 ```bash
 devcontainer-wizard prebuilt [CONTAINER]
 ```
+
+![DevContainer Wizard](./assets/prebuilt.gif)
 
 - **List available options**:
 
