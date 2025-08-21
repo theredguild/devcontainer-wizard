@@ -159,6 +159,8 @@ The wizard offers curated extension collections:
 
 ### Start pre-built containers
 
+Prebuilt containers are stored in the [theredguild/devcontainer](https://github.com/theredguild/devcontainer) repository.
+
 ```bash
 devcontainer-wizard prebuilt [CONTAINER]
 ```
@@ -173,7 +175,7 @@ devcontainer-wizard prebuilt --list
 devcontainer-wizard prebuilt -l
 ```
 
-- **Available containers**: `minimal`, `theredguild`, `auditor`.
+- **Available containers**: `minimal`,  `auditor`, `minimal-legacy`, `theredguild-legacy`.
 - You will be prompted how to open it (Terminal or VS Code).
 
 #### GitHub Codespaces

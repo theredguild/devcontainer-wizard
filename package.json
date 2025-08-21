@@ -27,8 +27,7 @@
   "files": [
     "bin/",
     "dist/",
-    "src/",
-    ".devcontainer/"
+    "src/"
   ],
   "scripts": {
     "build": "tsc && tsc-alias",

@@ -5,33 +5,34 @@ import { copyPrebuiltContainer } from '@/core/devcontainer/resolvePrebuiltPath'
 
 export async function prebuiltList() {
     const selected = await selectWithTopDescription({
-    message: 'Select a pre-built container to start:',
-    choices: [
-        {
-          name: 'Minimal 🧶',
-          value: ".devcontainer/minimal/devcontainer.json",
-          description: 'Contains a beginner friendly enviroment.',
-          disabled: false
-        },
-        {
-          name: 'Auditor 🔍',
-          value: ".devcontainer/auditor/devcontainer.json",
-          description: 'Contains an audit-ready environment.',
-          disabled: false,
-        },
-        {
-          name: 'Legacy The Red Guild 🪷',
-          value: ".devcontainer/legacy-theredguild/devcontainer.json",
-          description: 'The Red Guild\'s original devcontainer. (Legacy)',
-          disabled: false
-        },
-        {
-          name: 'Legacy Minimal 🧶',
-          value: ".devcontainer/legacy-minimal/devcontainer.json",
-          description: 'The Red Guild\'s original minimal devcontainer. (Legacy)',
-          disabled: false
-        }
-    ]});
+        message: 'Select a pre-built container to start:',
+        choices: [
+            {
+              name: 'Minimal 🧶',
+              value: 'minimal',
+              description: 'Contains a beginner friendly environment.',
+              disabled: false
+            },
+            {
+              name: 'Auditor 🔍',
+              value: 'auditor',
+              description: 'Contains an audit-ready environment.',
+              disabled: false,
+            },
+            {
+              name: 'Legacy The Red Guild 🪷',
+              value: 'legacy-theredguild',
+              description: 'The Red Guild\'s original devcontainer. (Legacy)',
+              disabled: false
+            },
+            {
+              name: 'Legacy Minimal 🧶',
+              value: 'legacy-minimal',
+              description: 'The Red Guild\'s original minimal devcontainer. (Legacy)',
+              disabled: false
+            }
+        ]
+    });
 
     console.log('📋 Copying selected devcontainer to current directory...');
     const openInSelection = await openIn()
