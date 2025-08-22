@@ -2,6 +2,8 @@ import { selectWithTopDescription } from '@/ui/components/selectWithTopDescripti
 import { devcontainerUp } from '@/core/devcontainer/devcontainerUp'
 import { openIn } from '@/utils/openIn'
 import { copyPrebuiltContainer } from '@/core/devcontainer/resolvePrebuiltPath'
+import { colorize, symbols } from '@/ui/components'
+import { ui } from '@/ui/styling/ui'
 
 export async function prebuiltList() {
     const selected = await selectWithTopDescription({
@@ -20,8 +22,8 @@ export async function prebuiltList() {
               disabled: false,
             },
             {
-              name: 'Legacy The Red Guild 🪷',
-              value: 'legacy-theredguild',
+              name: 'Legacy 🪷',
+              value: 'legacy',
               description: 'The Red Guild\'s original devcontainer. (Legacy)',
               disabled: false
             },
@@ -34,16 +36,17 @@ export async function prebuiltList() {
         ]
     });
 
-    console.log('📋 Copying selected devcontainer to current directory...');
+    console.log(colorize.brand(symbols.bullet + ' Copying selected devcontainer to current directory...'));
     const openInSelection = await openIn()
 
+    console.log(colorize.brand(symbols.arrow + ' Starting selected devcontainer...'));
     try {
       const localConfigPath = await copyPrebuiltContainer(selected)
-      console.log('🚀 Starting selected devcontainer...');
       await devcontainerUp(localConfigPath, openInSelection);
-      console.log('✨ Devcontainer started successfully!');
+      console.log(colorize.success(symbols.check + ' Devcontainer started successfully!'));
+      console.log('')
     } catch (error) {
-      console.error('❌ Failed to start devcontainer:', error instanceof Error ? error.message : String(error));
-      throw error;
+      console.error(colorize.error(symbols.circle + ' Failed to start devcontainer: ' + (error instanceof Error ? error.message : String(error))));
+      console.log('')
     }
 }

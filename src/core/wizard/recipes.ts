@@ -162,52 +162,62 @@ export async function recipes() {
       { 
         name: "Airgapped ephemeral sandbox", 
         value: "airgapped-ephemeral-sandbox", 
-        description: "Sealed box without network or persistence for maximum isolation. Extensions and package managers will not work." 
+        description: RECIPE_MAPPINGS["airgapped-ephemeral-sandbox"].description,
+        caveat: RECIPE_MAPPINGS["airgapped-ephemeral-sandbox"].caveat
       },
       { 
         name: "Hardened online dev", 
         value: "hardened-online-dev", 
-        description: "Day-to-day development with network access but reduced attack surface. Tools that craft packets will break due to no-raw-packets." 
+        description: RECIPE_MAPPINGS["hardened-online-dev"].description,
+        caveat: RECIPE_MAPPINGS["hardened-online-dev"].caveat
       },
       { 
         name: "Source-review only", 
         value: "source-review-only", 
-        description: "For reading code and running linters without writing to the repository. Compilers and formatters that write will fail." 
+        description: RECIPE_MAPPINGS["source-review-only"].description,
+        caveat: RECIPE_MAPPINGS["source-review-only"].caveat
       },
       { 
         name: "Training workshop lab", 
         value: "training-workshop-lab", 
-        description: "For classroom or public workshops with predictable resource usage. Memory-hungry builds may OOM at 512 MB." 
+        description: RECIPE_MAPPINGS["training-workshop-lab"].description,
+        caveat: RECIPE_MAPPINGS["training-workshop-lab"].caveat
       },
       { 
         name: "Network restricted analysis", 
         value: "network-restricted-analysis", 
-        description: "For web APIs, git, and package installs without packet crafting capabilities. Packet-crafting tools will not work." 
+        description: RECIPE_MAPPINGS["network-restricted-analysis"].description,
+        caveat: RECIPE_MAPPINGS["network-restricted-analysis"].caveat
       },
       { 
         name: "CI-like local runner", 
         value: "ci-like-local-runner", 
-        description: "Mirrors CI behavior locally with immutable file system. Cache writes will not persist across runs." 
+        description: RECIPE_MAPPINGS["ci-like-local-runner"].description,
+        caveat: RECIPE_MAPPINGS["ci-like-local-runner"].caveat
       },
       { 
         name: "Forensics reader", 
         value: "forensics-reader", 
-        description: "Inspect artifacts offline without altering evidence. No network access or persistence." 
+        description: RECIPE_MAPPINGS["forensics-reader"].description,
+        caveat: RECIPE_MAPPINGS["forensics-reader"].caveat
       },
       { 
         name: "Package-install session", 
         value: "package-install-session", 
-        description: "Allows installing packages while keeping guardrails in place. Omit drop-caps if installs fail unexpectedly." 
+        description: RECIPE_MAPPINGS["package-install-session"].description,
+        caveat: RECIPE_MAPPINGS["package-install-session"].caveat
       },
       { 
         name: "Net-disabled build test", 
         value: "net-disabled-build-test", 
-        description: "Prove builds succeed without network access. Build steps requiring downloads will fail." 
+        description: RECIPE_MAPPINGS["net-disabled-build-test"].description,
+        caveat: RECIPE_MAPPINGS["net-disabled-build-test"].caveat
       },
       { 
         name: "Security research with controlled net", 
         value: "security-research-controlled-net", 
-        description: "For API testing and collectors without packet crafting capability. Packet-crafting tools will not work." 
+        description: RECIPE_MAPPINGS["security-research-controlled-net"].description,
+        caveat: RECIPE_MAPPINGS["security-research-controlled-net"].caveat
       },   
     ],
   });

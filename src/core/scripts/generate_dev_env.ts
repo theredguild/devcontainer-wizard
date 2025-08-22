@@ -1,11 +1,12 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { confirm } from '@inquirer/prompts';
-import { confirmTheme } from '@/ui/styling/confirm';
+import { confirmWithFooter as confirm } from '@/ui/components';
 import { openIn } from '@/utils/openIn';
 import { devcontainerUp } from '@/core/devcontainer/devcontainerUp';
 import { INSTALL_COMMANDS, ToolKey } from '@/core/scripts/install_commands';
 import { WizardState } from "@/types";
+import { colorize, symbols } from '@/ui/components';
+import { ui } from '@/ui/styling/ui';
 
 interface GenerationOptions {
   configPath?: string;
@@ -28,7 +29,8 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
     }
   }
 
-  console.log('🚀 Starting development environment generation...');
+  ui.clearScreen()
+  console.log(colorize.brand(symbols.arrow + ' Starting development environment generation...'));
   
     const savePath = config.savePath || '.';
   const projectName = config.name || 'Web3 Dev Environment';
@@ -37,16 +39,16 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
     .replace(/[^a-z0-9._-]+/gi, '-')
     .replace(/^-+|-+$/g, '') || 'default';
   
-  console.log(`📁 Project: ${projectName}`);
-  console.log(`💾 Save path: ${savePath}`);
-  console.log(`📂 Folder name: ${safeFolderName}`);
+  console.log(colorize.brand(symbols.bullet + ' Project: ' + projectName));
+  console.log(colorize.brand(symbols.bullet + ' Save path: ' + savePath));
+  console.log(colorize.brand(symbols.bullet + ' Folder name: ' + safeFolderName));
 
-    console.log('🐳 Generating Dockerfile...');
+    console.log(colorize.brand(symbols.diamond + ' Generating Dockerfile...'));
   
   const requiredDeps = new Set<ToolKey>();
   
   if (config.languages?.includes('solidity')) {
-    requiredDeps.add('python')
+    requiredDeps.add('python');
     requiredDeps.add('solc-select');
   }
   if (config.languages?.includes('vyper')) {
@@ -54,7 +56,7 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
     requiredDeps.add('vyper');
   }
   
- config.frameworks?.forEach(framework => {
+  config.frameworks?.forEach(framework => {
     if (framework === 'foundry') {
       requiredDeps.add('rust');
       requiredDeps.add('foundry');
@@ -82,7 +84,6 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
     }
   });
   
-
   config.securityTooling?.forEach(tool => {
     if (tool in INSTALL_COMMANDS) {
       requiredDeps.add(tool as ToolKey);
@@ -99,10 +100,10 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   });
   
   if (requiredDeps.size === 0) {
-    console.log('⚠️  No tools selected - creating minimal environment');
+    console.log(colorize.warning(symbols.triangle + ' No tools selected - creating minimal environment'));
   }
   
-  console.log(`🔧 Installing ${requiredDeps.size} tools: ${Array.from(requiredDeps).join(', ')}`);
+  console.log(colorize.brand(symbols.diamond + ' Installing ' + requiredDeps.size + ' tools: ' + Array.from(requiredDeps).join(', ')));
 
   const dockerfileContent: string[] = [];
 
@@ -250,13 +251,14 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   const dockerfilePath = path.join(devcontainerDir, 'Dockerfile');
   try {
     await fs.writeFile(dockerfilePath, dockerfileContent.join('\n'));
-    console.log(`✅ Dockerfile generated at: ${dockerfilePath}`);
+    console.log(colorize.success(symbols.check + ' Dockerfile generated at: ' + dockerfilePath));
   } catch (error) {
     throw new Error(`Failed to write Dockerfile: ${error}`);
   }
   
   // --- Generate devcontainer.json ---
-  console.log('📋 Generating devcontainer.json...');
+  ui.clearScreen()
+  console.log(colorize.brand(symbols.bullet + ' Generating devcontainer.json...'));
   
   const devcontainerConfig: any = {
     name: projectName,
@@ -310,7 +312,7 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
 
   if (selectedHardening.has('ephemeral-workspace')) {
     devcontainerConfig.workspaceMount = "type=tmpfs,destination=/workspace,tmpfs-mode=1777";
-    console.log('🔒 Applied ephemeral workspace (tmpfs mount)');
+    console.log(colorize.brand(symbols.diamond + ' Applied ephemeral workspace (tmpfs mount)'));
   }  else {
     devcontainerConfig.workspaceMount = "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached";
   }
@@ -395,41 +397,41 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
       devcontainerPath,
       JSON.stringify(devcontainerConfig, null, 2)
     );
-    console.log(`✅ devcontainer.json generated at: ${devcontainerPath}`);
+    console.log(colorize.success(symbols.check + ' devcontainer.json generated at: ' + devcontainerPath));
   } catch (error) {
     throw new Error(`Failed to write devcontainer.json: ${error}`);
   }
   
   // Generate summary
-  console.log('\n🎯 Generation Summary:');
-  console.log(`   Project: ${projectName}`);
-  console.log(`   Location: ${devcontainerDir}`);
-  console.log(`   Languages: ${config.languages?.join(', ') || 'None'}`);
-  console.log(`   Frameworks: ${config.frameworks?.join(', ') || 'None'}`);
-  console.log(`   Security Tools: ${config.securityTooling?.join(', ') || 'None'}`);
-  console.log(`   Testing Tools: ${config.fuzzingAndTesting?.join(', ') || 'None'}`);
-  console.log(`   VS Code Extensions: ${config.vscodeExtensions?.length || 0} extensions`);
+  ui.clearScreen()
+  console.log('\n' + colorize.brand(symbols.diamond + ' Generation Summary:'));
+  console.log('   Project: ' + projectName);
+  console.log('   Location: ' + devcontainerDir);
+  console.log('   Languages: ' + (config.languages?.join(', ') || 'None'));
+  console.log('   Frameworks: ' + (config.frameworks?.join(', ') || 'None'));
+  console.log('   Security Tools: ' + (config.securityTooling?.join(', ') || 'None'));
+  console.log('   Testing Tools: ' + (config.fuzzingAndTesting?.join(', ') || 'None'));
+  console.log('   VS Code Extensions: ' + (config.vscodeExtensions?.length || 0) + ' extensions');
   if (config.systemHardening?.length) {
-    console.log(`   Security Hardening: ${config.systemHardening.join(', ')}`);
+    console.log('   Security Hardening: ' + config.systemHardening.join(', '));
   }
   if (config.gitRepository?.enabled && config.gitRepository.url) {
-    console.log(`   Git Repository: ${config.gitRepository.url}${config.gitRepository.branch ? ` (${config.gitRepository.branch})` : ''}`);
+    console.log('   Git Repository: ' + config.gitRepository.url + (config.gitRepository.branch ? ' (' + config.gitRepository.branch + ')' : ''));
   }
   
 
-
   const shouldRun = await confirm({
-    theme: confirmTheme,
-    message: '🎯 Would you like to start the devcontainer now?',
+    message: colorize.brand(symbols.diamond + ' Would you like to start the devcontainer now?'),
     default: true
   });
   
   if (shouldRun) {
+      ui.clearScreen()
       const openInSelection = await openIn();
       await devcontainerUp(devcontainerPath, openInSelection);
   } else {
-    console.log('📝 You can start it later with:');
-    console.log(`   devcontainer up --workspace-folder . --config ${devcontainerPath}`);
+    console.log(colorize.brand(symbols.diamond + ' You can start it later with:'));
+    console.log(' npx devcontainer up --workspace-folder . --config ' + devcontainerPath);
   }
 }
 
@@ -444,7 +446,7 @@ export { generateFiles };
 // Auto-run script if called directly
 if (require.main === module) {
   generateFiles().catch(error => {
-    console.error('❌ Generation failed:', error.message);
+    console.error(colorize.error(symbols.circle + ' Generation failed: ' + error.message));
     process.exit(1);
   });
 }

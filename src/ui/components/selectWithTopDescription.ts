@@ -2,7 +2,6 @@ import {
   createPrompt,
   useState,
   useKeypress,
-  usePrefix,
   isUpKey,
   isDownKey,
   isEnterKey,
@@ -10,10 +9,12 @@ import {
 } from '@inquirer/core';
 import { Separator } from '@inquirer/prompts';
 import { symbols } from '@/ui/styling/symbols';
+import { colorize } from '@/ui/styling/colors';
+import { ui } from '../styling/ui';
 
 type RawChoice<T = any> =
   | string
-  | { name?: string; value?: T; description?: string; disabled?: boolean }
+  | { name?: string; value?: T; description?: string; caveat?: string; disabled?: boolean }
   | Separator;
 
 type PromptConfig<T = any> = {
@@ -32,14 +33,15 @@ function normalizeChoices<T>(raw: RawChoice<T>[]) {
                            Object.values(c)[0] ||
                            String(c) || 
                            '--------';
-      return { isSeparator: true, name: separatorText, value: undefined, description: undefined, disabled: true };
+      return { isSeparator: true, name: separatorText, value: undefined, description: undefined, caveat: undefined, disabled: true };
     }
     return typeof c === 'string'
-      ? { name: c, value: c as unknown as T, description: undefined, disabled: false, isSeparator: false }
+      ? { name: c, value: c as unknown as T, description: undefined, caveat: undefined, disabled: false, isSeparator: false }
       : {
           name: c.name ?? (c.value as any)?.toString() ?? `choice ${idx}`,
           value: c.value ?? (c.name as any),
           description: c.description,
+          caveat: c.caveat,
           disabled: !!c.disabled,
           isSeparator: false,
         };
@@ -61,12 +63,13 @@ export const selectWithTopDescription: any = createPrompt((config: PromptConfig,
     active: index,
     renderItem: ({ item, isActive }) => {
       if (item.isSeparator) {
-        return `${symbols.separatorIndent}${item.name}`;
+        return `${colorize.muted(symbols.separatorIndent + item.name)}`;
       }
-      const pointer = isActive ? symbols.pointer : ' ';
+      const pointer = isActive ? colorize.brand(symbols.pointer) : ' ';
       const name = item.name ?? String(item.value);
-      const disabledTag = item.disabled ? ' (disabled)' : '';
-      return `${pointer} ${name}${disabledTag}`;
+      const disabledTag = item.disabled ? colorize.muted(' (disabled)') : '';
+      const styledName = isActive ? colorize.highlight(name) : name;
+      return `${pointer} ${styledName}${disabledTag}`;
     },
     pageSize: 10,
     loop: false,
@@ -108,12 +111,22 @@ export const selectWithTopDescription: any = createPrompt((config: PromptConfig,
   if (isDone) {
     process.stdout.write('\x1B[?25h');
     const selected = choices[index];
-    return `${symbols.bullet} ${config.message ?? ''}\n ${symbols.check} ${selected.name}`;
+    return `${colorize.brand(symbols.bullet)} ${config.message ?? ''}\n\n ${colorize.success(symbols.check)} ${colorize.brand(selected.name)}`;
   }
 
   const msg = config.message ?? '';
   const current = choices[index];
-  const currentDesc = current?.description && !current.isSeparator ? `${current.description}\n\n` : '';
+  let currentDesc = '';
+  
+  if (current?.description && !current.isSeparator) {
+    currentDesc += `${colorize.bold(current.description)}`;
+    if (current.caveat) {
+      currentDesc += `\n${colorize.warning(current.caveat)}`;
+    }
+    currentDesc += '\n\n';
+  } else if (current?.caveat && !current.isSeparator) {
+    currentDesc += `${colorize.warning(current.caveat)}\n\n`;
+  }
 
-  return `${symbols.bullet} ${msg}\n\n${currentDesc}${pagination}`;
+  return `${colorize.brand(symbols.bullet)} ${colorize.brand(msg)}\n\n${currentDesc}${pagination} \n\n${ui.footer()}`;
 });

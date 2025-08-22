@@ -6,19 +6,7 @@ A comprehensive CLI tool to set up fully equipped Web3 development containers. F
 
 ## Requirements
 
-1. [Dev Containers CLI (`@devcontainers/cli`)](https://github.com/devcontainers/cli/) installed globally:
-
-    ```bash
-    pnpm add -g @devcontainers/cli
-    ```
-
-    ```bash
-    npm i -g @devcontainers/cli
-    ```
-
-    ```bash
-    yarn global add @devcontainers/cli
-    ```
+1. **Node.js 18+** and a package manager (**pnpm**, **npm**, or **yarn**) for installing the CLI.
 
 2. For use with [VS Code](https://code.visualstudio.com/) you need to install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers). We recommend reading the [Dev Containers documentation](https://code.visualstudio.com/docs/devcontainers/containers) for more information.
 

@@ -7,21 +7,20 @@
   "dependencies": {
     "@inquirer/core": "^10.1.15",
     "@inquirer/prompts": "^7.8.1",
-    "@oclif/core": "^4.5.2",
-    "@oclif/plugin-help": "^6.0.0"
-  },
+    "@oclif/core": "^4.5.2"
+    },
   "bin": {
     "devcontainer-wizard": "./bin/run.js"
   },
   "oclif": {
     "bin": "devcontainer-wizard",
-    "commands": "./dist/commands",
+    "commands": {
+      "strategy": "single",
+      "target": "./dist/index.js"
+    },
     "tsconfig": "./tsconfig.json",
     "dirname": "devcontainer-wizard",
     "topicSeparator": " ",
-    "plugins": [
-      "@oclif/plugin-help"
-    ],
     "devCommands": "./src/commands"
   },
   "files": [

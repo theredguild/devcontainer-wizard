@@ -12,6 +12,13 @@ export const symbols = {
     interval: 80,
     frames: ['⠋','⠙','⠸','⠴','⠦','⠇'],
   },
+  // Additional styling symbols
+  arrow: '→',
+  star: '★',
+  diamond: '◆',
+  circle: '●',
+  square: '■',
+  triangle: '▲',
 } as const;
 
 

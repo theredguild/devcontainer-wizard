@@ -1,0 +1,146 @@
+import { Command, Args, Flags } from '@oclif/core'
+import { prebuiltList } from '@/core/devcontainer/prebuiltList'
+import { wizard } from '@/core/wizard'
+import { generateDevEnvironment } from '@/core/scripts/generate_dev_env'
+import { selectWithTopDescription } from '@/ui/components/selectWithTopDescription'
+import { colorize, symbols } from '@/ui/components'
+import { ui } from '@/ui/styling/ui'
+
+export default class DevcontainerWizard extends Command {
+
+  static override description = 'DevContainer Wizard - Create custom containers or use pre-built ones'
+
+  static override examples = [
+    '$ devcontainer-wizard create',
+    '$ devcontainer-wizard prebuilt',
+    '$ devcontainer-wizard create --name my-project'
+  ]
+
+  static override args = {
+    action: Args.string({
+      description: 'Action to perform: create (custom container) or prebuilt (use pre-built container)',
+      required: false,
+      options: ['create', 'prebuilt'],
+    }),
+  }
+
+  static override flags = {
+    name: Flags.string({
+      description: 'Name for the project/container',
+      char: 'N',
+    }),
+  }
+
+  public async run(): Promise<void> {
+    const { args, flags } = await this.parse()
+
+    try {
+
+
+      if (args.action === 'prebuilt') {
+        await this.runPrebuiltFlow();
+      } else if (args.action === 'create') {
+        await this.runCreateFlow(flags.name);
+      } else {
+        await this.runMainMenu(flags.name);
+      }
+    } catch (error) {
+      if (error instanceof Error && (error.message === 'User force closed the prompt with SIGINT' || error.message === 'User force closed the prompt with SIGTERM')) {
+        this.log('\nExited with CTRL+C 👋')
+        process.exit(0)
+      } else {
+        this.error(`Failed to start wizard: ${error instanceof Error ? error.message : String(error)}`)
+      }
+    }   
+  }
+
+  private async runMainMenu(name?: string): Promise<void> {
+    while (true) {
+      ui.clearScreen()
+      this.log(colorize.brand(`
+        ╭───────────────────────────────────────────╮
+        │    ✻ Welcome to Devcontainer Wizard 🪷    │
+        ╰───────────────────────────────────────────╯
+        `));
+      const selected = await selectWithTopDescription({
+        message: 'You can select a pre-built container or create your own',
+        choices: [
+          { name: 'Create a custom container', value: 'custom'},
+          { name: 'Use a pre-built container', value: 'pre-built' },
+        ],
+      })
+
+      if (selected === 'pre-built') {
+        try {
+          await this.runPrebuiltFlow();
+          break; // Exit the loop after successful completion
+        } catch (error) {
+          if (error instanceof Error && error.message === 'go_back') {
+            // Continue the loop to show main menu again
+            continue;
+          } else {
+            throw error;
+          }
+        }
+      } else {
+        try {
+          await this.runCreateFlow(name);
+          break; // Exit the loop after successful completion
+        } catch (error) {
+          if (error instanceof Error && error.message === 'go_back') {
+            // Continue the loop to show main menu again
+            continue;
+          } else {
+            throw error;
+          }
+        }
+      }
+    }
+  }
+
+  private async runPrebuiltFlow(): Promise<void> {
+    while (true) {
+      try {
+        await prebuiltList();
+        break; // Exit the loop after successful completion
+      } catch (error) {
+        if (error instanceof Error && error.message === 'go_back') {
+          // Go back to main menu
+          throw error;
+        } else if (error instanceof Error && (error.message === 'User force closed the prompt with SIGINT' || error.message === 'User force closed the prompt with SIGTERM')) {
+          this.log('\nExited with CTRL+C 👋')
+          process.exit(0)
+        } else {
+          throw error;
+        }
+      }
+    }
+  }
+
+  private async runCreateFlow(name?: string): Promise<void> {
+    try {
+      ui.clearScreen()
+      const wizardState = await wizard({ name: name || undefined })
+      console.log('')
+      
+      ui.clearScreen()
+      await generateDevEnvironment({ config: wizardState })
+      console.log('')
+      
+      console.log(colorize.success(symbols.check + ' Devcontainer creation completed successfully!'))
+      console.log(colorize.brand(symbols.star + ' Your custom Web3 development environment is ready!'))
+      console.log('')
+      
+    } catch (error) {
+      if (error instanceof Error && error.message === 'go_back') {
+        // Go back to main menu
+        throw error;
+      } else if (error instanceof Error && (error.message === 'User force closed the prompt with SIGINT' || error.message === 'User force closed the prompt with SIGTERM')) {
+        this.log('\nExited with CTRL+C 👋')
+        process.exit(0)
+      } else {
+        this.error(`Failed to create devcontainer: ${error instanceof Error ? error.message : String(error)}`)
+      }
+    }
+  }
+}

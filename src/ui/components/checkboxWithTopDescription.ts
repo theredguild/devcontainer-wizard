@@ -2,7 +2,6 @@ import {
   createPrompt,
   useState,
   useKeypress,
-  usePrefix,
   isUpKey,
   isDownKey,
   isSpaceKey,
@@ -11,6 +10,8 @@ import {
 } from '@inquirer/core';
 import { Separator } from '@inquirer/prompts';
 import { symbols } from '@/ui/styling/symbols';
+import { colorize } from '@/ui/styling/colors';
+import { ui } from '../styling/ui';
 
 type RawChoice<T = any> =
   | string
@@ -25,7 +26,7 @@ type PromptConfig<T = any> = {
 function normalizeChoices<T>(raw: RawChoice<T>[]) {
   return raw.map((c, idx) => {
     if (c instanceof Separator) {
-      // Try different ways to access separator text
+      
       const separatorText = (c as any).line || 
                            (c as any).separator || 
                            (c as any).name || 
@@ -55,7 +56,7 @@ export const checkboxWithTopDescription: any = createPrompt((config: PromptConfi
   process.stdout.write('\x1B[?25l');
 
   const firstIndex = choices.findIndex((c) => !c.disabled && !c.isSeparator);
-  const [index, setIndex] = useState(firstIndex === -1 ? 0 : firstIndex);
+  const [index, setIndex] = useState(firstIndex === -1 ? 0 : 0);
   const [isDone, setIsDone] = useState(false);
   const initialChecked = new Set<number>();
   choices.forEach((c, i) => {
@@ -68,13 +69,18 @@ export const checkboxWithTopDescription: any = createPrompt((config: PromptConfi
     active: index,
     renderItem: ({ item, isActive, index: itemIndex }) => {
       if (item.isSeparator) {
-        return `${symbols.separatorIndent.repeat(3)}${item.name}`;
+        return `${colorize.muted(symbols.separatorIndent.repeat(3) + item.name)}`;
       }
-      const pointer = isActive ? symbols.pointer : ' ';
-      const box = item.disabled ? symbols.checkbox.disabled : checkedSet.has(itemIndex) ? symbols.checkbox.checked : symbols.checkbox.unchecked;
+      const pointer = isActive ? colorize.brand(symbols.pointer) : ' ';
+      const box = item.disabled 
+        ? colorize.muted(symbols.checkbox.disabled) 
+        : checkedSet.has(itemIndex) 
+          ? colorize.brand(symbols.checkbox.checked) 
+          : colorize.brand(symbols.checkbox.unchecked);
       const name = item.name ?? String(item.value);
-      const disabledTag = item.disabled ? ' (disabled)' : '';
-      return `${pointer} ${box} ${name}${disabledTag}`;
+      const disabledTag = item.disabled ? colorize.muted(' (disabled)') : '';
+      const styledName = isActive ? colorize.highlight(name) : name;
+      return `${pointer} ${box} ${styledName}${disabledTag}`;
     },
     pageSize: 10,
     loop: false,
@@ -129,12 +135,12 @@ export const checkboxWithTopDescription: any = createPrompt((config: PromptConfi
   if (isDone) {
     process.stdout.write('\x1B[?25h');
     const selectedCount = checkedSet.size;
-    return `${symbols.bullet} ${config.message ?? ''}\n ${symbols.check} ${selectedCount} selected`;
+    return `${colorize.brand(symbols.bullet)} ${config.message ?? ''}\n\n ${colorize.success(symbols.check)} ${selectedCount} selected`;
   }
 
   const msg = config.message ?? '';
   const current = choices[index];
-  const currentDesc = current?.description && !current.isSeparator ? `${current.description}\n\n` : '';
+  const currentDesc = current?.description && !current.isSeparator ? `${colorize.muted(current.description)}\n` : '';
 
-  return `${symbols.bullet} ${msg}\n\n${currentDesc}${pagination}`;
+  return `${colorize.brand(symbols.bullet)} ${colorize.brand(msg)}\n\n${currentDesc}${pagination} \n\n${ui.footer()}`;
 });

@@ -5,10 +5,10 @@ export async function devcontainerUp(devcontainerConfig: string, openIn: string)
   
   const { containerId } = await new Promise<{ containerId: string; }>((resolve, reject) => {
     const child = spawn(
-      'devcontainer',
+      'npx',
           // Using --id-label to ensure we can find the container later if needed.
           // The command will output a JSON object with details upon completion.
-      ['up', '--config', devcontainerConfig, '--workspace-folder', '.']
+      ['@devcontainers/cli', 'up', '--config', devcontainerConfig, '--workspace-folder', '.']
     );
 
     let output = '';
@@ -61,8 +61,9 @@ export async function devcontainerUp(devcontainerConfig: string, openIn: string)
   if (openIn === 'shell') {
     await new Promise<void>((resolve, reject) => {
       const exec = spawn(
-        'devcontainer',
+        'npx',
         [
+          '@devcontainers/cli',
           'exec',
           '--container-id',
           containerId,

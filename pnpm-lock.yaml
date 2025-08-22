@@ -17,9 +17,6 @@ importers:
       '@oclif/core':
         specifier: ^4.5.2
         version: 4.5.2
-      '@oclif/plugin-help':
-        specifier: ^6.0.0
-        version: 6.2.32
     devDependencies:
       '@oclif/prettier-config':
         specifier: ^0.2.1

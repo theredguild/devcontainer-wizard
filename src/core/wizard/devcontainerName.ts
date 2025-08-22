@@ -2,7 +2,14 @@ import { inputWithSymbols as input } from "@/ui/components";
 import * as path from "node:path";
 
 export async function devcontainerName(): Promise<string> {
-  const defaultName = path.basename(process.cwd()) || "Solidity Dev Environment";
+  
+  let defaultName = path.basename(process.cwd());
+  
+  
+  if (!defaultName || defaultName.trim().length === 0 || /^[.\s]+$/.test(defaultName)) {
+    defaultName = "Devcontainer";
+  }
+  
   const name = await input({
     message: "Name your devcontainer:",
     default: defaultName,
