@@ -1,8 +1,7 @@
 export const INSTALL_COMMANDS: Record<string, string> = {
   // Deps
   python: `
-# Python is installed via apt-get in main Dockerfile, uv is installed there too
-# This entry exists for dependency tracking only
+# This entry exists for dependency tracking only, python is installed via uv in generate_dev_env.ts
   `,
   rust: `
 # Install rust

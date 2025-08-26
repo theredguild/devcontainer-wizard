@@ -171,10 +171,13 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
 
   if (requiredDeps.has('python')) {
     dockerfileContent.push(
-      "# Configure pip to allow system packages in container environment",
-      "ENV PIP_BREAK_SYSTEM_PACKAGES=1",
-      "# Install uv package manager",
-      "RUN python3 -m pip install --no-cache-dir --upgrade uv"
+      `# Install uv
+      RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+      # Update PATH environment
+      ENV UV_LOCAL_BIN=$HOME/.cargo/bin`,
+      "ENV PATH=${PATH}:${USR_LOCAL_BIN}:${LOCAL_BIN}:${PNPM_HOME}:${UV_LOCAL_BIN}",
+      `# Install Python 3.12 with uv
+      RUN uv python install 3.12`
     )
   }
   
