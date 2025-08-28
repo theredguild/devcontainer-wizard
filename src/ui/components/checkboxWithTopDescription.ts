@@ -133,7 +133,7 @@ export const checkboxWithTopDescription: any = createPrompt((config: PromptConfi
   });
 
   if (isDone) {
-    process.stdout.write('\x1B[?25h');
+    process.stdout.write('\x1B[25h');
     const selectedCount = checkedSet.size;
     return `${colorize.brand(symbols.bullet)} ${config.message ?? ''}\n\n ${colorize.success(symbols.check)} ${selectedCount} selected`;
   }

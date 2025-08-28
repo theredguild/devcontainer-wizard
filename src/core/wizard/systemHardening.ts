@@ -1,6 +1,10 @@
 import { checkboxWithTopDescription, selectWithTopDescription } from "@/ui/components/";
+import { ui } from "@/ui/styling/ui";
 
 export async function systemHardening() {
+  ui.clearScreen();
+  console.log(ui.header());
+  console.log('');
   const selectedOptions: string[] = [];
 
   // File System Security
@@ -15,6 +19,10 @@ export async function systemHardening() {
   });
   selectedOptions.push(...fsOptions);
 
+  ui.clearScreen();
+  console.log(ui.header());
+  console.log('');
+
   // Container Security
   const containerSecurity = await checkboxWithTopDescription({
     message: "Container Security",
@@ -23,10 +31,13 @@ export async function systemHardening() {
       { name: "Drop all capabilities", value: "drop-caps", description: "Removes all Linux capabilities from container" },
       { name: "No new privileges", value: "no-new-privs", description: "Prevents privilege escalation through SUID/SGID" },
       { name: "AppArmor profile", value: "apparmor", description: "Applies Docker's default AppArmor MAC profile" },
-      { name: "Seccomp filtering", value: "seccomp", description: "Applies default seccomp security profile" },
     ],
   });
   selectedOptions.push(...containerSecurity);
+
+  ui.clearScreen();
+  console.log(ui.header());
+  console.log('');
 
   // Network Security (with conflict detection)
   const networkIsolation = await selectWithTopDescription({
@@ -40,6 +51,9 @@ export async function systemHardening() {
   });
 
   if (networkIsolation === "secure-dns") {
+    ui.clearScreen();
+    console.log(ui.header());
+    console.log('');
     selectedOptions.push("secure-dns");
     
     // Additional network security options
@@ -56,6 +70,10 @@ export async function systemHardening() {
     selectedOptions.push("network-none");
   }
 
+  ui.clearScreen();
+  console.log(ui.header());
+  console.log('');
+
   // Application Security
   const appSecurity = await checkboxWithTopDescription    ({
     message: "Application Security",
@@ -65,6 +83,10 @@ export async function systemHardening() {
     ],
   });
   selectedOptions.push(...appSecurity);
+
+  ui.clearScreen();
+  console.log(ui.header());
+  console.log('');
 
   // Resource Limits
   const resourceLimits = await selectWithTopDescription({

@@ -4,6 +4,7 @@ import { openIn } from '@/utils/openIn'
 import { copyPrebuiltContainer } from '@/core/devcontainer/resolvePrebuiltPath'
 import { colorize, symbols } from '@/ui/components'
 import { ui } from '@/ui/styling/ui'
+import { shouldRun } from '@/utils/shouldRun'
 
 export async function prebuiltList() {
     const selected = await selectWithTopDescription({
@@ -12,13 +13,25 @@ export async function prebuiltList() {
             {
               name: 'Minimal 🧶',
               value: 'minimal',
-              description: 'Contains a beginner friendly environment.',
+              description: 'Essential development with basic security.',
               disabled: false
             },
             {
               name: 'Auditor 🔍',
               value: 'auditor',
-              description: 'Contains an audit-ready environment.',
+              description: 'Smart contract auditors and security researchers.',
+              disabled: false,
+            },
+            {
+              name: 'Hardened 💻️',
+              value: 'hardened',
+              description: 'Enhanced security with development flexibility.',
+              disabled: false,
+            },
+            {
+              name: 'Isolated 🔒',
+              value: 'isolated',
+              description: 'Maximum security isolation, air-gapped environments.',
               disabled: false,
             },
             {
@@ -27,26 +40,16 @@ export async function prebuiltList() {
               description: 'The Red Guild\'s original devcontainer. (Legacy)',
               disabled: false
             },
-            {
-              name: 'Legacy Minimal 🧶',
-              value: 'legacy-minimal',
-              description: 'The Red Guild\'s original minimal devcontainer. (Legacy)',
-              disabled: false
-            }
         ]
     });
 
     console.log(colorize.brand(symbols.bullet + ' Copying selected devcontainer to current directory...'));
-    const openInSelection = await openIn()
-
-    console.log(colorize.brand(symbols.arrow + ' Starting selected devcontainer...'));
+    console.log(colorize.brand(symbols.check + ' Selected devcontainer copied successfully!'));
     try {
       const localConfigPath = await copyPrebuiltContainer(selected)
-      await devcontainerUp(localConfigPath, openInSelection);
-      console.log(colorize.success(symbols.check + ' Devcontainer started successfully!'));
-      console.log('')
+      await shouldRun(localConfigPath);
     } catch (error) {
-      console.error(colorize.error(symbols.circle + ' Failed to start devcontainer: ' + (error instanceof Error ? error.message : String(error))));
+      console.error(colorize.error(symbols.circle + ' Failed to copy devcontainer: ' + (error instanceof Error ? error.message : String(error))));
       console.log('')
     }
 }

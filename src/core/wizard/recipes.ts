@@ -12,9 +12,7 @@ const RECIPE_MAPPINGS = {
       "drop-caps",
       "no-new-privs",
       "apparmor",
-      "seccomp",
       "network-none",
-      "resource-limits",
       "vscode-security"
     ]
   },
@@ -26,11 +24,9 @@ const RECIPE_MAPPINGS = {
       "drop-caps",
       "no-new-privs",
       "apparmor",
-      "seccomp",
       "no-raw-packets",
       "secure-dns",
-      "vscode-security",
-      "resource-limits"
+      "vscode-security"
     ]
   },
   "source-review-only": {
@@ -43,7 +39,6 @@ const RECIPE_MAPPINGS = {
       "drop-caps",
       "no-new-privs",
       "apparmor",
-      "seccomp",
       "no-raw-packets",
       "secure-dns",
       "vscode-security"
@@ -58,9 +53,7 @@ const RECIPE_MAPPINGS = {
       "drop-caps",
       "no-new-privs",
       "apparmor",
-      "seccomp",
       "secure-dns",
-      "resource-limits",
       "vscode-security"
     ]
   },
@@ -73,10 +66,8 @@ const RECIPE_MAPPINGS = {
       "drop-caps",
       "no-new-privs",
       "apparmor",
-      "seccomp",
       "no-raw-packets",
-      "secure-dns",
-      "resource-limits"
+      "secure-dns"
     ]
   },
   "ci-like-local-runner": {
@@ -89,9 +80,7 @@ const RECIPE_MAPPINGS = {
       "drop-caps",
       "no-new-privs",
       "apparmor",
-      "seccomp",
-      "secure-dns",
-      "resource-limits"
+      "secure-dns"
     ]
   },
   "forensics-reader": {
@@ -104,7 +93,6 @@ const RECIPE_MAPPINGS = {
       "drop-caps",
       "no-new-privs",
       "apparmor",
-      "seccomp",
       "network-none",
       "vscode-security"
     ]
@@ -117,9 +105,7 @@ const RECIPE_MAPPINGS = {
       "secure-tmp",
       "no-new-privs",
       "apparmor",
-      "seccomp",
       "secure-dns",
-      "resource-limits",
       "vscode-security"
     ]
   },
@@ -132,9 +118,7 @@ const RECIPE_MAPPINGS = {
       "drop-caps",
       "no-new-privs",
       "apparmor",
-      "seccomp",
       "network-none",
-      "resource-limits",
       "vscode-security"
     ]
   },
@@ -147,7 +131,6 @@ const RECIPE_MAPPINGS = {
       "drop-caps",
       "no-new-privs",
       "apparmor",
-      "seccomp",
       "no-raw-packets",
       "secure-dns"
     ]
@@ -234,7 +217,11 @@ export function recipesToSecurityHardening(selectedRecipes: string[]): string[] 
   for (const recipe of selectedRecipes) {
     if (recipe in RECIPE_MAPPINGS) {
       const recipeMapping = RECIPE_MAPPINGS[recipe as keyof typeof RECIPE_MAPPINGS];
-      recipeMapping.choices.forEach(choice => hardeningChoices.add(choice));
+      recipeMapping.choices.forEach(choice => {
+        if (choice) {
+          hardeningChoices.add(choice);
+        }
+      });
     }
   }
   

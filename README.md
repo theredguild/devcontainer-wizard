@@ -105,7 +105,6 @@ When choosing manual configuration, you have fine-grained control over:
 - Drop all capabilities
 - No new privileges (prevents SUID/SGID escalation)
 - AppArmor profile
-- Seccomp filtering
 
 **Network Configuration**:
 - Enhanced DNS security (Cloudflare DNS)
@@ -175,6 +174,42 @@ You can also run prebuilt containers using GitHub Codespaces:
 ## Pre-built containers
 
 - **Minimal**: Beginner-friendly environment.
-- **Auditor**: Audit-ready environment with common security tooling.
-- **Legacy The Red Guild**: The Red Guild's original devcontainer.
-- **Legacy Minimal**: The Red Guild's original minimal devcontainer.
+- **Auditor**: For smart contract auditors and security researchers..
+- **Hardened**: Enhanced security with development flexibility.
+- **Isolated**: Maximum security isolation, air-gapped environments.
+- **Legacy**: The Red Guild's original devcontainer.
+
+## How to contribute
+
+### Wizard
+
+We welcome contributions! To get started:
+
+1. **Fork this repository** and clone it to your machine.
+2. **Install dependencies**:
+   ```bash
+   pnpm install
+   ```
+3. **Make your changes** in a new branch.
+4. **Test your changes** locally.
+5. **Commit and push** your branch.
+6. **Open a pull request** with a clear description of your changes.
+
+For major changes, please open an issue first to discuss what you would like to change.
+
+**Tips:**
+- Follow the existing code style and structure.
+- Keep documentation concise and up to date.
+- If adding a new color or symbol, update `src/ui/styling/colors.ts` or `src/ui/styling/symbols.ts` as appropriate.
+
+Thank you for helping improve DevContainer Wizard!
+
+### Pre-built containers
+
+We welcome contributions to the pre-built containers! To get started:
+
+1. **Fork the [theredguild/devcontainer](https://github.com/theredguild/devcontainer) repository** and clone it to your machine.
+2. **Make your changes** in a new branch.
+3. **Test your changes** locally.
+4. **Commit and push** your branch.
+5. **Open a pull request** with a clear description of your changes.

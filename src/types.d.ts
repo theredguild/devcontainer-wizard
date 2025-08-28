@@ -20,11 +20,15 @@ export type Selection = {
     securityTooling: string[];
 };
 
-export type WizardState = Selection & {
-  name: string
-  vscodeExtensions: string[]
-  savePath: string
-  systemHardening: string[]
+export type WizardState = {
+  languages?: string[]
+  frameworks?: string[]
+  fuzzingAndTesting?: string[]
+  securityTooling?: string[]
+  name?: string
+  vscodeExtensions?: string[]
+  savePath?: string
+  systemHardening?: string[]
   gitRepository?: {
     url: string
     branch?: string
@@ -32,3 +36,4 @@ export type WizardState = Selection & {
   }
 }
 
+type stepFunction = (wizardState: WizardState) => Promise<void>

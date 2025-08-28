@@ -128,7 +128,6 @@ export default class DevcontainerWizard extends Command {
       console.log('')
       
       console.log(colorize.success(symbols.check + ' Devcontainer creation completed successfully!'))
-      console.log(colorize.brand(symbols.star + ' Your custom Web3 development environment is ready!'))
       console.log('')
       
     } catch (error) {

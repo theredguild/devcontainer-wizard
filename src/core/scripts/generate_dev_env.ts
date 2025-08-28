@@ -7,6 +7,7 @@ import { INSTALL_COMMANDS, ToolKey } from '@/core/scripts/install_commands';
 import { WizardState } from "@/types";
 import { colorize, symbols } from '@/ui/components';
 import { ui } from '@/ui/styling/ui';
+import { shouldRun } from '@/utils/shouldRun';
 
 interface GenerationOptions {
   configPath?: string;
@@ -338,18 +339,32 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   // Read-only
 
   if (selectedHardening.has('readonly-os')) {
-    runArgs.push('--read-only')
+    runArgs.push(
+    "--read-only",
+      // --- Writable, EXECUTABLE Mounts for VS Code Server ---
+      "--tmpfs", "/home/vscode/.vscode-server:rw,exec,nosuid,size=512m,uid=1000,gid=1000",
+      "--tmpfs", "/home/vscode/.vscode-server-insiders:rw,exec,nosuid,size=256m,uid=1000,gid=1000",
+
+      // --- Writable, NON-EXECUTABLE Mounts for Caches, Configs, and Logs ---
+      "--tmpfs", "/home/vscode/.cache:rw,noexec,nosuid,size=256m,uid=1000,gid=1000",
+      "--tmpfs", "/home/vscode/.config:rw,noexec,nosuid,size=128m,uid=1000,gid=1000",
+      "--tmpfs", "/home/vscode/.local:rw,noexec,nosuid,size=256m,uid=1000,gid=1000",
+      "--tmpfs", "/home/vscode/.gnupg:rw,noexec,nosuid,size=32m,uid=1000,gid=1000",
+      "--tmpfs", "/tmp:rw,noexec,nosuid,size=512m",
+      "--tmpfs", "/var/tmp:rw,noexec,nosuid,size=512m",
+      "--tmpfs", "/var/log:rw,noexec,nosuid,size=128m",
+      "--tmpfs", "/run:rw,noexec,nosuid,size=128m",
+      "--tmpfs", "/home/vscode/.devcontainer:rw,noexec,nosuid,size=32m,uid=1000,gid=1000"
+    )
   }
 
+    
   // Security options
   if (selectedHardening.has('no-new-privs')) {
     runArgs.push('--security-opt', 'no-new-privileges:true');
   }
   if (selectedHardening.has('apparmor')) {
     runArgs.push('--security-opt', 'apparmor=docker-default');
-  }
-  if (selectedHardening.has('seccomp')) {
-    runArgs.push('--security-opt', 'seccomp=unconfined');
   }
 
   // Networking
@@ -422,29 +437,14 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
     console.log('   Git Repository: ' + config.gitRepository.url + (config.gitRepository.branch ? ' (' + config.gitRepository.branch + ')' : ''));
   }
   
-
-  const shouldRun = await confirm({
-    message: colorize.brand(symbols.diamond + ' Would you like to start the devcontainer now?'),
-    default: true
-  });
   
-  if (shouldRun) {
-      ui.clearScreen()
-      const openInSelection = await openIn();
-      await devcontainerUp(devcontainerPath, openInSelection);
-  } else {
-    console.log(colorize.brand(symbols.diamond + ' You can start it later with:'));
-    console.log(' npx devcontainer up --workspace-folder . --config ' + devcontainerPath);
-  }
+  await shouldRun(devcontainerPath);
 }
 
 // Legacy function for backwards compatibility
-async function generateFiles(configPath: string = 'config.json'): Promise<void> {
+export async function generateFiles(configPath: string = 'config.json'): Promise<void> {
   return generateDevEnvironment({ configPath });
 }
-
-// Export both functions
-export { generateFiles };
 
 // Auto-run script if called directly
 if (require.main === module) {

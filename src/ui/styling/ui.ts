@@ -10,12 +10,9 @@ export const ui = {
   },
   
   // Header and footer
-  header: (stepName: string, stepNumber?: number, totalSteps?: number) => {
-    const stepInfo = stepNumber && totalSteps ? ` [${stepNumber}/${totalSteps}]` : '';
-    const title = `${colorize.brand('✻')} ${colorize.highlight('Devcontainer Wizard by The Red Guild 🪷')}${stepInfo}`;
-    const step = colorize.muted(`${stepName}`);
-    
-    return `${title}\n${step}`;
+  header: () => {
+    const title = `${colorize.brand('✻')} ${colorize.highlight('Devcontainer Wizard by The Red Guild 🪷')}`;
+    return `${title}`;
   },
   
   footer: () => {
