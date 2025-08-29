@@ -25,17 +25,7 @@ A comprehensive CLI tool to set up fully equipped Web3 development containers. F
 
 ## Install
 
-```bash
-pnpm install -g devcontainer-wizard
-```
-
-```bash
-npm install -g devcontainer-wizard
-```
-
-```bash
-yarn global add devcontainer-wizard
-```
+Work in progress
 
 ## How to use
 
