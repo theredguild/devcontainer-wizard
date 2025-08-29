@@ -1,6 +1,5 @@
 import { selectWithTopDescription } from "@/ui/components/selectWithTopDescription";
 
-// Recipe to security hardening mapping
 const RECIPE_MAPPINGS = {
   "airgapped-ephemeral-sandbox": {
     description: "Sealed box without network or persistence for maximum isolation.",
@@ -137,10 +136,11 @@ const RECIPE_MAPPINGS = {
   }
 } as const;
 
-export async function recipes() {
+export async function recipes(state: {recipes?: string[]}) {
   return await selectWithTopDescription({
     message: "Select one hardening recipe:",
     loop: false,
+    default: state.recipes,
     choices: [
       { 
         name: "Airgapped ephemeral sandbox", 
@@ -206,11 +206,7 @@ export async function recipes() {
   });
 }
 
-/**
- * Converts recipe selections to their corresponding security hardening choices
- * @param selectedRecipes Array of selected recipe keys
- * @returns Array of security hardening choice strings
- */
+
 export function recipesToSecurityHardening(selectedRecipes: string[]): string[] {
   const hardeningChoices = new Set<string>();
   
@@ -228,11 +224,7 @@ export function recipesToSecurityHardening(selectedRecipes: string[]): string[] 
   return Array.from(hardeningChoices);
 }
 
-/**
- * Gets the description and caveat for a recipe
- * @param recipeKey The recipe key
- * @returns Object with description and caveat, or null if not found
- */
+
 export function getRecipeInfo(recipeKey: string): { description: string; caveat: string } | null {
   if (recipeKey in RECIPE_MAPPINGS) {
     const recipe = RECIPE_MAPPINGS[recipeKey as keyof typeof RECIPE_MAPPINGS];

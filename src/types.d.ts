@@ -35,5 +35,3 @@ export type WizardState = {
     enabled: boolean
   }
 }
-
-type stepFunction = (wizardState: WizardState) => Promise<void>

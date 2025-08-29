@@ -26,8 +26,13 @@ export default class DevcontainerWizard extends Command {
 
   static override flags = {
     name: Flags.string({
-      description: 'Name for the project/container',
+      description: 'Name. For create: project name. For prebuilt: prebuilt ID.',
       char: 'N',
+    }),
+    list: Flags.boolean({
+      description: 'List available prebuilt containers and exit',
+      char: 'L',
+      default: false,
     }),
   }
 
@@ -38,7 +43,11 @@ export default class DevcontainerWizard extends Command {
 
 
       if (args.action === 'prebuilt') {
-        await this.runPrebuiltFlow();
+        if (flags.list) {
+          await prebuiltList({ listOnly: true });
+          return;
+        }
+        await this.runPrebuiltFlow(flags.name);
       } else if (args.action === 'create') {
         await this.runCreateFlow(flags.name);
       } else {
@@ -55,6 +64,7 @@ export default class DevcontainerWizard extends Command {
   }
 
   private async runMainMenu(name?: string): Promise<void> {
+    const BACK = Symbol.for('back');
     while (true) {
       ui.clearScreen()
       this.log(colorize.brand(`
@@ -68,46 +78,33 @@ export default class DevcontainerWizard extends Command {
           { name: 'Create a custom container', value: 'custom'},
           { name: 'Use a pre-built container', value: 'pre-built' },
         ],
+        footer: { back: false, exit: true },
+        allowBack: false,
       })
 
       if (selected === 'pre-built') {
-        try {
-          await this.runPrebuiltFlow();
-          break; // Exit the loop after successful completion
-        } catch (error) {
-          if (error instanceof Error && error.message === 'go_back') {
-            // Continue the loop to show main menu again
-            continue;
-          } else {
-            throw error;
-          }
+        const result = await this.runPrebuiltFlow();
+        if (result === Symbol.for('back')) {
+          continue;
         }
+        break;
       } else {
-        try {
-          await this.runCreateFlow(name);
-          break; // Exit the loop after successful completion
-        } catch (error) {
-          if (error instanceof Error && error.message === 'go_back') {
-            // Continue the loop to show main menu again
-            continue;
-          } else {
-            throw error;
-          }
-        }
+        await this.runCreateFlow(name);
+        break; 
       }
     }
   }
 
-  private async runPrebuiltFlow(): Promise<void> {
+  private async runPrebuiltFlow(selectedName?: string): Promise<any> {
     while (true) {
       try {
-        await prebuiltList();
+        const selection = await prebuiltList({ selected: selectedName });
+        if (selection === Symbol.for('back')) {
+          return Symbol.for('back');
+        }
         break; // Exit the loop after successful completion
       } catch (error) {
-        if (error instanceof Error && error.message === 'go_back') {
-          // Go back to main menu
-          throw error;
-        } else if (error instanceof Error && (error.message === 'User force closed the prompt with SIGINT' || error.message === 'User force closed the prompt with SIGTERM')) {
+        if (error instanceof Error && (error.message === 'User force closed the prompt with SIGINT' || error.message === 'User force closed the prompt with SIGTERM')) {
           this.log('\nExited with CTRL+C 👋')
           process.exit(0)
         } else {
@@ -131,10 +128,7 @@ export default class DevcontainerWizard extends Command {
       console.log('')
       
     } catch (error) {
-      if (error instanceof Error && error.message === 'go_back') {
-        // Go back to main menu
-        throw error;
-      } else if (error instanceof Error && (error.message === 'User force closed the prompt with SIGINT' || error.message === 'User force closed the prompt with SIGTERM')) {
+      if (error instanceof Error && (error.message === 'User force closed the prompt with SIGINT' || error.message === 'User force closed the prompt with SIGTERM')) {
         this.log('\nExited with CTRL+C 👋')
         process.exit(0)
       } else {

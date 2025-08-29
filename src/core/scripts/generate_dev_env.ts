@@ -1,8 +1,5 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { confirmWithFooter as confirm } from '@/ui/components';
-import { openIn } from '@/utils/openIn';
-import { devcontainerUp } from '@/core/devcontainer/devcontainerUp';
 import { INSTALL_COMMANDS, ToolKey } from '@/core/scripts/install_commands';
 import { WizardState } from "@/types";
 import { colorize, symbols } from '@/ui/components';

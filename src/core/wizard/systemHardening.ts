@@ -1,7 +1,7 @@
 import { checkboxWithTopDescription, selectWithTopDescription } from "@/ui/components/";
 import { ui } from "@/ui/styling/ui";
 
-export async function systemHardening() {
+export async function systemHardening(state: {systemHardening?: string[]}) {
   ui.clearScreen();
   console.log(ui.header());
   console.log('');
@@ -16,6 +16,11 @@ export async function systemHardening() {
       { name: "Secure temp directories", value: "secure-tmp", description: "Creates temp dirs with noexec, nosuid flags" },
       { name: "Ephemeral workspace", value: "ephemeral-workspace", description: "Uses tmpf mount to create a ephemeral workpsace"}
     ],
+    default: state.systemHardening,
+    footer: {
+      back: false,
+      exit: true,
+    },
   });
   selectedOptions.push(...fsOptions);
 
@@ -23,7 +28,7 @@ export async function systemHardening() {
   console.log(ui.header());
   console.log('');
 
-  // Container Security
+ 
   const containerSecurity = await checkboxWithTopDescription({
     message: "Container Security",
     loop: false,
@@ -32,6 +37,9 @@ export async function systemHardening() {
       { name: "No new privileges", value: "no-new-privs", description: "Prevents privilege escalation through SUID/SGID" },
       { name: "AppArmor profile", value: "apparmor", description: "Applies Docker's default AppArmor MAC profile" },
     ],
+    footer: {
+      exit: true,
+    },
   });
   selectedOptions.push(...containerSecurity);
 
@@ -39,7 +47,6 @@ export async function systemHardening() {
   console.log(ui.header());
   console.log('');
 
-  // Network Security (with conflict detection)
   const networkIsolation = await selectWithTopDescription({
     message: "Network Configuration",
     loop: false,
@@ -48,6 +55,9 @@ export async function systemHardening() {
       { name: "Enhanced DNS security", value: "secure-dns", description: "Forces Cloudflare DNS (1.1.1.1, 1.0.0.1)" },
       { name: "Complete network isolation", value: "network-none", description: "Completely isolates container from network (conflicts with DNS options)" },
     ],
+    footer: {
+      exit: true,
+    },
   });
 
   if (networkIsolation === "secure-dns") {
@@ -81,6 +91,10 @@ export async function systemHardening() {
     choices: [
       { name: "VS Code security", value: "vscode-security", description: "Disables auto-tasks, workspace trust, and telemetry" },
     ],
+    footer: {
+      back: false,
+      exit: true,
+    },
   });
   selectedOptions.push(...appSecurity);
 
@@ -98,6 +112,10 @@ export async function systemHardening() {
       { name: "Medium (2GB, 4 cores)", value: "resource-limits-medium", description: "Better for Node.js, Rust, Java projects" },
       { name: "Heavy (4GB, 8 cores)", value: "resource-limits-heavy", description: "For ML, large builds, or complex projects" },
     ],
+    footer: {
+      back: false,
+      exit: true,
+    },
   });
   if (resourceLimits !== "none") {
     selectedOptions.push(resourceLimits);

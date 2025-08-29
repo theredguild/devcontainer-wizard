@@ -20,7 +20,12 @@ type RawChoice<T = any> =
 type PromptConfig<T = any> = {
   message?: string;
   choices?: RawChoice<T>[];
-};
+  footer?: {
+    back?: boolean;
+    exit?: boolean;
+  };
+  allowBack?: boolean;
+}
 
 function normalizeChoices<T>(raw: RawChoice<T>[]) {
   return raw.map((c, idx) => {
@@ -106,6 +111,11 @@ export const selectWithTopDescription: any = createPrompt((config: PromptConfig,
       }
       return;
     }
+
+    if (key.name === 'escape' && config.allowBack) {
+      done(Symbol.for('back'));
+      return;
+    }
   });
 
   if (isDone) {
@@ -128,5 +138,5 @@ export const selectWithTopDescription: any = createPrompt((config: PromptConfig,
     currentDesc += `${colorize.warning(current.caveat)}\n\n`;
   }
 
-  return `${colorize.brand(symbols.bullet)} ${colorize.brand(msg)}\n\n${currentDesc}${pagination} \n\n${ui.footer()}`;
+  return `${colorize.brand(symbols.bullet)} ${colorize.brand(msg)}\n\n${currentDesc}${pagination} \n\n${ui.footer(config.footer?.back ?? false, config.footer?.exit ?? true)}`;
 });

@@ -12,6 +12,11 @@ type PromptConfig = {
   message?: string;
   default?: boolean;
   theme?: any;
+  footer?: {
+    back?: boolean;
+    exit?: boolean;
+  };
+  allowBack?: boolean;
 };
 
 export const confirmWithFooter: any = createPrompt((config: PromptConfig, done: (res: any) => void) => {
@@ -38,6 +43,12 @@ export const confirmWithFooter: any = createPrompt((config: PromptConfig, done: 
       return;
     }
 
+    if (key.name === 'escape' && config.allowBack) {
+      process.stdout.write('\x1B[?25h');
+      done(Symbol.for('back'));
+      return;
+    }
+
     if (isEnterKey(key)) {
       setIsDone(true);
       done(value);
@@ -56,5 +67,5 @@ export const confirmWithFooter: any = createPrompt((config: PromptConfig, done: 
     (config.default ? ' (Y/n)' : ' (y/N)') : ' (y/N)';
   const answer = value ? colorize.brand('Yes') : colorize.brand('No');
   
-  return `${colorize.brand(symbols.bullet)} ${colorize.brand(msg)}${colorize.muted(defaultHint)} ${answer}\n\n${ui.footer()}`;
+  return `${colorize.brand(symbols.bullet)} ${colorize.brand(msg)}${colorize.muted(defaultHint)} ${answer}\n\n${ui.footer(config.footer?.back ?? false, config.footer?.exit ?? true)}`;
 });
