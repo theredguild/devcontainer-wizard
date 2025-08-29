@@ -2,7 +2,7 @@
 
 A comprehensive CLI tool to set up fully equipped Web3 development containers. Features an interactive wizard for creating custom environments with advanced security hardening, git integration, and pre-configured toolchains, or quickly launch pre-built containers for common workflows.
 
-![DevContainer Wizard](./assets/home.gif)
+![DevContainer Wizard](./assets/main.gif)
 
 ## Requirements
 
@@ -42,18 +42,16 @@ yarn global add devcontainer-wizard
 ### Quick start
 
 ```bash
-devcontainer-wizard start
+devcontainer-wizard
 ```
-
-- Select a pre-built container or create your own via the wizard.
 
 ### Create your own devcontainer
 
-```bash
-devcontainer-wizard create [NAME]
-```
-
 ![DevContainer Wizard](./assets/create.gif)
+
+```bash
+devcontainer-wizard create --name <name>
+```
 
 The wizard will prompt you for:
 
@@ -146,24 +144,24 @@ The wizard offers curated extension collections:
 
 ### Start pre-built containers
 
-Prebuilt containers are stored in the [theredguild/devcontainer](https://github.com/theredguild/devcontainer) repository.
-
-```bash
-devcontainer-wizard prebuilt [CONTAINER]
-```
-
 ![DevContainer Wizard](./assets/prebuilt.gif)
 
-- **List available options**:
+Prebuilt containers are stored in the [theredguild/devcontainer](https://github.com/theredguild/devcontainer) repository.
+
+- **Start a pre-built container**:
+
+```bash
+devcontainer-wizard prebuilt --name <name>
+```
+
+- **List available pre-built containers**:
 
 ```bash
 devcontainer-wizard prebuilt --list
-# or
-devcontainer-wizard prebuilt -l
 ```
 
-- **Available containers**: `minimal`,  `auditor`, `minimal-legacy`, `theredguild-legacy`.
-- You will be prompted how to open it (Terminal or VS Code).
+- **Available pre-built containers**: `minimal`,  `auditor`, `hardened`, `isolated`, `legacy`.
+- You will be prompted how to open it (Terminal, VS Code, or Cursor).
 
 #### GitHub Codespaces
 

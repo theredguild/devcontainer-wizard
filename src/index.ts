@@ -26,8 +26,13 @@ export default class DevcontainerWizard extends Command {
 
   static override flags = {
     name: Flags.string({
-      description: 'Name for the project/container',
+      description: 'Name. For create: project name. For prebuilt: prebuilt ID.',
       char: 'N',
+    }),
+    list: Flags.boolean({
+      description: 'List available prebuilt containers and exit',
+      char: 'L',
+      default: false,
     }),
   }
 
@@ -38,7 +43,11 @@ export default class DevcontainerWizard extends Command {
 
 
       if (args.action === 'prebuilt') {
-        await this.runPrebuiltFlow();
+        if (flags.list) {
+          await prebuiltList({ listOnly: true });
+          return;
+        }
+        await this.runPrebuiltFlow(flags.name);
       } else if (args.action === 'create') {
         await this.runCreateFlow(flags.name);
       } else {
@@ -86,10 +95,10 @@ export default class DevcontainerWizard extends Command {
     }
   }
 
-  private async runPrebuiltFlow(): Promise<any> {
+  private async runPrebuiltFlow(selectedName?: string): Promise<any> {
     while (true) {
       try {
-        const selection = await prebuiltList();
+        const selection = await prebuiltList({ selected: selectedName });
         if (selection === Symbol.for('back')) {
           return Symbol.for('back');
         }
