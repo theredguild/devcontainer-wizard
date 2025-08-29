@@ -6,7 +6,7 @@ import { colorize, symbols } from '@/ui/components'
 import { ui } from '@/ui/styling/ui'
 import { shouldRun } from '@/utils/shouldRun'
 
-export async function prebuiltList() {
+export async function prebuiltList(): Promise<any> {
     const selected = await selectWithTopDescription({
         message: 'Select a pre-built container to start:',
         choices: [
@@ -40,14 +40,22 @@ export async function prebuiltList() {
               description: 'The Red Guild\'s original devcontainer. (Legacy)',
               disabled: false
             },
-        ]
+        ],
+        footer: { back: true, exit: true },
+        allowBack: true,
     });
+    if (selected === Symbol.for('back')) {
+      return Symbol.for('back');
+    }
 
     console.log(colorize.brand(symbols.bullet + ' Copying selected devcontainer to current directory...'));
     console.log(colorize.brand(symbols.check + ' Selected devcontainer copied successfully!'));
     try {
       const localConfigPath = await copyPrebuiltContainer(selected)
-      await shouldRun(localConfigPath);
+      const runResult = await shouldRun(localConfigPath);
+      if (runResult === Symbol.for('back')) {
+        return Symbol.for('back');
+      }
     } catch (error) {
       console.error(colorize.error(symbols.circle + ' Failed to copy devcontainer: ' + (error instanceof Error ? error.message : String(error))));
       console.log('')

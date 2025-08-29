@@ -15,10 +15,10 @@ export const ui = {
     return `${title}`;
   },
   
-  footer: () => {
+  footer: (back: boolean = false, exit: boolean = true) => {
     const commands = [];
-    commands.push(`B ${colorize.muted('Back')}`);
-    commands.push(`CTRL+C ${colorize.muted('Exit')}`);
+    if (back) commands.push(`ESC ${colorize.muted('Back')}`);
+    if (exit) commands.push(`CTRL+C ${colorize.muted('Exit')}`);
     
     if (commands.length === 0) return '';
     

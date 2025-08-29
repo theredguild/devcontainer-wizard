@@ -22,7 +22,16 @@ export async function savePath(): Promise<string> {
         return "Invalid path";
       }
     },
+    footer: {
+      back: true,
+      exit: true,
+    },
+    allowBack: true
   });
+
+  if ((answer as any) === Symbol.for('back')) {
+    return Symbol.for('back') as any;
+  }
 
   return path.resolve(answer.trim() || ".");
 }

@@ -16,18 +16,27 @@ const tintinExtensions: VscodeExtension[] = [
 ];
 
 const NomicFoundation: VscodeExtension[] = [
-  { id: "NomicFoundation.hardhat-solidity", name: "Nomic's Solidity + Hardhat" },
+  { id: "NomicFoundation.hardhat-solidity", name: "Nomic's Solidity" },
 ]
 
 const Olympix: VscodeExtension[] = [
-  { id: "Olympixai.olympix", name: "Olympix" },
+  { id: "Olympixai.olympix", name: "Olympix AI" },
 ]
 
-export async function vscodeExtensions(): Promise<string[]> {
+export async function vscodeExtensions(state: {vscodeExtensions?: string[]}): Promise<string[]> {
   const autoInstall = await confirm({
     message: "Do you want to automatically install recommended VS Code extensions?",
-    default: true,
+    default: state.vscodeExtensions ?? true,
+    footer: {
+      back: true,
+      exit: true,
+    },
+    allowBack: true
   });
+
+  if (autoInstall === Symbol.for('back')) {
+    return Symbol.for('back') as any;
+  }
 
   if (autoInstall) {
     return tintinExtensions.map((ext) => ext.id);

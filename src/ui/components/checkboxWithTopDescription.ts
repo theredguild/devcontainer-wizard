@@ -21,6 +21,11 @@ type RawChoice<T = any> =
 type PromptConfig<T = any> = {
   message?: string;
   choices?: RawChoice<T>[];
+  footer?: {
+    back?: boolean;
+    exit?: boolean;
+  };
+  allowBack?: boolean;
 };
 
 function normalizeChoices<T>(raw: RawChoice<T>[]) {
@@ -109,6 +114,11 @@ export const checkboxWithTopDescription: any = createPrompt((config: PromptConfi
     if (key.name === 'left') {
       return;
     }
+
+    if (key.name === 'escape' && config.allowBack) {
+      done(Symbol.for('back'));
+      return;
+    }
     
     if (isSpaceKey(key) || key.name === 'right') {
       if (choices[index] && !choices[index].disabled && !choices[index].isSeparator) {
@@ -142,5 +152,5 @@ export const checkboxWithTopDescription: any = createPrompt((config: PromptConfi
   const current = choices[index];
   const currentDesc = current?.description && !current.isSeparator ? `${colorize.muted(current.description)}\n` : '';
 
-  return `${colorize.brand(symbols.bullet)} ${colorize.brand(msg)}\n\n${currentDesc}${pagination} \n\n${ui.footer()}`;
+  return `${colorize.brand(symbols.bullet)} ${colorize.brand(msg)}\n\n${currentDesc}${pagination} \n\n${ui.footer(config.footer?.back ?? false, config.footer?.exit ?? true)}`;
 });

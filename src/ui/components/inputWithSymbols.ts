@@ -11,6 +11,11 @@ type PromptConfig = {
   message?: string;
   default?: string;
   validate?: (input: string) => true | string | Promise<true | string>;
+  footer?: {
+    back?: boolean;
+    exit?: boolean;
+  };
+  allowBack?: boolean;
 };
 
 function isPrintableKey(key: any) {
@@ -50,6 +55,11 @@ export const inputWithSymbols: any = createPrompt((config: PromptConfig, done: (
       return;
     }
 
+    if (key.name === 'escape' && config.allowBack) {
+      done(Symbol.for('back'));
+      return;
+    }
+
     if (key.name === 'return' || key.name === 'enter') {
       
       const toValidate = hasStartedTyping ? value : initial;
@@ -86,7 +96,7 @@ export const inputWithSymbols: any = createPrompt((config: PromptConfig, done: (
   const msg = config.message ?? '';
   const errorText = error ? `\n${colorize.error(error)}` : '';
   const displayValue = hasStartedTyping ? value : (initial ? colorize.muted(initial) : colorize.muted('_'));
-  return `${colorize.brand(symbols.bullet)} ${colorize.brand(msg)} ${displayValue}${errorText} \n\n${ui.footer()}`;
+  return `${colorize.brand(symbols.bullet)} ${colorize.brand(msg)} ${displayValue}${errorText} \n\n${ui.footer(config.footer?.back ?? false, config.footer?.exit ?? true)}`;
 });
 
 

@@ -6,11 +6,20 @@ export interface GitRepositoryConfig {
   enabled: boolean
 }
 
-export async function gitClone(): Promise<GitRepositoryConfig> {
+export async function gitClone(state: {gitClone?: boolean}): Promise<GitRepositoryConfig> {
   const shouldClone = await confirm({
     message: 'Would you like to automatically clone a git repository during build?',
-    default: false
+    default: state.gitClone ?? false,
+    footer: {
+      back: true,
+      exit: true,
+    },
+    allowBack: true
   })
+
+  if ((shouldClone as any) === Symbol.for('back')) {
+    return Symbol.for('back') as any;
+  }
 
   if (!shouldClone) {
     return {
