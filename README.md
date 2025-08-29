@@ -25,7 +25,13 @@ A comprehensive CLI tool to set up fully equipped Web3 development containers. F
 
 ## Install
 
-Work in progress
+To install our pre-realease clone this repo and run:
+
+```bash
+pnpm install
+pnpm build
+pnpm link
+```
 
 ## How to use
 
