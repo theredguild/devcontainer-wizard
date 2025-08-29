@@ -18,100 +18,84 @@ import { symbols } from "@/ui/styling/symbols";
 import { ui } from "@/ui/styling/ui";
 
 export async function wizard(args: { name?: string }) {
-  const totalSteps = 9;
+
   let currentStep = 1;
-
   const wizardState: WizardState = {}
-  
-  ui.clearScreen();
-  console.log(ui.header());
-  console.log('');
-  wizardState.name = args.name !== undefined ? args.name : await devcontainerName()
-  currentStep++;
-  
-  ui.clearScreen();
-  console.log(ui.header());
-  console.log('');
-  wizardState.languages = await languages()
-  currentStep++;
-  
-  ui.clearScreen();
-  console.log(ui.header());
-  console.log('');
-  wizardState.frameworks = await frameworks()
-  currentStep++;
-  
-  ui.clearScreen();
-  console.log(ui.header());
-  console.log('');
-  wizardState.fuzzingAndTesting = await fuzzingAndTesting()
-  currentStep++;
-  
-  ui.clearScreen();
-  console.log(ui.header());
-  console.log('');
-  wizardState.securityTooling = await securityTooling()
-  currentStep++;
 
-  ui.clearScreen();
-  console.log(ui.header());
-  console.log('');
-  const hardeningMethod = await selectWithTopDescription({
-    message: 'How would you like to configure security hardening?',
-    choices: [
-      { 
-        name: 'Use security hardening recipes', 
-        value: 'recipes',
-        description: 'Choose from predefined security configurations'
-      },
-      { 
-        name: 'Manual selection', 
-        value: 'manual',
-        description: 'Manually select individual security hardening options'
-      },
-    ],
-  })
-  currentStep++;
-
-  if (hardeningMethod === 'recipes') {
+  while (currentStep <= 8) {
     ui.clearScreen();
     console.log(ui.header());
     console.log('');
-    const selectedRecipes = await recipes()
-    wizardState.systemHardening = recipesToSecurityHardening([selectedRecipes])
-    
-    if (wizardState.systemHardening.length > 0) {
-      console.log(`\n${colorize.brand(`${symbols.diamond} Security hardening options automatically selected from recipes:`)}`)
-      wizardState.systemHardening.forEach(option => {
-        console.log(`  ${colorize.success(symbols.check)} ${colorize.brand(option)}`)
-      })
-      console.log('')
+
+    switch (currentStep) {
+      case 1:
+        wizardState.name = args.name !== undefined ? args.name : await devcontainerName()
+        break;
+      
+      case 2:
+        wizardState.languages = await languages()
+        break;
+      
+      case 3:
+        wizardState.frameworks = await frameworks()
+        break;
+      
+      case 4:
+        wizardState.fuzzingAndTesting = await fuzzingAndTesting()
+        break;
+      
+      case 5:
+        wizardState.securityTooling = await securityTooling()
+        break;
+      
+      case 6:
+        const hardeningMethod = await selectWithTopDescription({
+          message: 'How would you like to configure security hardening?',
+          choices: [
+            { 
+              name: 'Use security hardening recipes', 
+              value: 'recipes',
+              description: 'Choose from predefined security configurations'
+            },
+            { 
+              name: 'Manual selection', 
+              value: 'manual',
+              description: 'Manually select individual security hardening options'
+            },
+          ],
+        })
+
+        if (hardeningMethod === 'recipes') {
+          const selectedRecipes = await recipes()
+          wizardState.systemHardening = recipesToSecurityHardening([selectedRecipes])
+          
+          if (wizardState.systemHardening.length > 0) {
+            console.log(`\n${colorize.brand(`${symbols.diamond} Security hardening options automatically selected from recipes:`)}`)
+            wizardState.systemHardening.forEach(option => {
+              console.log(`  ${colorize.success(symbols.check)} ${colorize.brand(option)}`)
+            })
+            console.log('')
+          }
+        } else {
+          wizardState.systemHardening = await systemHardening()
+        }
+        break;
+      
+      case 7:
+        wizardState.vscodeExtensions = await vscodeExtensions()
+        break;
+      
+      case 8:
+        wizardState.gitRepository = await gitClone()
+        break;
+      
+      case 9:
+        wizardState.savePath = await savePath()
+        break;
     }
-    currentStep++;
-  } else {
-    ui.clearScreen();
-    console.log(ui.header());
-    console.log('');
-    wizardState.systemHardening = await systemHardening()
+    
     currentStep++;
   }
-
-  ui.clearScreen();
-  console.log(ui.header());
-  console.log('');
-  wizardState.vscodeExtensions = await vscodeExtensions()
-  currentStep++;
-  
-  ui.clearScreen();
-  console.log(ui.header());
-  console.log('');
-  wizardState.gitRepository = await gitClone()
-  currentStep++;
-  
-  ui.clearScreen();
-  console.log(ui.header());
-  console.log('');
-  wizardState.savePath = await savePath()
 
   return wizardState
 }
