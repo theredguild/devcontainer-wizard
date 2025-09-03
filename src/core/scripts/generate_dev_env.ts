@@ -319,7 +319,7 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   }
 
   if (config.gitRepository?.enabled && config.gitRepository.url) {
-    devcontainerConfig.postCreateCommand = 'mkdir -p /workspace/repo && cp -r /home/vscode/repos/project/* /workspace/repo'
+    devcontainerConfig.postCreateCommand = 'mkdir -p /workspace/repo && cp -r /home/vscode/repos/project/. /workspace/repo'
   }
 
 
@@ -338,20 +338,19 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   if (selectedHardening.has('readonly-os')) {
     runArgs.push(
     "--read-only",
-      // --- Writable, EXECUTABLE Mounts for VS Code Server ---
-      "--tmpfs", "/home/vscode/.vscode-server:rw,exec,nosuid,size=512m,uid=1000,gid=1000",
-      "--tmpfs", "/home/vscode/.vscode-server-insiders:rw,exec,nosuid,size=256m,uid=1000,gid=1000",
-
-      // --- Writable, NON-EXECUTABLE Mounts for Caches, Configs, and Logs ---
-      "--tmpfs", "/home/vscode/.cache:rw,noexec,nosuid,size=256m,uid=1000,gid=1000",
-      "--tmpfs", "/home/vscode/.config:rw,noexec,nosuid,size=128m,uid=1000,gid=1000",
-      "--tmpfs", "/home/vscode/.local:rw,noexec,nosuid,size=256m,uid=1000,gid=1000",
-      "--tmpfs", "/home/vscode/.gnupg:rw,noexec,nosuid,size=32m,uid=1000,gid=1000",
-      "--tmpfs", "/tmp:rw,noexec,nosuid,size=512m",
-      "--tmpfs", "/var/tmp:rw,noexec,nosuid,size=512m",
-      "--tmpfs", "/var/log:rw,noexec,nosuid,size=128m",
-      "--tmpfs", "/run:rw,noexec,nosuid,size=128m",
-      "--tmpfs", "/home/vscode/.devcontainer:rw,noexec,nosuid,size=32m,uid=1000,gid=1000"
+    // --- Writable, EXECUTABLE Mounts for VS Code Server ---
+    "--tmpfs", "/home/vscode/.vscode-server:rw,exec,nosuid,size=2g,uid=1000,gid=1000",
+    "--tmpfs", "/home/vscode/.vscode-server-insiders:rw,exec,nosuid,size=1g,uid=1000,gid=1000",
+    // --- Writable, NON-EXECUTABLE Mounts for Caches, Configs, and Logs ---
+    "--tmpfs", "/home/vscode/.cache:rw,noexec,nosuid,size=1g,uid=1000,gid=1000",
+    "--tmpfs", "/home/vscode/.config:rw,noexec,nosuid,size=512m,uid=1000,gid=1000",
+    "--tmpfs", "/home/vscode/.local:rw,noexec,nosuid,size=1g,uid=1000,gid=1000",
+    "--tmpfs", "/home/vscode/.gnupg:rw,noexec,nosuid,size=64m,uid=1000,gid=1000",
+    "--tmpfs", "/tmp:rw,noexec,nosuid,size=1g",
+    "--tmpfs", "/var/tmp:rw,noexec,nosuid,size=1g",
+    "--tmpfs", "/var/log:rw,noexec,nosuid,size=256m",
+    "--tmpfs", "/run:rw,noexec,nosuid,size=256m",
+    "--tmpfs", "/home/vscode/.devcontainer:rw,noexec,nosuid,size=128m,uid=1000,gid=1000"
     )
   }
 

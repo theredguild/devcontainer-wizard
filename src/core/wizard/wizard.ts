@@ -4,7 +4,7 @@ import {
     fuzzingAndTesting,
     securityTooling,
     systemHardening,
-    recipes,
+    securityProfiles,
     recipesToSecurityHardening,
     vscodeExtensions,
     savePath,
@@ -53,8 +53,8 @@ export async function wizard(args: { name?: string }) {
             message: 'How would you like to configure security hardening?',
             choices: [
                 { 
-                    name: 'Use security hardening recipes', 
-                    value: 'recipes',
+                    name: 'Use security profiles', 
+                    value: 'profiles',
                     description: 'Choose from predefined security configurations'
                 },
                 { 
@@ -74,21 +74,21 @@ export async function wizard(args: { name?: string }) {
             return BACK;
         }
 
-        if (hardeningMethod === 'recipes') {
-            const selectedRecipes = await recipes({})
-            if (selectedRecipes === BACK) return BACK;
+        if (hardeningMethod === 'profiles') {
+            const selectedProfile = await securityProfiles()
+            if (selectedProfile === BACK) return BACK;
 
-            wizardState.systemHardening = recipesToSecurityHardening([selectedRecipes])
+            wizardState.systemHardening = recipesToSecurityHardening([selectedProfile])
             
             if (wizardState.systemHardening.length > 0) {
                 console.log(`
-${colorize.brand(`${symbols.diamond} Security hardening options automatically selected from recipes:`)}`)
+${colorize.brand(`${symbols.diamond} Security hardening options automatically selected from profiles:`)}`)
                 wizardState.systemHardening.forEach(option => {
                     console.log(`  ${colorize.success(symbols.check)} ${colorize.brand(option)}`)
                 })
                 console.log('')
             }
-            return selectedRecipes;
+            return selectedProfile;
         } else {
             const result = await systemHardening({ systemHardening: wizardState.systemHardening })
             if ((result as any) !== BACK) wizardState.systemHardening = result as string[];

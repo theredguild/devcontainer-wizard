@@ -69,20 +69,26 @@ When finished, the CLI writes `Dockerfile` and `devcontainer.json` to `.devconta
 
 #### Security Hardening Recipes
 
-The wizard now includes predefined security recipes for common use cases:
+The wizard includes predefined security profiles copied from prebuilt devcontainers, so you can build your own container with custom tools and a tested security profile:
 
-- **Airgapped ephemeral sandbox**: Maximum isolation without network or persistence
-- **Hardened online dev**: Day-to-day development with reduced attack surface
-- **Source-review only**: Read code and run linters without repository writes
-- **Training workshop lab**: Classroom use with predictable resource constraints
-- **Network restricted analysis**: API access and package installs without packet crafting
-- **CI-like local runner**: Mirrors CI behavior with immutable file system
-- **Forensics reader**: Inspect artifacts offline without altering evidence
-- **Package-install session**: Install packages while maintaining security guardrails
-- **Net-disabled build test**: Prove builds work without network access
-- **Security research with controlled net**: API testing without packet crafting capabilities
+- **Development**: Balanced security for daily development work
+  - *Use cases*: Building dApps, writing smart contracts, testing with frameworks like Hardhat/Foundry
+  - *Features*: Secure temp directories, no privilege escalation, AppArmor, secure DNS, VS Code security
 
-Each recipe automatically configures appropriate security hardening options based on the intended use case.
+- **Hardened**: Enhanced security for smart contract auditing and security research
+  - *Use cases*: Code audits, security analysis, penetration testing, vulnerability research
+  - *Features*: Ephemeral workspace, dropped capabilities, no raw packets, network restrictions, enhanced isolation
+
+- **Isolated**: Maximum security with air-gapped environment
+  - *Use cases*: Analyzing malware, handling sensitive data, forensic analysis, air-gapped development
+  - *Features*: Read-only filesystem, complete network isolation, ephemeral workspace, maximum capability restrictions
+
+Experimental profiles:
+
+- **Network Restricted Analysis**: API access and package installs without packet crafting
+- **CI-like Local Runner**: Mirrors CI behavior with immutable file system
+- **Package Install Session**: Install packages while maintaining security guardrails
+- **Security Research (Controlled Net)**: API testing without packet crafting capabilities
 
 #### Manual Security Hardening Options
 

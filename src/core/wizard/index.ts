@@ -3,7 +3,7 @@ export { frameworks } from "./frameworks";
 export { fuzzingAndTesting } from "./fuzzingTesting";
 export { securityTooling } from "./securityTooling";
 export { systemHardening } from "./systemHardening";
-export { recipes, recipesToSecurityHardening, getRecipeInfo } from "./recipes";
+export { securityProfiles, recipesToSecurityHardening, getRecipeInfo } from "./securityProfiles";
 export { vscodeExtensions } from "./vscodeExtensions";
 export { savePath } from "./savePath";
 export { devcontainerName } from "./devcontainerName";
