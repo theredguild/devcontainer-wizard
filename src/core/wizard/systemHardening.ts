@@ -53,7 +53,7 @@ export async function systemHardening(state: {systemHardening?: string[]}) {
     choices: [
       { name: "Normal networking", value: "normal", description: "Standard container networking" },
       { name: "Enhanced DNS security", value: "secure-dns", description: "Forces Cloudflare DNS (1.1.1.1, 1.0.0.1)" },
-      { name: "Complete network isolation", value: "network-none", description: "Completely isolates container from network (conflicts with DNS options), VS Code extensions will not be installed" },
+      { name: "Complete network isolation", value: "network-none", description: "Isolates container from network, VS Code extensions will not be installed" },
     ],
     footer: {
       exit: true,

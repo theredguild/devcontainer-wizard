@@ -84,7 +84,12 @@ export const inputWithSymbols: any = createPrompt((config: PromptConfig, done: (
     }
 
     if (key.name === 'backspace' || key.sequence === '\u007f') {
-      if (cursorPosition > 0) {
+      if (!hasStartedTyping) {
+        // If user hasn't started typing, clear the default and start fresh
+        setHasStartedTyping(true);
+        setValue('');
+        setCursorPosition(0);
+      } else if (cursorPosition > 0) {
         const newValue = value.slice(0, cursorPosition - 1) + value.slice(cursorPosition);
         setValue(newValue);
         setCursorPosition(cursorPosition - 1);
@@ -93,7 +98,12 @@ export const inputWithSymbols: any = createPrompt((config: PromptConfig, done: (
     }
 
     if (key.name === 'delete') {
-      if (cursorPosition < value.length) {
+      if (!hasStartedTyping) {
+        // If user hasn't started typing, clear the default and start fresh
+        setHasStartedTyping(true);
+        setValue('');
+        setCursorPosition(0);
+      } else if (cursorPosition < value.length) {
         const newValue = value.slice(0, cursorPosition) + value.slice(cursorPosition + 1);
         setValue(newValue);
       }

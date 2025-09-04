@@ -107,7 +107,7 @@ ${colorize.brand(`${symbols.diamond} Security hardening options automatically se
     },
     async () => {
         const result = await savePath();
-        if ((result as any) !== BACK) wizardState.savePath = result as string;
+        if (result !== BACK) wizardState.savePath = result as string;
         return result;
     },
   ];

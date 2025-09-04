@@ -34,12 +34,12 @@ const PREBUILT_CHOICES: PrebuiltChoice[] = [
   {
     name: 'Legacy 🪷',
     value: 'legacy',
-    description: 'The Red Guild\'s original devcontainer. (Legacy)',
+    description: 'The Red Guild\'s original devcontainer.',
     disabled: false
   },
   {
     name: 'Paranoid 🔒',
-    value: 'Paranoid',
+    value: 'paranoid',
     description: 'Maximum security isolation, read-only OS and air-gapped environments.',
     disabled: false,
     experimental: true,
@@ -50,9 +50,13 @@ export async function prebuiltList(options?: { listOnly?: boolean; selected?: st
   const listOnly = options?.listOnly === true;
   const selectedName = options?.selected;
 
-  if (listOnly) {
+  if (listOnly) { 
+    const maxValueLength = Math.max(...PREBUILT_CHOICES.map(choice => choice.value.length));
+    const paddingLength = maxValueLength + 2;
+    
     for (const choice of PREBUILT_CHOICES) {
-      console.log(`${choice.value}\t${choice.name}`);
+      const paddedValue = choice.value.padEnd(paddingLength);
+      console.log(`${paddedValue}${choice.description}`);
     }
     return;
   }

@@ -21,17 +21,7 @@ export async function shouldRun(devcontainerPath: string) {
       return Symbol.for('back') as any;
     }
 
-    process.stdout.write(colorize.muted(symbols.circle + ' Building devcontainer...'));
-    let frameIndex = 0;
-    const spinnerInterval = setInterval(() => {
-      process.stdout.write(`\r${colorize.muted(symbols.spinner.frames[frameIndex])} Building devcontainer...`);
-      frameIndex = (frameIndex + 1) % symbols.spinner.frames.length;
-    }, symbols.spinner.interval);
-
     const containerId = await devcontainerUp(devcontainerPath);
-
-    clearInterval(spinnerInterval);
-    process.stdout.write('\n');
     
     if (shouldRun) {
         ui.clearScreen()
