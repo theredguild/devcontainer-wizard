@@ -1,12 +1,10 @@
+import { Separator } from '@inquirer/core'
 import { selectWithTopDescription } from '@/ui/components/selectWithTopDescription'
-import { devcontainerUp } from '@/core/devcontainer/devcontainerUp'
-import { openIn } from '@/utils/openIn'
 import { copyPrebuiltContainer } from '@/core/devcontainer/resolvePrebuiltPath'
 import { colorize, symbols } from '@/ui/components'
-import { ui } from '@/ui/styling/ui'
 import { shouldRun } from '@/utils/shouldRun'
 
-type PrebuiltChoice = { name: string; value: string; description: string; disabled: boolean };
+type PrebuiltChoice = { name: string; value: string; description: string; disabled: boolean, experimental?: boolean };
 
 const PREBUILT_CHOICES: PrebuiltChoice[] = [
   {
@@ -22,15 +20,15 @@ const PREBUILT_CHOICES: PrebuiltChoice[] = [
     disabled: false,
   },
   {
-    name: 'Hardened 💻️',
-    value: 'hardened',
+    name: 'Isolated 🔒',
+    value: 'isolated',
     description: 'Enhanced security with development flexibility.',
     disabled: false,
   },
   {
-    name: 'Isolated 🔒',
-    value: 'isolated',
-    description: 'Maximum security isolation, air-gapped environments.',
+    name: 'Air-gapped ✈️',
+    value: 'airgapped',
+    description: 'Air-gapped environment.',
     disabled: false,
   },
   {
@@ -38,6 +36,13 @@ const PREBUILT_CHOICES: PrebuiltChoice[] = [
     value: 'legacy',
     description: 'The Red Guild\'s original devcontainer. (Legacy)',
     disabled: false
+  },
+  {
+    name: 'Paranoid 🔒',
+    value: 'Paranoid',
+    description: 'Maximum security isolation, read-only OS and air-gapped environments.',
+    disabled: false,
+    experimental: true,
   },
 ];
 
@@ -52,6 +57,16 @@ export async function prebuiltList(options?: { listOnly?: boolean; selected?: st
     return;
   }
 
+  const choices = [];
+  const regularChoices = PREBUILT_CHOICES.filter(choice => !choice.experimental);
+  const experimentalChoices = PREBUILT_CHOICES.filter(choice => choice.experimental);
+  
+  choices.push(...regularChoices);
+  if (experimentalChoices.length > 0) {
+    choices.push(new Separator("——— Experimental Profiles ———"));
+    choices.push(...experimentalChoices);
+  }
+
   let selected: any;
   if (selectedName) {
     const match = PREBUILT_CHOICES.find(c => c.value === selectedName);
@@ -64,7 +79,7 @@ export async function prebuiltList(options?: { listOnly?: boolean; selected?: st
   } else {
     selected = await selectWithTopDescription({
       message: 'Select a pre-built container to start:',
-      choices: PREBUILT_CHOICES,
+      choices: choices,
       footer: { back: true, exit: true },
       allowBack: true,
     });

@@ -12,7 +12,7 @@ export async function systemHardening(state: {systemHardening?: string[]}) {
     message: "File System Security",
     loop: false,
     choices: [
-      { name: "Read-only file system", value: "readonly-os", description: "Mounts the file system as read-only" },
+      { name: "(EXPERIMENTAL) Read-only file system", value: "readonly-os", description: "Mounts the file system as read-only, some tools will not work" },
       { name: "Secure temp directories", value: "secure-tmp", description: "Creates temp dirs with noexec, nosuid flags" },
       { name: "Ephemeral workspace", value: "ephemeral-workspace", description: "Uses tmpf mount to create a ephemeral workpsace"}
     ],
@@ -53,7 +53,7 @@ export async function systemHardening(state: {systemHardening?: string[]}) {
     choices: [
       { name: "Normal networking", value: "normal", description: "Standard container networking" },
       { name: "Enhanced DNS security", value: "secure-dns", description: "Forces Cloudflare DNS (1.1.1.1, 1.0.0.1)" },
-      { name: "Complete network isolation", value: "network-none", description: "Completely isolates container from network (conflicts with DNS options)" },
+      { name: "Complete network isolation", value: "network-none", description: "Completely isolates container from network (conflicts with DNS options), VS Code extensions will not be installed" },
     ],
     footer: {
       exit: true,

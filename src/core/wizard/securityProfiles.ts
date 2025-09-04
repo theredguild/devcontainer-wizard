@@ -65,7 +65,7 @@ const RECIPE_MAPPINGS = {
       "vscode-security"
     ]
   },
-  "hardened": {
+  "isolated": {
     description: "Enhanced security for smart contract auditing and security research",
     caveat: "Packet-crafting tools will not work due to no-raw-packets restriction.",
     choices: [
@@ -79,7 +79,22 @@ const RECIPE_MAPPINGS = {
       "vscode-security"
     ]
   },
-  "isolated": {
+  "airgapped": {
+    description: "Enhanced security for smart contract auditing and security research",
+    caveat: "VS Code extensions will not be installed.",
+    choices: [
+      "ephemeral-workspace",
+      "secure-tmp",
+      "drop-caps",
+      "no-new-privs",
+      "apparmor",
+      "no-raw-packets",
+      "secure-dns",
+      "vscode-security",
+      "network-none",
+    ]
+  },
+  "paranoid": {
     description: "Maximum security with air-gapped environment",
     caveat: "No network access or persistent storage - extensions and package managers will not work.",
     choices: [
@@ -107,18 +122,24 @@ export async function securityProfiles() {
         caveat: RECIPE_MAPPINGS["development"].caveat
       },
       { 
-        name: "Hardened", 
-        value: "hardened", 
-        description: RECIPE_MAPPINGS["hardened"].description,
-        caveat: RECIPE_MAPPINGS["hardened"].caveat
-      },
-      { 
         name: "Isolated", 
         value: "isolated", 
         description: RECIPE_MAPPINGS["isolated"].description,
         caveat: RECIPE_MAPPINGS["isolated"].caveat
       },
+      { 
+        name: "Air-gapped", 
+        value: "airgapped", 
+        description: RECIPE_MAPPINGS["airgapped"].description,
+        caveat: RECIPE_MAPPINGS["airgapped"].caveat
+      },
       new Separator("——— Experimental Profiles ———"),
+      { 
+        name: "Paranoid", 
+        value: "paranoid", 
+        description: RECIPE_MAPPINGS["paranoid"].description,
+        caveat: RECIPE_MAPPINGS["paranoid"].caveat
+      },
       { 
         name: "Network Restricted Analysis", 
         value: "network-restricted-analysis", 
