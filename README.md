@@ -2,6 +2,21 @@
 
 A comprehensive CLI tool to set up fully equipped Web3 development containers. Features an interactive wizard for creating custom environments with advanced security hardening, git integration, and pre-configured toolchains, or quickly launch pre-built containers for common workflows.
 
+> [!IMPORTANT]
+> Dev Containers can improve your workflow, but they are **not a fully secure environment**.  
+> If you need to run untrusted or suspicious code, use [GitHub Codespaces](https://github.com/codespaces/new?hide_repo_select=true&ref=main&template_repository=theredguild/devcontainer), GitPod, or a similar remote setup — **never run it directly on your machine**.
+
+
+> [!CAUTION]
+> **VS Code considerations:**
+> 
+> VS Code does a lot of things to improve user experience, but that has security tradeoffs. For example, by default, VS Code allows API calls to open new terminals, even bypassing the host machine:
+> ```bash
+> code --command workbench.action.terminal.newLocal
+> ```
+
+
+
 ![DevContainer Wizard](./assets/main.gif)
 
 ## Requirements
@@ -76,7 +91,7 @@ The wizard includes predefined security profiles copied from prebuilt devcontain
 - **Development**: Balanced security for daily development work
   - *Features*: Secure temp directories, no privilege escalation, AppArmor, secure DNS, VS Code security
 
-- **Isolated**: Isolated workspace without copying host folder
+- **Isolated**: Isolated workspace without copying the host folder
   - *Features*: Ephemeral workspace, maximum capability restrictions
 
 - **Air-gapped**: Isolated profile + no network
@@ -86,7 +101,7 @@ The wizard includes predefined security profiles copied from prebuilt devcontain
 Experimental profiles:
 
 - **Network Restricted Analysis**: API access and package installs without packet crafting
-- **CI-like Local Runner**: Mirrors CI behavior with immutable file system
+- **CI-like Local Runner**: Mirrors CI behavior with an immutable file system
 - **Package Install Session**: Install packages while maintaining security guardrails
 - **Security Research (Controlled Net)**: API testing without packet crafting capabilities
 
@@ -173,9 +188,9 @@ You can also run prebuilt containers using GitHub Codespaces:
 
 ## Pre-built containers
 
-- **Minimal**: Use Hardhat and Foundry doing zero config.
+- **Minimal**: Use Hardhat and Foundry, doing zero config.
 - **Auditor**: Audit smart contracts.
-- **Isolated**: Use and isolated workspace without copying your environment.
+- **Isolated**: Use an isolated workspace without copying your environment.
 - **Air-gapped**: Air-gapped environment.
 - **ETH Security Toolbox**: Auditor environment with Trail of Bits selected tools.
 - **Legacy**: The Red Guild's original devcontainer.
