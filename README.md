@@ -91,10 +91,10 @@ The wizard includes predefined security profiles copied from prebuilt devcontain
 - **Development**: Balanced security for daily development work
   - *Features*: Secure temp directories, no privilege escalation, AppArmor, secure DNS, VS Code security
 
-- **Isolated**: Isolated workspace without copying the host folder
+- **Hardened**: Ephemeral workspace without copying the host folder
   - *Features*: Ephemeral workspace, maximum capability restrictions
 
-- **Air-gapped**: Isolated profile + no network
+- **Air-gapped**: Hardened profile + no network
   - *Features*: No network, ephemeral workspace, maximum capability restrictions
 
 -
@@ -177,7 +177,7 @@ devcontainer-wizard prebuilt --name <name>
 devcontainer-wizard prebuilt --list
 ```
 
-- **Available pre-built containers**: `minimal`,  `auditor`, `isolated`, `paranoid`, `eth-security-toolbox`, `legacy`.
+- **Available pre-built containers**: `minimal`,  `auditor`, `Hardened`, `paranoid`, `eth-security-toolbox`, `legacy`.
 - You will be prompted how to open it (Terminal, VS Code, or Cursor).
 
 #### GitHub Codespaces
@@ -190,7 +190,7 @@ You can also run prebuilt containers using GitHub Codespaces:
 
 - **Minimal**: Use Hardhat and Foundry, doing zero config.
 - **Auditor**: Audit smart contracts.
-- **Isolated**: Use an isolated workspace without copying your environment.
+- **Hardened**: Use an Hardened workspace without copying your environment.
 - **Air-gapped**: Air-gapped environment.
 - **ETH Security Toolbox**: Auditor environment with Trail of Bits selected tools.
 - **Legacy**: The Red Guild's original devcontainer.
