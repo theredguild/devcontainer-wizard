@@ -82,7 +82,7 @@ The wizard includes predefined security profiles copied from prebuilt devcontain
   - *Features*: Ephemeral workspace, dropped capabilities, no raw packets, network restrictions, enhanced isolation
 
 - **Isolated**: Maximum security with air-gapped environment
-  - *Use cases*: Analyzing malware, handling sensitive data, forensic analysis, air-gapped development
+  - *Use cases*: Handling sensitive data, forensic analysis, air-gapped development
   - *Features*: Read-only filesystem, complete network isolation, ephemeral workspace, maximum capability restrictions
 
 Experimental profiles:
@@ -164,7 +164,7 @@ devcontainer-wizard prebuilt --name <name>
 devcontainer-wizard prebuilt --list
 ```
 
-- **Available pre-built containers**: `minimal`,  `auditor`, `hardened`, `isolated`, `legacy`.
+- **Available pre-built containers**: `minimal`,  `auditor`, `isolated`, `paranoid`, `eth-security-toolbox`, `legacy`.
 - You will be prompted how to open it (Terminal, VS Code, or Cursor).
 
 #### GitHub Codespaces
