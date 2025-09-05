@@ -69,22 +69,20 @@ The wizard will prompt you for:
 
 When finished, the CLI writes `Dockerfile` and `devcontainer.json` to `.devcontainer/<name>` and offers to start it immediately. It also prints the exact `devcontainer up` command you can run later.
 
-#### Security Hardening Recipes
+#### Security Profiles
 
 The wizard includes predefined security profiles copied from prebuilt devcontainers, so you can build your own container with custom tools and a tested security profile:
 
 - **Development**: Balanced security for daily development work
-  - *Use cases*: Building dApps, writing smart contracts, testing with frameworks like Hardhat/Foundry
   - *Features*: Secure temp directories, no privilege escalation, AppArmor, secure DNS, VS Code security
 
-- **Hardened**: Enhanced security for smart contract auditing and security research
-  - *Use cases*: Code audits, security analysis, penetration testing, vulnerability research
-  - *Features*: Ephemeral workspace, dropped capabilities, no raw packets, network restrictions, enhanced isolation
+- **Isolated**: Isolated workspace without copying host folder
+  - *Features*: Ephemeral workspace, maximum capability restrictions
 
-- **Isolated**: Maximum security with air-gapped environment
-  - *Use cases*: Handling sensitive data, forensic analysis, air-gapped development
-  - *Features*: Read-only filesystem, complete network isolation, ephemeral workspace, maximum capability restrictions
+- **Air-gapped**: Isolated profile + no network
+  - *Features*: No network, ephemeral workspace, maximum capability restrictions
 
+-
 Experimental profiles:
 
 - **Network Restricted Analysis**: API access and package installs without packet crafting
@@ -177,7 +175,7 @@ You can also run prebuilt containers using GitHub Codespaces:
 
 - **Minimal**: Use Hardhat and Foundry doing zero config.
 - **Auditor**: Audit smart contracts.
-- **Isolated**: Run untrusted code.
+- **Isolated**: Use and isolated workspace without copying your environment.
 - **Air-gapped**: Air-gapped environment.
 - **ETH Security Toolbox**: Auditor environment with Trail of Bits selected tools.
 - **Legacy**: The Red Guild's original devcontainer.
