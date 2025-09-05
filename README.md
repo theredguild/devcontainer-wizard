@@ -28,9 +28,11 @@ A comprehensive CLI tool to set up fully equipped Web3 development containers. F
 To install our pre-realease clone this repo and run:
 
 ```bash
-pnpm install
-pnpm build
-pnpm link
+npm i -g devcontainer-wizard
+
+#or
+
+pnpm add -g devcontainer-wizard
 ```
 
 ## How to use
