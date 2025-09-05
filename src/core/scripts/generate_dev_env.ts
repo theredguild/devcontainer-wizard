@@ -276,7 +276,6 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
     
     // Container environment
     containerEnv: {
-      "SHELL": "/bin/zsh",
       "DEVCONTAINER_ID_LABEL": `${safeFolderName}-web3-devcontainer`
     },
     

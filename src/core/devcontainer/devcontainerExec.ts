@@ -10,9 +10,7 @@ export async function devcontainerExec(containerId: string, openIn: string) {
           'exec',
           '--container-id',
           containerId,
-          'bash',
-          '-lc',
-          'cd /workspace && exec bash -l'
+          'bash'
         ],
         { stdio: 'inherit' }
       );
