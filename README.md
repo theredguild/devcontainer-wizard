@@ -173,10 +173,11 @@ You can also run prebuilt containers using GitHub Codespaces:
 
 ## Pre-built containers
 
-- **Minimal**: Beginner-friendly environment.
-- **Auditor**: For smart contract auditors and security researchers..
-- **Hardened**: Enhanced security with development flexibility.
-- **Isolated**: Maximum security isolation, air-gapped environments.
+- **Minimal**: Use Hardhat and Foundry doing zero config.
+- **Auditor**: Audit smart contracts.
+- **Isolated**: Run untrusted code.
+- **Air-gapped**: Air-gapped environment.
+- **ETH Security Toolbox**: Auditor environment with Trail of Bits selected tools.
 - **Legacy**: The Red Guild's original devcontainer.
 
 ## How to contribute
