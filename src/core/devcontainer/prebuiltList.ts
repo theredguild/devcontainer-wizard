@@ -10,19 +10,19 @@ const PREBUILT_CHOICES: PrebuiltChoice[] = [
   {
     name: 'Minimal 🧶',
     value: 'minimal',
-    description: 'Essential development with basic security.',
+    description: 'Use Hardhat and Foundry doing zero config.',
     disabled: false
   },
   {
     name: 'Auditor 🔍',
     value: 'auditor',
-    description: 'Smart contract auditors and security researchers.',
+    description: 'Audit smart contracts.',
     disabled: false,
   },
   {
     name: 'Isolated 🔒',
     value: 'isolated',
-    description: 'Enhanced security with development flexibility.',
+    description: 'Run untrusted code.',
     disabled: false,
   },
   {
@@ -30,6 +30,12 @@ const PREBUILT_CHOICES: PrebuiltChoice[] = [
     value: 'airgapped',
     description: 'Air-gapped environment.',
     disabled: false,
+  },
+  {
+    name: 'ETH Security Toolbox 📦️',
+    value: 'eth-security-toolbox',
+    description: 'Auditor environment with Trail of Bits selected tools',
+    disabled: false
   },
   {
     name: 'Legacy 🪷',
