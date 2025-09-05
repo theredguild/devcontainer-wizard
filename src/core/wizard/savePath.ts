@@ -2,7 +2,7 @@ import { inputWithSymbols as input } from "@/ui/components";
 import * as path from "node:path";
 import * as fs from "node:fs/promises";
 
-export async function savePath(): Promise<string> {
+export async function savePath(): Promise<string | symbol> {
   const answer = await input({
     message: "Select a directory to save the devcontainer files",
     default: process.cwd(),
@@ -11,7 +11,6 @@ export async function savePath(): Promise<string> {
         const resolved = path.resolve(value.trim() || ".");
         const stats = await fs.stat(resolved).catch(() => undefined);
         if (!stats) {
-          // Allow non-existing; we'll create it later when generating files
           return true;
         }
         if (!stats.isDirectory()) {

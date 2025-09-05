@@ -1,12 +1,10 @@
+import { Separator } from '@inquirer/core'
 import { selectWithTopDescription } from '@/ui/components/selectWithTopDescription'
-import { devcontainerUp } from '@/core/devcontainer/devcontainerUp'
-import { openIn } from '@/utils/openIn'
 import { copyPrebuiltContainer } from '@/core/devcontainer/resolvePrebuiltPath'
 import { colorize, symbols } from '@/ui/components'
-import { ui } from '@/ui/styling/ui'
 import { shouldRun } from '@/utils/shouldRun'
 
-type PrebuiltChoice = { name: string; value: string; description: string; disabled: boolean };
+type PrebuiltChoice = { name: string; value: string; description: string; disabled: boolean, experimental?: boolean };
 
 const PREBUILT_CHOICES: PrebuiltChoice[] = [
   {
@@ -22,22 +20,29 @@ const PREBUILT_CHOICES: PrebuiltChoice[] = [
     disabled: false,
   },
   {
-    name: 'Hardened 💻️',
-    value: 'hardened',
+    name: 'Isolated 🔒',
+    value: 'isolated',
     description: 'Enhanced security with development flexibility.',
     disabled: false,
   },
   {
-    name: 'Isolated 🔒',
-    value: 'isolated',
-    description: 'Maximum security isolation, air-gapped environments.',
+    name: 'Air-gapped ✈️',
+    value: 'airgapped',
+    description: 'Air-gapped environment.',
     disabled: false,
   },
   {
     name: 'Legacy 🪷',
     value: 'legacy',
-    description: 'The Red Guild\'s original devcontainer. (Legacy)',
+    description: 'The Red Guild\'s original devcontainer.',
     disabled: false
+  },
+  {
+    name: 'Paranoid 🔒',
+    value: 'paranoid',
+    description: 'Maximum security isolation, read-only OS and air-gapped environments.',
+    disabled: false,
+    experimental: true,
   },
 ];
 
@@ -45,11 +50,25 @@ export async function prebuiltList(options?: { listOnly?: boolean; selected?: st
   const listOnly = options?.listOnly === true;
   const selectedName = options?.selected;
 
-  if (listOnly) {
+  if (listOnly) { 
+    const maxValueLength = Math.max(...PREBUILT_CHOICES.map(choice => choice.value.length));
+    const paddingLength = maxValueLength + 2;
+    
     for (const choice of PREBUILT_CHOICES) {
-      console.log(`${choice.value}\t${choice.name}`);
+      const paddedValue = choice.value.padEnd(paddingLength);
+      console.log(`${paddedValue}${choice.description}`);
     }
     return;
+  }
+
+  const choices = [];
+  const regularChoices = PREBUILT_CHOICES.filter(choice => !choice.experimental);
+  const experimentalChoices = PREBUILT_CHOICES.filter(choice => choice.experimental);
+  
+  choices.push(...regularChoices);
+  if (experimentalChoices.length > 0) {
+    choices.push(new Separator("——— Experimental Profiles ———"));
+    choices.push(...experimentalChoices);
   }
 
   let selected: any;
@@ -64,7 +83,7 @@ export async function prebuiltList(options?: { listOnly?: boolean; selected?: st
   } else {
     selected = await selectWithTopDescription({
       message: 'Select a pre-built container to start:',
-      choices: PREBUILT_CHOICES,
+      choices: choices,
       footer: { back: true, exit: true },
       allowBack: true,
     });

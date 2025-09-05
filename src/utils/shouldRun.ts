@@ -21,17 +21,7 @@ export async function shouldRun(devcontainerPath: string) {
       return Symbol.for('back') as any;
     }
 
-    process.stdout.write(colorize.muted(symbols.circle + ' Building devcontainer...'));
-    let frameIndex = 0;
-    const spinnerInterval = setInterval(() => {
-      process.stdout.write(`\r${colorize.muted(symbols.spinner.frames[frameIndex])} Building devcontainer...`);
-      frameIndex = (frameIndex + 1) % symbols.spinner.frames.length;
-    }, symbols.spinner.interval);
-
     const containerId = await devcontainerUp(devcontainerPath);
-
-    clearInterval(spinnerInterval);
-    process.stdout.write('\n');
     
     if (shouldRun) {
         ui.clearScreen()
@@ -39,7 +29,7 @@ export async function shouldRun(devcontainerPath: string) {
         await devcontainerExec(containerId, openInSelection);
     } else {
       console.log(colorize.brand(symbols.diamond + ' You can start it later with:'));
-      console.log("npx @devcontainers/cli exec --container-id " + containerId + " bash -lc 'cd /workspace && exec bash -l'");
+      console.log("npx @devcontainers/cli exec --container-id " + containerId + " bash");
     }
   } catch (error) {
     if (error instanceof Error && (error.message === 'User force closed the prompt with SIGINT' || error.message === 'User force closed the prompt with SIGTERM')) {
