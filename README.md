@@ -9,13 +9,12 @@ A comprehensive CLI tool to set up fully equipped Web3 development containers. F
 
 > [!CAUTION]
 > **VS Code considerations:**
-> 
-> VS Code does a lot of things to improve user experience, but that has security tradeoffs. For example, by default, VS Code allows API calls to open new terminals, even bypassing the host machine:
+>
+> VS Code does a lot to improve user experience, but that comes with security tradeoffs. For example, by default, VS Code allows API calls to open new terminals, even bypassing the host machine:
 > ```bash
 > code --command workbench.action.terminal.newLocal
 > ```
-
-
+> We're working on an article covering all the tricks VS Code uses — stay tuned.
 
 ![DevContainer Wizard](./assets/main.gif)
 
