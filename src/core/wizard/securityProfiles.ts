@@ -65,7 +65,7 @@ const RECIPE_MAPPINGS = {
       "vscode-security"
     ]
   },
-  "isolated": {
+  "hardened": {
     description: "Enhanced security for smart contract auditing and security research",
     caveat: "Packet-crafting tools will not work due to no-raw-packets restriction.",
     choices: [
@@ -122,10 +122,10 @@ export async function securityProfiles() {
         caveat: RECIPE_MAPPINGS["development"].caveat
       },
       { 
-        name: "Isolated", 
-        value: "isolated", 
-        description: RECIPE_MAPPINGS["isolated"].description,
-        caveat: RECIPE_MAPPINGS["isolated"].caveat
+        name: "Hardened", 
+        value: "hardened", 
+        description: RECIPE_MAPPINGS["hardened"].description,
+        caveat: RECIPE_MAPPINGS["hardened"].caveat
       },
       { 
         name: "Air-gapped", 

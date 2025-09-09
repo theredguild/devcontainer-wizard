@@ -20,9 +20,9 @@ const PREBUILT_CHOICES: PrebuiltChoice[] = [
     disabled: false,
   },
   {
-    name: 'Isolated 🔒',
-    value: 'isolated',
-    description: 'Run untrusted code.',
+    name: 'Hardened 🛡️',
+    value: 'hardened',
+    description: 'Hardened environment with ephemeral workspace.',
     disabled: false,
   },
   {

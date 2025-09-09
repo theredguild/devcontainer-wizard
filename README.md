@@ -2,6 +2,16 @@
 
 A comprehensive CLI tool to set up fully equipped Web3 development containers. Features an interactive wizard for creating custom environments with advanced security hardening, git integration, and pre-configured toolchains, or quickly launch pre-built containers for common workflows.
 
+> [!IMPORTANT]
+> Dev Containers can improve your workflow, but they are **not a fully secure environment**.  
+> If you need to run untrusted or suspicious code, use [GitHub Codespaces](https://github.com/codespaces/new?hide_repo_select=true&ref=main&template_repository=theredguild/devcontainer), GitPod, or a similar remote setup — **never run it directly on your machine**.
+
+
+> [!CAUTION]
+> **VS Code considerations:**
+>
+> VS Code does a lot to improve user experience, but that doesn't come without security tradeoffs. VS Code might allow API calls that can lead to running arbitrary commands on the host machine, and by default, it shares sockets such as the gpg-agent’s, which means keys stored outside the container can be used for signing. This opens the door to blind-signing commits scenarios, where a process inside the container may trigger signatures without the user’s full awareness. If you want to deep dive into these "tricks", we're working on an article covering the most relevant of them — stay tuned.
+
 ![DevContainer Wizard](./assets/main.gif)
 
 ## Requirements
@@ -76,17 +86,17 @@ The wizard includes predefined security profiles copied from prebuilt devcontain
 - **Development**: Balanced security for daily development work
   - *Features*: Secure temp directories, no privilege escalation, AppArmor, secure DNS, VS Code security
 
-- **Isolated**: Isolated workspace without copying host folder
+- **Hardened**: Ephemeral workspace without copying the host folder
   - *Features*: Ephemeral workspace, maximum capability restrictions
 
-- **Air-gapped**: Isolated profile + no network
+- **Air-gapped**: Hardened profile + no network
   - *Features*: No network, ephemeral workspace, maximum capability restrictions
 
 -
 Experimental profiles:
 
 - **Network Restricted Analysis**: API access and package installs without packet crafting
-- **CI-like Local Runner**: Mirrors CI behavior with immutable file system
+- **CI-like Local Runner**: Mirrors CI behavior with an immutable file system
 - **Package Install Session**: Install packages while maintaining security guardrails
 - **Security Research (Controlled Net)**: API testing without packet crafting capabilities
 
@@ -162,7 +172,7 @@ devcontainer-wizard prebuilt --name <name>
 devcontainer-wizard prebuilt --list
 ```
 
-- **Available pre-built containers**: `minimal`,  `auditor`, `isolated`, `paranoid`, `eth-security-toolbox`, `legacy`.
+- **Available pre-built containers**: `minimal`,  `auditor`, `Hardened`, `paranoid`, `eth-security-toolbox`, `legacy`.
 - You will be prompted how to open it (Terminal, VS Code, or Cursor).
 
 #### GitHub Codespaces
@@ -173,9 +183,9 @@ You can also run prebuilt containers using GitHub Codespaces:
 
 ## Pre-built containers
 
-- **Minimal**: Use Hardhat and Foundry doing zero config.
+- **Minimal**: Use Hardhat and Foundry, doing zero config.
 - **Auditor**: Audit smart contracts.
-- **Isolated**: Use and isolated workspace without copying your environment.
+- **Hardened**: Use an Hardened workspace without copying your environment.
 - **Air-gapped**: Air-gapped environment.
 - **ETH Security Toolbox**: Auditor environment with Trail of Bits selected tools.
 - **Legacy**: The Red Guild's original devcontainer.
