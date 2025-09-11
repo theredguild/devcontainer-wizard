@@ -1,16 +1,25 @@
 #!/usr/bin/env node
+const { spawn } = require('node:child_process');
 
-// Thin wrapper that delegates execution to the core package's oclif CLI
-// Resolves the installed @theredguild/devcontainer-wizard package and runs it.
+let entry;
+try {
+  // Prefer the package's default export which should point to the CLI entry
+  entry = require.resolve('@theredguild/devcontainer-wizard');
+} catch (e) {
+  // Detect a common failure mode: older core package missing subpath exports
+  const hint = [
+    'Failed to resolve @theredguild/devcontainer-wizard.',
+    'If you installed devcontainer-wizard before this fix, update to the latest:',
+    '  pnpm add -g devcontainer-wizard@latest  # or npm/yarn equivalent',
+  ].join('\n');
+  console.error(hint + `\nOriginal error: ${e && e.message}`);
+  process.exit(1);
+}
 
-// eslint-disable-next-line unicorn/prefer-top-level-await
-;(async () => {
-  const oclif = await import('@oclif/core')
-  const path = require('node:path')
+const child = spawn(process.execPath, [entry, ...process.argv.slice(2)], {
+  stdio: 'inherit',
+  env: process.env
+});
 
-  const corePkgPath = require.resolve('@theredguild/devcontainer-wizard/package.json')
-  const coreDir = path.dirname(corePkgPath)
-
-  await oclif.execute({ dir: coreDir })
-})()
-
+child.on('exit', (code, signal) => signal ? process.kill(process.pid, signal) : process.exit(code));
+child.on('error', (e) => { console.error('Failed to spawn CLI:', e.message); process.exit(1); });

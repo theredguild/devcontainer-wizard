@@ -7,9 +7,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./cli": "./dist/index.js"
-  },
+    ".": "./bin/run.js",
+    "./package.json": "./package.json",
+    "./bin/run.js": "./bin/run.js"
+  }, 
   "dependencies": {
     "@inquirer/core": "^10.1.15",
     "@inquirer/prompts": "^7.8.1",

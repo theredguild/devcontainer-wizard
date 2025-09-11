@@ -1,6 +1,11 @@
 {
   "name": "devcontainer-wizard-monorepo",
   "private": true,
-  "workspaces": ["packages/*"],
-  "packageManager": "npm@10"
+  "workspaces": [
+    "packages/*"
+  ],
+  "packageManager": "npm@10",
+  "dependencies": {
+    "devcontainer-wizard": "^1.1.1"
+  }
 }
