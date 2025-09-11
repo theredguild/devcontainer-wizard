@@ -11,6 +11,7 @@ A comprehensive CLI tool to set up fully equipped Web3 development containers. F
 > **VS Code considerations:**
 >
 > VS Code does a lot to improve user experience, but that doesn't come without security tradeoffs. VS Code might allow API calls that can lead to running arbitrary commands on the host machine, and by default, it shares sockets such as the gpg-agent’s, which means keys stored outside the container can be used for signing. This opens the door to blind-signing commits scenarios, where a process inside the container may trigger signatures without the user’s full awareness. If you want to deep dive into these "tricks", we're working on an article covering the most relevant of them — stay tuned.
+
 ![DevContainer Wizard](/assets/main.gif)
 
 ## Requirements
