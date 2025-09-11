@@ -12,8 +12,8 @@ importers:
         specifier: ^4.5.2
         version: 4.5.3
       '@theredguild/devcontainer-wizard':
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: 1.1.0
+        version: 1.1.0
 
 packages:
 
@@ -151,9 +151,9 @@ packages:
     resolution: {integrity: sha512-ISoFlfmsuxJvNKXhabCO4/KqNXDQdLHchZdTPfZbtqAsQbqTw5IKitLVZq9Sz1LWizN37HILp4u0350B8scBjg==}
     engines: {node: '>=18.0.0'}
 
-  '@theredguild/devcontainer-wizard@1.0.0':
-    resolution: {integrity: sha512-rqV7IztMhCaOSmWHzGwCr6PwE9ZYFRDUF0kdd9dHeBu7bxwBuU401rIu+pbvm7TFDYo4PFuUGOxy7pvZlrgyEw==}
-    hasBin: true
+  '@theredguild/devcontainer-wizard@1.1.0':
+    resolution: {integrity: sha512-E3uAGzx08uIFb2A7tp4pBP+lVRdCWr/yTn17/x9f6zTzMC8Y8clGCuvvyiBlspTrwDNZ5OALY+vDgU06yJoJ8A==}
+    engines: {node: '>=18.17'}
 
   ansi-escapes@4.3.2:
     resolution: {integrity: sha512-gKXj5ALrKWQLsYG9jlTRmR/xKluxHV+Z9QEwNIgCfM1/uwPMCuzVVnh5mwTd+OuBZcwSIMbqssNWRm1lE51QaQ==}
@@ -464,7 +464,7 @@ snapshots:
       wordwrap: 1.0.0
       wrap-ansi: 7.0.0
 
-  '@theredguild/devcontainer-wizard@1.0.0':
+  '@theredguild/devcontainer-wizard@1.1.0':
     dependencies:
       '@inquirer/core': 10.2.0
       '@inquirer/prompts': 7.8.4
