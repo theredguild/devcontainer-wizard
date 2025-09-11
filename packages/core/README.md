@@ -11,6 +11,7 @@ A comprehensive CLI tool to set up fully equipped Web3 development containers. F
 > **VS Code considerations:**
 >
 > VS Code does a lot to improve user experience, but that doesn't come without security tradeoffs. VS Code might allow API calls that can lead to running arbitrary commands on the host machine, and by default, it shares sockets such as the gpg-agent’s, which means keys stored outside the container can be used for signing. This opens the door to blind-signing commits scenarios, where a process inside the container may trigger signatures without the user’s full awareness. If you want to deep dive into these "tricks", we're working on an article covering the most relevant of them — stay tuned.
+
 ![DevContainer Wizard](/assets/main.gif)
 
 ## Requirements
@@ -193,37 +194,26 @@ You can also run prebuilt containers using GitHub Codespaces:
 
 ### Wizard
 
-This repo uses npm workspaces with the layout:
+We welcome contributions! To get started:
 
-- `packages/core` → `@theredguild/devcontainer-wizard` (the actual CLI)
-- `packages/wrapper` → `devcontainer-wizard` (thin wrapper that delegates to core)
+1. **Fork this repository** and clone it to your machine.
+2. **Install dependencies**:
+   ```bash
+   pnpm install
+   ```
+3. **Make your changes** in a new branch.
+4. **Test your changes** locally.
+5. **Commit and push** your branch.
+6. **Open a pull request** with a clear description of your changes.
 
-Getting started:
+For major changes, please open an issue first to discuss what you would like to change.
 
-- Install all deps and link workspaces: `npm install` (run at repo root)
-- Run a script in a workspace:
-  - Core build: `npm run -w @theredguild/devcontainer-wizard build`
-  - Core dev (ts-node): `npm run -w @theredguild/devcontainer-wizard dev`
-- Run the CLI locally:
-  - Via wrapper bin: `node packages/wrapper/bin.js`
-  - Or after install: `npx devcontainer-wizard`
+**Tips:**
+- Follow the existing code style and structure.
+- Keep documentation concise and up to date.
+- If adding a new color or symbol, update `src/ui/styling/colors.ts` or `src/ui/styling/symbols.ts` as appropriate.
 
-Developing wrapper against local core:
-
-- For local development, set the wrapper’s dependency to the workspace protocol so it links your local core:
-  - In `packages/wrapper/package.json`: `"@theredguild/devcontainer-wizard": "workspace:*"`
-- Re-run `npm install` at the root to update links.
-
-Publishing (order matters):
-
-- Publish core first: `npm publish -w packages/core --access public`
-- Then update wrapper to depend on the published version (if you moved off `workspace:*`) and publish:
-  - `npm publish -w packages/wrapper --access public`
-
-Notes:
-
-- Root `package.json` declares `workspaces: ["packages/*"]` and `packageManager: "npm@10"`.
-- pnpm or yarn can work too, but npm is the reference configuration.
+Thank you for helping improve DevContainer Wizard!
 
 ### Pre-built containers
 

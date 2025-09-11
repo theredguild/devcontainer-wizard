@@ -1,0 +1,22 @@
+{
+  "name": "devcontainer-wizard",
+  "version": "1.1.1",
+  "description": "Wrapper CLI that delegates to @theredguild/devcontainer-wizard",
+  "license": "MIT",
+  "type": "commonjs",
+  "bin": {
+    "devcontainer-wizard": "bin.js"
+  },
+  "dependencies": {
+    "@oclif/core": "^4.5.2",
+    "@theredguild/devcontainer-wizard": "1.1.1"
+  },
+  "files": ["bin.js"],
+  "publishConfig": { "access": "public" },
+  "engines": { "node": ">=18.17" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/theredguild/devcontainer-wizard.git",
+    "directory": "packages/wrapper"
+  }
+}
