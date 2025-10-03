@@ -21,6 +21,7 @@ export type Selection = {
 };
 
 export type WizardState = {
+  coreLanguages?: string[]
   languages?: string[]
   frameworks?: string[]
   fuzzingAndTesting?: string[]

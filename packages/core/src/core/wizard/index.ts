@@ -1,3 +1,4 @@
+export { coreLanguages } from "./coreLanguages";
 export { languages } from "./languages";
 export { frameworks } from "./frameworks";
 export { fuzzingAndTesting } from "./fuzzingTesting";
