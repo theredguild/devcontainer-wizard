@@ -45,6 +45,19 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   
   const requiredDeps = new Set<ToolKey>();
   
+  // Add core languages selected by user
+  config.coreLanguages?.forEach(lang => {
+    if (lang === 'rust') {
+      requiredDeps.add('rust');
+    } else if (lang === 'python') {
+      requiredDeps.add('python');
+    } else if (lang === 'go') {
+      requiredDeps.add('go');
+    } else if (lang === 'node') {
+      requiredDeps.add('node');
+    }
+  });
+  
   if (config.languages?.includes('solidity')) {
     requiredDeps.add('python');
     requiredDeps.add('solc-select');
@@ -420,6 +433,7 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
   console.log('\n' + colorize.brand(symbols.diamond + ' Generation Summary:'));
   console.log('   Project: ' + projectName);
   console.log('   Location: ' + devcontainerDir);
+  console.log('   Core Languages: ' + (config.coreLanguages?.join(', ') || 'None'));
   console.log('   Languages: ' + (config.languages?.join(', ') || 'None'));
   console.log('   Frameworks: ' + (config.frameworks?.join(', ') || 'None'));
   console.log('   Security Tools: ' + (config.securityTooling?.join(', ') || 'None'));

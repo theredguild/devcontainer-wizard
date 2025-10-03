@@ -1,4 +1,5 @@
 import {
+    coreLanguages,
     languages,
     frameworks,
     fuzzingAndTesting,
@@ -26,6 +27,11 @@ export async function wizard(args: { name?: string }) {
     async () => {
         const result = args.name !== undefined ? args.name : await devcontainerName({ name: wizardState.name });
         if ((result as any) !== BACK) wizardState.name = result as string;
+        return result;
+    },
+    async () => {
+        const result = await coreLanguages({ coreLanguages: wizardState.coreLanguages });
+        if ((result as any) !== BACK) wizardState.coreLanguages = result as string[];
         return result;
     },
     async () => {
