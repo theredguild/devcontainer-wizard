@@ -1,6 +1,6 @@
 {
   "name": "devcontainer-wizard",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Wrapper CLI that delegates to @theredguild/devcontainer-wizard",
   "license": "MIT",
   "type": "commonjs",

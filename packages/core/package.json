@@ -1,6 +1,6 @@
 {
   "name": "@theredguild/devcontainer-wizard",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A comprehensive CLI tool to set up fully equipped Web3 development containers with advanced security hardening and git integration.",
   "license": "MIT",
   "type": "commonjs",
