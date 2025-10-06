@@ -44,7 +44,10 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.2"
   },
-  "publishConfig": { "access": "public" },
+  "publishConfig": { 
+    "access": "public",
+    "provenance": true
+  },
   "engines": { "node": ">=18.17" },
   "repository": {
     "type": "git",
