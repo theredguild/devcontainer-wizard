@@ -1,6 +1,6 @@
 {
   "name": "@theredguild/devcontainer-wizard",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "A comprehensive CLI tool to set up fully equipped Web3 development containers with advanced security hardening and git integration.",
   "license": "MIT",
   "type": "commonjs",
@@ -31,9 +31,9 @@
   "scripts": {
     "build": "tsc && tsc-alias",
     "dev": "node ./bin/dev.js",
-    "prod": "npm run build && node ./bin/run.js",
+    "prod": "pnpm run build && node ./bin/run.js",
     "postpack": "rm -f oclif.manifest.json",
-    "prepack": "npm run build && oclif manifest && oclif readme"
+    "prepack": "pnpm run build && oclif manifest && oclif readme"
   },
   "devDependencies": {
     "@oclif/prettier-config": "^0.2.1",
