@@ -54,7 +54,10 @@ jobs:
         id: pack
         working-directory: packages/core
         run: |
-          FILENAME=$(pnpm pack --json | jq -r .filename)
+          NAME=$(jq -r .name package.json | sed 's/@//' | sed 's/\//-/g')
+          VERSION=$(jq -r .version package.json)
+          FILENAME="${NAME}-${VERSION}.tgz"
+          pnpm pack --silent
           echo "FILENAME=$FILENAME"
           echo "filename=$FILENAME" >> $GITHUB_OUTPUT
       
@@ -163,7 +166,10 @@ jobs:
         id: pack
         working-directory: packages/wrapper
         run: |
-          FILENAME=$(pnpm pack --json | jq -r .filename)
+          NAME=$(jq -r .name package.json | sed 's/@//' | sed 's/\//-/g')
+          VERSION=$(jq -r .version package.json)
+          FILENAME="${NAME}-${VERSION}.tgz"
+          pnpm pack --silent
           echo "FILENAME=$FILENAME"
           echo "filename=$FILENAME" >> $GITHUB_OUTPUT
       
