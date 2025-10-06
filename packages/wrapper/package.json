@@ -1,6 +1,6 @@
 {
   "name": "devcontainer-wizard",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Wrapper CLI that delegates to @theredguild/devcontainer-wizard",
   "license": "MIT",
   "type": "commonjs",
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@oclif/core": "^4.5.2",
-    "@theredguild/devcontainer-wizard": "1.1.1"
+    "@theredguild/devcontainer-wizard": "workspace:*"
   },
   "files": ["bin.js"],
   "publishConfig": { "access": "public" },

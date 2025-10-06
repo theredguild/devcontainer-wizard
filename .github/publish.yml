@@ -1,0 +1,236 @@
+name: Publish Package
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions: {}
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NPM_TAG: latest
+
+jobs:
+  prepare-core:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # To clone the repository
+      actions: write # To upload the package tarball to the artifacts
+    outputs:
+      packageName: ${{ steps.packageName.outputs.packageName }}
+      filename: ${{ steps.pack.outputs.filename }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: "pnpm"
+      - name: Store package name
+        id: packageName
+        working-directory: packages/core
+        run: |
+          PACKAGE_NAME=$(cat package.json | jq -r .name)
+          echo "PACKAGE_NAME=$PACKAGE_NAME"
+          echo "packageName=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+      - name: Install dependencies
+        # No `--prefer-offline` flag here to allow pnpm to validate its cache
+        # integrity.
+        run: pnpm install --frozen-lockfile
+      - name: List all dependencies for future reference
+        run: pnpm list --depth=10000
+      - name: Build the core package
+        run: pnpm --filter @theredguild/devcontainer-wizard build
+      - name: Publish dry run for core package
+        # Using --no-git-checks because we are releasing from a tag,
+        # not a branch. Highly recommended to use the git-checks though.
+        run: pnpm --filter @theredguild/devcontainer-wizard publish --dry-run --no-git-checks --tag ${{ env.NPM_TAG }}
+      - name: Pack core package
+        id: pack
+        working-directory: packages/core
+        run: |
+          FILENAME=$(pnpm pack --json | jq -r .filename)
+          echo "FILENAME=$FILENAME"
+          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+      
+      - name: Upload core tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.pack.outputs.filename }}
+          path: packages/core/${{ steps.pack.outputs.filename }}
+          retention-days: 2
+          overwrite: true
+          if-no-files-found: error
+
+  review-core:
+    needs: prepare-core
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read # To download the tarball to review
+    steps:
+      - name: Download packed tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.prepare-core.outputs.filename }}
+          path: .
+      - name: Download previous "@${{ env.NPM_TAG }}" version tarball
+        run: |
+          TARBALL_URL=$(npm view "${{ needs.prepare-core.outputs.packageName }}@${{ env.NPM_TAG }}" dist.tarball)
+          curl -L "$TARBALL_URL" -o ${{ env.NPM_TAG }}.tgz
+          TARBALL_NAME=$(basename "$TARBALL_URL")
+          echo "Downloaded $TARBALL_NAME as ${{ env.NPM_TAG }}.tgz"
+      
+      - name: Prepare tarballs for comparisons
+        run: |
+          mkdir ${{ env.NPM_TAG }}
+          tar -xzf ${{ env.NPM_TAG }}.tgz -C ${{ env.NPM_TAG }}
+          mkdir proposed-version
+          tar -xzf ${{ needs.prepare-core.outputs.filename }} -C proposed-version
+      
+      - name: List new, changed and deleted files
+        run: |
+          git diff --color=always --no-index --name-status ${{ env.NPM_TAG }} proposed-version || true
+      
+      - name: Compare package.json files
+        run: |
+          git diff --color=always --no-index ${{ env.NPM_TAG }}/package/package.json proposed-version/package/package.json  || true
+
+  publish-core:
+    needs: [prepare-core, review-core]
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      actions: read # To download the tarball to publish
+      id-token: write ## Needed for npm Trusted Publishing (OIDC)
+    steps:
+      - name: Download packed tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.prepare-core.outputs.filename }}
+          path: .
+      - name: Setup node to be able to update npm for core package
+        uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+      
+      - name: Update npm to make sure it supports Trusted Publishing for core package
+        run: npm install -g npm@latest
+      
+      - name: Publish core package
+        run: |
+          echo "Publishing ${{ needs.prepare-core.outputs.filename }}"
+          npm publish "${{ needs.prepare-core.outputs.filename }}" --tag ${{ env.NPM_TAG }}
+  prepare-wrapper:
+    needs: publish-core
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # To clone the repository
+      actions: write # To upload the package tarball to the artifacts
+    outputs:
+      packageName: ${{ steps.packageName.outputs.packageName }}
+      filename: ${{ steps.pack.outputs.filename }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: "pnpm"
+      - name: Store package name
+        id: packageName
+        working-directory: packages/wrapper
+        run: |
+          PACKAGE_NAME=$(cat package.json | jq -r .name)
+          echo "PACKAGE_NAME=$PACKAGE_NAME"
+          echo "packageName=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+      - name: Install dependencies
+        # No `--prefer-offline` flag here to allow pnpm to validate its cache
+        # integrity.
+        run: pnpm install --frozen-lockfile
+      - name: List all dependencies for future reference
+        run: pnpm list --depth=10000
+      - name: Publish dry run for wrapper package
+        # Using --no-git-checks because we are releasing from a tag,
+        # not a branch. Highly recommended to use the git-checks though.
+        run: pnpm --filter devcontainer-wizard publish --dry-run --no-git-checks --tag ${{ env.NPM_TAG }}
+      - name: Pack wrapper package
+        id: pack
+        working-directory: packages/wrapper
+        run: |
+          FILENAME=$(pnpm pack --json | jq -r .filename)
+          echo "FILENAME=$FILENAME"
+          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+      
+      - name: Upload wrapper tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.pack.outputs.filename }}
+          path: packages/wrapper/${{ steps.pack.outputs.filename }}
+          retention-days: 2
+          overwrite: true
+          if-no-files-found: error
+
+  review-wrapper:
+    needs: prepare-wrapper
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read # To download the tarball to review
+    steps:
+      - name: Download packed tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.prepare-wrapper.outputs.filename }}
+          path: .
+      - name: Download previous "@${{ env.NPM_TAG }}" version tarball
+        run: |
+          TARBALL_URL=$(npm view "${{ needs.prepare-wrapper.outputs.packageName }}@${{ env.NPM_TAG }}" dist.tarball)
+          curl -L "$TARBALL_URL" -o ${{ env.NPM_TAG }}.tgz
+          TARBALL_NAME=$(basename "$TARBALL_URL")
+          echo "Downloaded $TARBALL_NAME as ${{ env.NPM_TAG }}.tgz"
+      
+      - name: Prepare tarballs for comparisons
+        run: |
+          mkdir ${{ env.NPM_TAG }}
+          tar -xzf ${{ env.NPM_TAG }}.tgz -C ${{ env.NPM_TAG }}
+          mkdir proposed-version
+          tar -xzf ${{ needs.prepare-wrapper.outputs.filename }} -C proposed-version
+      
+      - name: List new, changed and deleted files
+        run: |
+          git diff --color=always --no-index --name-status ${{ env.NPM_TAG }} proposed-version || true
+      
+      - name: Compare package.json files
+        run: |
+          git diff --color=always --no-index ${{ env.NPM_TAG }}/package/package.json proposed-version/package/package.json  || true
+
+  publish-wrapper:
+    needs: [prepare-wrapper, review-wrapper]
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      actions: read # To download the tarball to publish
+      id-token: write ## Needed for npm Trusted Publishing (OIDC)
+    steps:
+      - name: Download packed tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.prepare-wrapper.outputs.filename }}
+          path: .
+      - name: Setup node to be able to update npm for wrapper package
+        uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+      
+      - name: Update npm to make sure it supports Trusted Publishing for wrapper package
+        run: npm install -g npm@latest
+      
+      - name: Publish wrapper package
+        run: |
+          echo "Publishing ${{ needs.prepare-wrapper.outputs.filename }}"
+          npm publish "${{ needs.prepare-wrapper.outputs.filename }}" --tag ${{ env.NPM_TAG }}
