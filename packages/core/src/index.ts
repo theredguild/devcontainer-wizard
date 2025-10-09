@@ -5,6 +5,7 @@ import { generateDevEnvironment } from '@/core/scripts/generate_dev_env'
 import { selectWithTopDescription } from '@/ui/components/selectWithTopDescription'
 import { colorize, symbols } from '@/ui/components'
 import { ui } from '@/ui/styling/ui'
+import { checkForUpdates } from '@/utils/versionCheck'
 
 export default class DevcontainerWizard extends Command {
 
@@ -72,6 +73,16 @@ export default class DevcontainerWizard extends Command {
         │    ✻ Welcome to Devcontainer Wizard 🪷    │
         ╰───────────────────────────────────────────╯
         `));
+      
+      // Check for updates (non-blocking, fails silently)
+      const updateInfo = await checkForUpdates().catch(() => null);
+      if (updateInfo && updateInfo.hasUpdate) {
+        this.log(colorize.warning(`        ${symbols.star} A new version is available!`))
+        this.log(colorize.muted(`        Current: ${updateInfo.currentVersion} ${symbols.arrow} Latest: ${updateInfo.latestVersion}`))
+        this.log(colorize.muted(`        Run: ${colorize.accent(updateInfo.updateCommand)}`))
+        this.log('')
+      }
+      
       const selected = await selectWithTopDescription({
         message: 'You can select a pre-built container or create your own',
         choices: [
@@ -96,8 +107,20 @@ export default class DevcontainerWizard extends Command {
   }
 
   private async runPrebuiltFlow(selectedName?: string): Promise<any> {
+    // Check for updates once at the start (non-blocking, fails silently)
+    const updateInfo = await checkForUpdates().catch(() => null);
+    
     while (true) {
       try {
+        ui.clearScreen()
+        
+        if (updateInfo && updateInfo.hasUpdate) {
+          this.log(colorize.warning(`${symbols.star} A new version is available!`))
+          this.log(colorize.muted(`  Current: ${updateInfo.currentVersion} ${symbols.arrow} Latest: ${updateInfo.latestVersion}`))
+          this.log(colorize.muted(`  Run: ${colorize.accent(updateInfo.updateCommand)}`))
+          this.log('')
+        }
+        
         const selection = await prebuiltList({ selected: selectedName });
         if (selection === Symbol.for('back')) {
           return Symbol.for('back');
@@ -117,6 +140,16 @@ export default class DevcontainerWizard extends Command {
   private async runCreateFlow(name?: string): Promise<void> {
     try {
       ui.clearScreen()
+      
+      // Check for updates (non-blocking, fails silently)
+      const updateInfo = await checkForUpdates().catch(() => null);
+      if (updateInfo && updateInfo.hasUpdate) {
+        this.log(colorize.warning(`${symbols.star} A new version is available!`))
+        this.log(colorize.muted(`  Current: ${updateInfo.currentVersion} ${symbols.arrow} Latest: ${updateInfo.latestVersion}`))
+        this.log(colorize.muted(`  Run: ${colorize.accent(updateInfo.updateCommand)}`))
+        this.log('')
+      }
+      
       const wizardState = await wizard({ name: name || undefined })
       console.log('')
       
