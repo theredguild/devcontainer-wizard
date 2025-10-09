@@ -14,7 +14,8 @@
   "dependencies": {
     "@inquirer/core": "^10.1.15",
     "@inquirer/prompts": "^7.8.1",
-    "@oclif/core": "^4.5.2"
+    "@oclif/core": "^4.5.2",
+    "semver": "^7.6.3"
   },
   "oclif": {
     "bin": "devcontainer-wizard",
@@ -38,6 +39,7 @@
   "devDependencies": {
     "@oclif/prettier-config": "^0.2.1",
     "@types/node": "^18.19.122",
+    "@types/semver": "^7.5.8",
     "oclif": "^4.5.0",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.10",
