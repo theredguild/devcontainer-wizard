@@ -23,6 +23,9 @@ importers:
       '@oclif/core':
         specifier: ^4.5.2
         version: 4.5.2
+      semver:
+        specifier: ^7.6.3
+        version: 7.7.2
     devDependencies:
       '@oclif/prettier-config':
         specifier: ^0.2.1
@@ -30,6 +33,9 @@ importers:
       '@types/node':
         specifier: ^18.19.122
         version: 18.19.122
+      '@types/semver':
+        specifier: ^7.5.8
+        version: 7.7.1
       oclif:
         specifier: ^4.5.0
         version: 4.22.12(@types/node@18.19.122)
@@ -666,6 +672,9 @@ packages:
 
   '@types/node@22.17.2':
     resolution: {integrity: sha512-gL6z5N9Jm9mhY+U2KXZpteb+09zyffliRkZyZOHODGATyC5B1Jt/7TzuuiLkFsSUMLbS1OLmlj/E+/3KF4Q/4w==}
+
+  '@types/semver@7.7.1':
+    resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
 
   '@types/uuid@9.0.8':
     resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
@@ -2486,6 +2495,8 @@ snapshots:
   '@types/node@22.17.2':
     dependencies:
       undici-types: 6.21.0
+
+  '@types/semver@7.7.1': {}
 
   '@types/uuid@9.0.8': {}
 
