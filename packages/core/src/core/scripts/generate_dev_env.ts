@@ -248,7 +248,7 @@ export async function generateDevEnvironment(options: GenerationOptions = {}): P
       dockerfileContent.push(
        `# Clone git repo
         RUN mkdir -p /home/vscode/repos \
-        && git clone https://github.com/theredguild/devcontainer /home/vscode/repos/project \
+        && git clone ${config.gitRepository.url} /home/vscode/repos/project \
         && chown -R vscode:vscode /home/vscode/repos`
       );
   }
