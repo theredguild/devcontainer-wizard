@@ -194,37 +194,32 @@ You can also run prebuilt containers using GitHub Codespaces:
 
 ### Wizard
 
-This repo uses npm workspaces with the layout:
+This repo uses pnpm workspaces with the layout:
 
 - `packages/core` → `@theredguild/devcontainer-wizard` (the actual CLI)
 - `packages/wrapper` → `devcontainer-wizard` (thin wrapper that delegates to core)
 
 Getting started:
 
-- Install all deps and link workspaces: `npm install` (run at repo root)
+- Install all deps and link workspaces: `pnpm install` (run at repo root)
 - Run a script in a workspace:
-  - Core build: `npm run -w @theredguild/devcontainer-wizard build`
-  - Core dev (ts-node): `npm run -w @theredguild/devcontainer-wizard dev`
+  - Core build: `pnpm --filter @theredguild/devcontainer-wizard build`
+  - Core dev (ts-node): `pnpm --filter @theredguild/devcontainer-wizard dev`
 - Run the CLI locally:
   - Via wrapper bin: `node packages/wrapper/bin.js`
-  - Or after install: `npx devcontainer-wizard`
+  - Or after install: `pnpx devcontainer-wizard`
 
 Developing wrapper against local core:
 
 - For local development, set the wrapper’s dependency to the workspace protocol so it links your local core:
   - In `packages/wrapper/package.json`: `"@theredguild/devcontainer-wizard": "workspace:*"`
-- Re-run `npm install` at the root to update links.
-
-Publishing (order matters):
-
-- Publish core first: `npm publish -w packages/core --access public`
-- Then update wrapper to depend on the published version (if you moved off `workspace:*`) and publish:
-  - `npm publish -w packages/wrapper --access public`
+- Re-run `pnpm install` at the root to update links.
 
 Notes:
 
-- Root `package.json` declares `workspaces: ["packages/*"]` and `packageManager: "npm@10"`.
-- pnpm or yarn can work too, but npm is the reference configuration.
+- Root `package.json` declares `workspaces: ["packages/*"]` and `packageManager: "pnpm@8"`.
+- The project uses pnpm as the primary package manager for workspace management.
+- Package publishing is done securely using Github Actions and Trusted Publishers. Check [this article ↗](https://blog.theredguild.org/how-to-npm-and-avoid-getting-rekt/) for more information.
 
 ### Pre-built containers
 
