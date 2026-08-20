@@ -63,3 +63,34 @@ describe('generateContainerfile (best-effort + shim)', () => {
     expect(generateContainerfile({ selections: { frameworks: ['foundry'] } })).toContain('tool install report')
   })
 })
+
+describe('assertCloneSafe — option-injection defense in depth', () => {
+  it('rejects a leading-dash value that git would read as an option', () => {
+    // `git clone --upload-pack=... <url>` is a build-time RCE primitive. The zod
+    // schema blocks this at the CLI boundary, but this guard bills itself as the
+    // last line of defense before the value is spliced into an unquoted RUN line.
+    expect(() =>
+      generateContainerfile({
+        selections: {},
+        gitRepository: { url: '--upload-pack=touch/pwned', enabled: true },
+      }),
+    ).toThrow(/unsafe/i)
+  })
+
+  it('rejects a leading-dash branch too', () => {
+    expect(() =>
+      generateContainerfile({
+        selections: {},
+        gitRepository: { url: 'https://github.com/a/b.git', branch: '--upload-pack=x', enabled: true },
+      }),
+    ).toThrow(/unsafe/i)
+  })
+
+  it('still accepts a normal repo + branch', () => {
+    const out = generateContainerfile({
+      selections: {},
+      gitRepository: { url: 'https://github.com/a/b.git', branch: 'main', enabled: true },
+    })
+    expect(out).toContain('git clone --branch main https://github.com/a/b.git')
+  })
+})

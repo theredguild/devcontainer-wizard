@@ -12,13 +12,21 @@ function enumArray(values: string[]) {
  * `user@host:path`. The character class deliberately excludes whitespace and
  * shell metacharacters so the value can't break out of the `RUN git clone`
  * line in the generated Containerfile (build-time RCE). Scheme URLs also
- * forbid `@`: `https://user:token@host/...` userinfo would be persisted in
+ * restrict `@`: `https://user:token@host/...` userinfo would be persisted in
  * cleartext into the manifest, the Containerfile and the image's
- * remote.origin.url. (The `user@` in scp-style remotes is an SSH login, not a
- * secret, and is still allowed.)
+ * remote.origin.url, so http(s) forbids `@` outright. `ssh://` and `git://`
+ * allow a bare `user@` login (the canonical `ssh://git@github.com/o/r.git`
+ * form this error message itself recommends) but not `user:password@`, since
+ * the userinfo pattern excludes `:`. The `user@` in scp-style remotes is an
+ * SSH login, not a secret, and is likewise allowed.
  */
+// `%` is excluded from every branch: git percent-decodes URL userinfo, so
+// `ssh://user%3Apass%40host/repo` passes a naive character check and is then handed
+// to ssh as `user:pass@host` — smuggling the credentials the rules below forbid
+// straight into the manifest and the generated Containerfile. No legitimate remote
+// dcw supports needs percent-encoding.
 const GIT_URL_RE =
-  /^(?:(?:https?|git|ssh):\/\/[^\s;`$(){}<>|&'"\\@]+|[A-Za-z0-9._-]+@[A-Za-z0-9._-]+:[A-Za-z0-9._/~-]+)$/
+  /^(?:https?:\/\/[^\s;`$(){}<>|&'"\\@%]+|(?:git|ssh):\/\/(?:[A-Za-z0-9._-]+@)?[^\s;`$(){}<>|&'"\\@%]+|[A-Za-z0-9._-]+@[A-Za-z0-9._-]+:[A-Za-z0-9._/~-]+)$/
 /** A safe git ref (branch/tag): no whitespace, no leading dash, no metacharacters. */
 const GIT_BRANCH_RE = /^(?!-)[A-Za-z0-9._/-]+$/
 

@@ -19,10 +19,21 @@ export interface GitRepository {
   enabled: boolean
 }
 
-/** Reject a value that would break out of the unquoted `RUN git clone` line. */
+/**
+ * Reject a value that would break out of the unquoted `RUN git clone` line, or
+ * that `git` itself would parse as an option rather than an operand.
+ *
+ * A leading `-` turns the value into a flag: `git clone --upload-pack=<cmd> <url>`
+ * executes `<cmd>` at build time. The zod schema blocks this at the CLI boundary,
+ * but this guard is the last check before the value is spliced into the RUN line,
+ * so it must cover the case independently.
+ */
 function assertCloneSafe(label: string, value: string): void {
   if (/[\s;`$(){}<>|&'"\\]/.test(value)) {
     throw new Error(`Refusing to generate Containerfile: ${label} contains unsafe characters.`)
+  }
+  if (value.startsWith('-')) {
+    throw new Error(`Refusing to generate Containerfile: ${label} is unsafe (starts with '-', which git reads as an option).`)
   }
 }
 

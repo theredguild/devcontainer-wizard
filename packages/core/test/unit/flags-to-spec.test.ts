@@ -115,11 +115,50 @@ describe('codex-security findings', () => {
   it('rejects credential-bearing (userinfo) scheme git urls (CS#5)', () => {
     expect(() => flagsToSpec({ name: 'x', gitUrl: 'https://user:ghp_token@github.com/a/b' })).toThrow(ValidationError)
     expect(() => flagsToSpec({ name: 'x', gitUrl: 'https://token@github.com/a/b' })).toThrow(ValidationError)
-    expect(() => flagsToSpec({ name: 'x', gitUrl: 'ssh://git@github.com/a/b' })).toThrow(ValidationError)
+    // A password in ssh:// userinfo is still a secret and stays rejected.
+    expect(() => flagsToSpec({ name: 'x', gitUrl: 'ssh://git:hunter2@github.com/a/b' })).toThrow(ValidationError)
+  })
+
+  it('accepts a bare ssh:// login, consistent with the scp-style form below (CS#5)', () => {
+    // `ssh://git@host/o/r` and `git@host:o/r` are the same remote written two ways;
+    // in both, `git@` is an SSH *login*, not a credential. Rejecting only the URL
+    // form was inconsistent, and blocked the very form the validation error
+    // recommends ("use SSH ... for private repos").
+    expect(flagsToSpec({ name: 'x', gitUrl: 'ssh://git@github.com/a/b' }).gitRepository?.url).toBe(
+      'ssh://git@github.com/a/b',
+    )
   })
 
   it('still accepts scp-style ssh remotes (user@ is a login, not a secret) (CS#5)', () => {
     const spec = flagsToSpec({ name: 'x', gitUrl: 'git@github.com:org/repo.git' })
     expect(spec.gitRepository?.url).toBe('git@github.com:org/repo.git')
+  })
+})
+
+describe('git remote URL validation', () => {
+  const accept = (url: string) => flagsToSpec({ name: 'x', gitUrl: url }).gitRepository?.url
+  const reject = (url: string) => expect(() => flagsToSpec({ name: 'x', gitUrl: url })).toThrow()
+
+  it('accepts the canonical ssh:// form with an SSH login', () => {
+    // The error message tells users to "use SSH" for private repos, so the
+    // canonical ssh://git@host/path form must not be rejected.
+    expect(accept('ssh://git@github.com/foo/bar.git')).toBe('ssh://git@github.com/foo/bar.git')
+  })
+
+  it('accepts scp-style and plain https remotes', () => {
+    expect(accept('git@github.com:foo/bar.git')).toBe('git@github.com:foo/bar.git')
+    expect(accept('https://github.com/foo/bar.git')).toBe('https://github.com/foo/bar.git')
+  })
+
+  it('still rejects embedded credentials in any scheme', () => {
+    reject('https://user:token@github.com/foo/bar.git')
+    reject('ssh://user:password@host/foo.git')
+    reject('https://user@github.com/foo/bar.git')
+  })
+
+  it('still rejects shell metacharacters and whitespace', () => {
+    reject('https://github.com/a/b.git;touch /pwned')
+    reject('https://github.com/a/b.git $(id)')
+    reject('ssh://git@host/`id`')
   })
 })
