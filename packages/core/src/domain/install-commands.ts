@@ -35,12 +35,21 @@ RUN git clone https://github.com/asdf-vm/asdf.git $HOME/.asdf --branch v0.15.0 &
   `,
   node: `
 USER root
-# Install nvm, yarn, npm, pnpm
-RUN curl -o- https://raw.githubusercontent.com/devcontainers/features/main/src/node/install.sh | bash
-RUN chown -R vscode:vscode \${HOME}/.npm
+# Install nvm, yarn, npm, pnpm.
+# HOME is pinned to /home/vscode image-wide, so root and vscode would share
+# ~/.npm. Upstream's script runs the npm-version step as root but the yarn/pnpm
+# steps via 'su vscode', so the shared cache ends up part root-owned and the
+# 'su vscode' npm call dies with EACCES (set -e then aborts the whole script).
+# Give root its own HOME: the script is fetched to a file first because an env
+# prefix on 'curl ... | bash' would only apply to curl, never to the script.
+RUN curl -fsSL -o /tmp/node-install.sh https://raw.githubusercontent.com/devcontainers/features/main/src/node/install.sh && HOME=/root bash /tmp/node-install.sh && rm -f /tmp/node-install.sh
+RUN mkdir -p \${HOME}/.npm && chown -R vscode:vscode \${HOME}/.npm
 USER vscode
 ENV PNPM_HOME=\${HOME}/.local/share/pnpm
-ENV PATH=\${PATH}:\${PNPM_HOME}
+# pnpm drops global bins straight into \$PNPM_HOME, but its own preflight check
+# refuses to run a global install unless \$PNPM_HOME/bin is on PATH too, so both
+# have to be listed or 'pnpm install -g' aborts with "not in PATH".
+ENV PATH=\${PATH}:\${PNPM_HOME}:\${PNPM_HOME}/bin
   `,
   // Frameworks
   foundry: `
