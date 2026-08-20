@@ -36,7 +36,7 @@ migration — v1 configs are not read. Coming from a VS Code Dev Containers work
 
 | Engine | Platform | Notes |
 | --- | --- | --- |
-| Docker | all | Full Linux MAC + capability + resource control |
+| Docker | all | Full capability + resource control. Linux MAC (AppArmor) only on Linux hosts — not enforced in the macOS VM |
 | OrbStack | macOS | Docker-compatible; auto-preferred on macOS |
 | Podman | all | Rootless; uid-mapped tmpfs auto-uses `--userns=keep-id` |
 | Lima (nerdctl) | macOS/Linux | AppArmor/sysctl depend on the guest VM |
@@ -100,7 +100,12 @@ dcw create --no-input --name audit \
 
 ## Hardening
 
+`dcw create` is **hardened by default**: with neither `--profile` nor `--harden`, it applies the `development` profile. Pass `--profile none` when you explicitly want no hardening.
+
 Pick a named profile (`--profile hardened`) or individual options (`--harden drop-caps --harden readonly-os`). Options map to engine-neutral effects, then to engine-correct flags. If the chosen engine can't honor an option it is **dropped with a warning** (or, under `--strict`, the command fails). `dcw up --json` reports `appliedFlags`, `warnings`, and `dropped`.
+
+> [!IMPORTANT]
+> **AppArmor is not enforced on macOS.** Docker Desktop and OrbStack run containers inside a Linux VM whose daemon reports no AppArmor support — dcw probes this directly rather than assuming it. On macOS the `apparmor` key is dropped with a warning, and `--strict` fails closed for every built-in profile that requests it.
 
 ## State
 

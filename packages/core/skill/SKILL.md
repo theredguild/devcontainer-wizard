@@ -70,7 +70,9 @@ All selection flags are **repeatable** (pass the flag multiple times):
 - `--sec <v>` — security tooling: `slither`, `mythril`, `crytic-compile`, `panoramix`,
   `slither-lsp`, `napalm-toolbox`, `semgrep`, `slitherin`, `heimdall`
 - `--ai-agent <v>` — AI coding agents to bake in: `claude`, `codex`, `opencode` (all pull Node)
-- `--profile <key>` — named security profile (see below)
+- `--profile <key>` — named security profile (see below). **Defaults to `development`**
+  when neither `--profile` nor `--harden` is given; pass `--profile none` to opt out of
+  hardening entirely.
 - `--harden <key>` — manual hardening key, repeatable, **merged with** `--profile`
 - `--git-url <url>` — clone this git repo into the image
 - `--git-branch <ref>` — branch/tag to clone (requires `--git-url`)
@@ -155,9 +157,13 @@ Two exceptions worth knowing before you script against these:
 Pass a profile with `--profile <key>`. Profiles expand to a set of hardening keys;
 `--profile` and any `--harden` flags are merged.
 
+**`dcw create` is hardened by default.** With neither `--profile` nor `--harden`, it
+applies the `development` profile — it does *not* create an unhardened environment.
+Use `--profile none` when you explicitly want no hardening.
+
 | Key | Summary |
 | --- | --- |
-| `development` | Balanced security for daily development (default-ish). |
+| `development` | Balanced security for daily development. **Applied by default.** |
 | `hardened` | Enhanced security for auditing/research. Packet-crafting tools won't work. |
 | `airgapped` | Hardened + no network. Extensions/package managers won't work. |
 | `paranoid` *(experimental)* | Max security: air-gapped + read-only, ephemeral. |
@@ -165,12 +171,20 @@ Pass a profile with `--profile <key>`. Profiles expand to a set of hardening key
 | `ci-like-local-runner` *(exp)* | Mirrors CI locally with immutable FS. Cache writes don't persist. |
 | `package-install-session` *(exp)* | Install packages while keeping guardrails. |
 | `security-research-controlled-net` *(exp)* | API testing/collectors, no packet crafting. |
+| `none` | Explicit opt-out — no hardening at all. Not a profile expansion. |
 
 Individual hardening keys can also be set directly, e.g.
 `--harden drop-caps --harden readonly-os` (keys include `readonly-os`,
 `ephemeral-workspace`, `secure-tmp`, `drop-caps`, `no-new-privs`, `apparmor`,
 `no-raw-packets`, `secure-dns`, `network-none`, `vscode-security`). Use `dcw schema`
 for the authoritative list.
+
+**AppArmor is not enforced on macOS.** Docker Desktop and OrbStack run containers in a
+Linux VM whose daemon reports no AppArmor support, and dcw now probes this directly
+(`docker info` → `SecurityOptions`) rather than assuming it. On macOS the `apparmor`
+key is therefore dropped with a warning, and `--strict` **fails closed** for every
+built-in profile that requests it. Do not tell a user an environment is AppArmor-
+protected on macOS.
 
 ### Hardening behavior
 
