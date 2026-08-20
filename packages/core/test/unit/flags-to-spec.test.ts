@@ -162,3 +162,40 @@ describe('git remote URL validation', () => {
     reject('ssh://git@host/`id`')
   })
 })
+
+describe('default hardening posture', () => {
+  it('applies the development profile when nothing was requested', () => {
+    // A bare `dcw create` must never produce a completely unhardened environment:
+    // no capability drops, no no-new-privs and no secure tmpfs, with --strict
+    // passing vacuously because nothing was asked for.
+    const spec = flagsToSpec({ name: 'x' })
+    expect(spec.profile).toBe('development')
+    expect(spec.hardening).toContain('no-new-privs')
+    expect(spec.hardening).toContain('secure-tmp')
+    expect(spec.hardening.length).toBeGreaterThan(0)
+  })
+
+  it('honours an explicit --profile none as a deliberate opt-out', () => {
+    const spec = flagsToSpec({ name: 'x', profile: 'none' })
+    expect(spec.hardening).toEqual([])
+    expect(spec.profile).toBe('none')
+  })
+
+  it('does not silently add the default on top of explicit --harden keys', () => {
+    // Naming hardening keys is itself a deliberate choice; merging `development`
+    // into it would apply controls the user did not ask for.
+    const spec = flagsToSpec({ name: 'x', hardening: ['drop-caps'] })
+    expect(spec.hardening).toEqual(['drop-caps'])
+    expect(spec.profile).toBeUndefined()
+  })
+
+  it('leaves an explicit profile alone', () => {
+    const spec = flagsToSpec({ name: 'x', profile: 'paranoid' })
+    expect(spec.profile).toBe('paranoid')
+    expect(spec.hardening).toContain('readonly-os')
+  })
+
+  it('still rejects an unknown profile', () => {
+    expect(() => flagsToSpec({ name: 'x', profile: 'bogus' })).toThrow(ValidationError)
+  })
+})

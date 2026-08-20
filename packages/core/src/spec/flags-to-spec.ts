@@ -1,5 +1,5 @@
 import { ValidationError } from '../errors.js'
-import { isProfileKey, recipesToHardening } from '../domain/profiles.js'
+import { DEFAULT_PROFILE, NO_PROFILE, isProfileKey, recipesToHardening } from '../domain/profiles.js'
 import { normalizeHardening } from '../domain/normalize.js'
 import { isValidEnvName, slugify } from '../util/slug.js'
 import { EnvSpecSchema, type EnvSpec } from './env-spec.js'
@@ -69,15 +69,25 @@ export function flagsToSpec(input: FlagInput): EnvSpec {
     )
   }
 
-  if (input.profile && !isProfileKey(input.profile)) {
-    throw new ValidationError(`Unknown profile '${input.profile}'.`)
+  if (input.profile && input.profile !== NO_PROFILE && !isProfileKey(input.profile)) {
+    throw new ValidationError(`Unknown profile '${input.profile}'. Use '${NO_PROFILE}' to opt out of hardening.`)
   }
 
   if (input.gitBranch && !input.gitUrl) {
     throw new ValidationError('--git-branch requires --git-url.')
   }
 
-  const fromProfile = input.profile ? recipesToHardening([input.profile]) : []
+  // Absence of any choice means the DEFAULT posture, not "no hardening": a bare
+  // `dcw create` used to produce an environment with no capability drops, no
+  // no-new-privileges and no secure tmpfs — and `--strict` passed vacuously,
+  // because nothing had been requested to fail. Naming `--harden` keys is itself a
+  // deliberate choice, so the default only applies when nothing at all was given;
+  // `--profile none` is the explicit opt-out.
+  const choseNothing = !input.profile && (input.hardening ?? []).length === 0
+  const effectiveProfile = choseNothing ? DEFAULT_PROFILE : input.profile
+
+  const fromProfile =
+    effectiveProfile && effectiveProfile !== NO_PROFILE ? recipesToHardening([effectiveProfile]) : []
   const { keys: hardening, unknown } = normalizeHardening([...fromProfile, ...(input.hardening ?? [])])
   if (unknown.length > 0) {
     throw new ValidationError(`Unknown hardening option(s): ${unknown.join(', ')}.`)
@@ -88,7 +98,7 @@ export function flagsToSpec(input: FlagInput): EnvSpec {
     engine: input.engine ?? 'auto',
     selections: compactSelections(input),
     hardening,
-    profile: input.profile,
+    profile: effectiveProfile,
     gitRepository: input.gitUrl
       ? { url: input.gitUrl, branch: input.gitBranch, enabled: true }
       : undefined,

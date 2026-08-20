@@ -40,7 +40,10 @@ export default class Create extends BaseCommand {
     fuzz: Flags.string({ multiple: true, description: 'Fuzzing/testing: echidna, medusa, halmos, ityfuzz, aderyn.' }),
     sec: Flags.string({ multiple: true, description: 'Security tooling: slither, mythril, semgrep, heimdall, …' }),
     'ai-agent': Flags.string({ multiple: true, description: 'AI coding agents: claude, codex, opencode.' }),
-    profile: Flags.string({ description: 'Security profile (e.g. development, hardened, airgapped, paranoid).' }),
+    profile: Flags.string({
+      description:
+        "Security profile (development, hardened, airgapped, paranoid). Defaults to 'development' when neither --profile nor --harden is given; pass 'none' to opt out of hardening entirely.",
+    }),
     harden: Flags.string({ multiple: true, description: 'Manual hardening keys (merged with --profile).' }),
     'git-url': Flags.string({ description: 'Clone this git repository into the image.' }),
     'git-branch': Flags.string({ description: 'Branch/tag to clone (requires --git-url).' }),

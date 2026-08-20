@@ -10,7 +10,7 @@ import {
   type CatalogItem,
 } from '../domain/catalog.js'
 import { HARDENING_OPTIONS } from '../domain/hardening.js'
-import { PROFILES, recipesToHardening } from '../domain/profiles.js'
+import { DEFAULT_PROFILE, NO_PROFILE, PROFILES, recipesToHardening } from '../domain/profiles.js'
 import { createDriver } from '../engine/registry.js'
 import type { EngineStatus } from '../engine/resolver.js'
 import type { EngineName } from '../engine/types.js'
@@ -207,23 +207,27 @@ function HardeningStep({
     )
   }
 
+  // Order matters: Select highlights the first enabled choice when there is no
+  // prior value, so leading with "None" made an unhardened environment the default
+  // answer in a tool whose purpose is isolation. Profiles lead; opting out is last
+  // and explicit.
   const choices = [
-    { label: 'None (no extra hardening)', value: '__none__', hint: 'Run without additional restrictions.' },
     ...PROFILES.map((p) => ({
       label: `${p.label}${p.experimental ? ' (experimental)' : ''}`,
       value: p.key,
       hint: `${p.description} — ${p.caveat}`,
     })),
     { label: 'Custom…', value: '__custom__', hint: 'Pick individual hardening options.' },
+    { label: 'None (no extra hardening)', value: NO_PROFILE, hint: 'Run without additional restrictions.' },
   ]
 
   return (
     <Select
       choices={choices}
-      initialValue={initialProfile}
+      initialValue={initialProfile ?? DEFAULT_PROFILE}
       onSubmit={(v) => {
         if (v === '__custom__') setMode('custom')
-        else if (v === '__none__') onSubmit(undefined, [])
+        else if (v === NO_PROFILE) onSubmit(NO_PROFILE, [])
         else onSubmit(v, recipesToHardening([v]))
       }}
       onBack={onBack}

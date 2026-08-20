@@ -62,7 +62,8 @@ describe('wizard App', () => {
 
     await tick() // let the first step mount before sending input
 
-    // 10 steps, each accepted with Enter (engine→name→5 multiselects→hardening(None)→review→confirm).
+    // 10 steps, each accepted with Enter
+    // (engine→name→5 multiselects→hardening(development)→review→confirm).
     for (let i = 0; i < 10; i++) {
       stdin.write(ENTER)
       await tick()
@@ -72,13 +73,51 @@ describe('wizard App', () => {
     const spec = onComplete.mock.calls[0]![0]
     expect(spec.name).toBe('my-proj')
     expect(spec.engine).toBe('auto')
-    expect(spec.hardening).toEqual([])
+    // Accepting every default must not yield an unhardened environment: the
+    // hardening step now leads with `development` rather than "None".
+    expect(spec.profile).toBe('development')
+    expect(spec.hardening).toContain('no-new-privs')
+    expect(spec.hardening).toContain('secure-tmp')
+  })
+
+  it('still allows opting out of hardening explicitly', async () => {
+    const onComplete = vi.fn<(spec: EnvSpec) => void>()
+    const { stdin } = render(
+      createElement(App, {
+        initial: { fallbackName: 'my-proj' },
+        engines: fakeEngines(),
+        onComplete,
+        onCancel: vi.fn(),
+      }),
+    )
+    await tick()
+
+    // engine → name → 6 multiselects lands on the hardening step (9/10).
+    for (let i = 0; i < 8; i++) {
+      stdin.write(ENTER)
+      await tick()
+    }
+    // Up wraps to the final choice, which is now "None" rather than the first.
+    stdin.write('\u001B[A')
+    await tick()
+    stdin.write(ENTER) // select None → review
+    await tick()
+    stdin.write(ENTER) // confirm review
+    await tick()
+
+    expect(onComplete).toHaveBeenCalledTimes(1)
+    expect(onComplete.mock.calls[0]![0].hardening).toEqual([])
   })
 
   it('parity: wizard defaults match the flag path for the same inputs', async () => {
     const { flagsToSpec } = await import('../../src/spec/flags-to-spec.js')
     const fromFlags = flagsToSpec({ fallbackName: 'my-proj', engine: 'auto' })
     expect(fromFlags.name).toBe('my-proj')
-    expect(fromFlags.hardening).toEqual([])
+    // Both entry points must land on the same default posture.
+    expect(fromFlags.profile).toBe('development')
+    expect(fromFlags.hardening).toContain('no-new-privs')
+
+    const optedOut = flagsToSpec({ fallbackName: 'my-proj', engine: 'auto', profile: 'none' })
+    expect(optedOut.hardening).toEqual([])
   })
 })

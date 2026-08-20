@@ -94,6 +94,12 @@ export const PROFILES: ProfileDefinition[] = [
 
 const PROFILE_BY_KEY = new Map(PROFILES.map((p) => [p.key, p]))
 
+/** Profile applied when the user expresses no preference at all. */
+export const DEFAULT_PROFILE = 'development'
+
+/** Explicit opt-out value for `--profile`: run with no hardening at all. */
+export const NO_PROFILE = 'none'
+
 export function isProfileKey(value: string): value is ProfileKey {
   return PROFILE_BY_KEY.has(value as ProfileKey)
 }
