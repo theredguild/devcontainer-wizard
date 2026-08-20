@@ -1,0 +1,12 @@
+{
+  // Type-checks the test suite alongside src (the build config compiles src only).
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".",
+    // The test suite reaches into bin/*.js, which ships untyped.
+    "allowJs": true,
+    "checkJs": false
+  },
+  "include": ["src", "test", "bin"]
+}
