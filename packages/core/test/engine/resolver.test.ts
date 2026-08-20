@@ -76,6 +76,7 @@ describe('surveyEngines', () => {
     const podman = statuses.find((s) => s.name === 'podman')!
     expect(podman.capabilities.userNamespaces.support).toBe('caveated')
     const apple = statuses.find((s) => s.name === 'apple-container')!
-    expect(apple.capabilities.capDrop.support).toBe('unsupported')
+    expect(apple.capabilities.apparmor.support).toBe('unsupported')
+    expect(apple.capabilities.tmpfs.support).toBe('unsupported')
   })
 })

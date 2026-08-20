@@ -1,6 +1,6 @@
 import { capture } from '../exec.js'
 import type { DetectResult, EngineCapabilities, EngineName } from '../types.js'
-import { caps } from './capabilities.js'
+import { daemonReportsApparmor, dockerCaps } from './capabilities.js'
 import { CliDriver } from './cli-driver.js'
 
 /**
@@ -11,15 +11,23 @@ import { CliDriver } from './cli-driver.js'
 export class OrbstackDriver extends CliDriver {
   readonly name: EngineName = 'orbstack'
   readonly displayName = 'OrbStack'
-  readonly capabilities: EngineCapabilities = caps()
+  capabilities: EngineCapabilities = dockerCaps()
 
   constructor() {
     super({ bin: 'docker' })
   }
 
+  /** Ask the DAEMON (not this host) whether AppArmor is actually available. */
+  private async refreshApparmorCapability(): Promise<void> {
+    const info = await capture(this.bin, this.argv('info', '--format', '{{json .SecurityOptions}}'))
+    if (info.code !== 0) return // leave the fail-closed default in place
+    this.capabilities = dockerCaps(daemonReportsApparmor(info.stdout))
+  }
+
   override async detect(): Promise<DetectResult> {
     const base = await super.detect()
     if (!base.available) return base
+    await this.refreshApparmorCapability()
 
     // Confirm the active Docker endpoint is OrbStack.
     const ctx = await capture('docker', ['context', 'show'])

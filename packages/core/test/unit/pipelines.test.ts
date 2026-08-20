@@ -95,7 +95,9 @@ describe('buildEnvironment', () => {
     const driver = new FakeDriver({ name: 'apple-container', capabilities: createDriver('apple-container').capabilities })
     const plan = planEnvironment(s)
     await buildEnvironment({ manifest: manifestFor(s), plan, driver, engineName: 'apple-container', now: NOW })
-    expect(driver.runOnces[0]!.flags).toEqual([])
+    // apple-container has no --network=none, but it does enforce --cap-drop, so the
+    // throwaway `cat` probe should still run with capabilities dropped.
+    expect(driver.runOnces[0]!.flags).toEqual(['--cap-drop=ALL'])
   })
 })
 
@@ -149,7 +151,7 @@ describe('upEnvironment', () => {
   })
 
   it('records dropped hardening on the manifest for degraded engines', async () => {
-    const s = spec({ hardening: ['drop-caps', 'apparmor'] })
+    const s = spec({ hardening: ['drop-caps', 'apparmor', 'network-none'] })
     const driver = new FakeDriver({ name: 'apple-container', capabilities: createDriver('apple-container').capabilities })
     const { plan, manifest } = await built(s, driver)
     const out = await upEnvironment({
@@ -161,12 +163,15 @@ describe('upEnvironment', () => {
       workspaceDir: '/tmp/x',
       now: NOW,
     })
-    expect(out.manifest.container?.droppedHardening).toEqual(expect.arrayContaining(['drop-cap', 'apparmor']))
+    // drop-caps IS honored by the container CLI, so only the genuinely
+    // unavailable controls are recorded as dropped.
+    expect(out.manifest.container?.droppedHardening).toEqual(expect.arrayContaining(['apparmor', 'network-none']))
+    expect(out.manifest.container?.droppedHardening).not.toContain('drop-cap')
     expect(out.translation.dropped.length).toBeGreaterThan(0)
   })
 
   it('throws under --strict when hardening is dropped', async () => {
-    const s = spec({ hardening: ['drop-caps'] })
+    const s = spec({ hardening: ['apparmor'] })
     const driver = new FakeDriver({ name: 'apple-container', capabilities: createDriver('apple-container').capabilities })
     const { plan, manifest } = await built(s, driver)
     await expect(

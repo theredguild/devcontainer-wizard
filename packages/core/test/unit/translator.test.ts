@@ -3,12 +3,21 @@ import { hardeningToEffects } from '../../src/hardening/effects.js'
 import { enforceStrict, translate } from '../../src/hardening/translator.js'
 import { StrictHardeningError } from '../../src/errors.js'
 import { createDriver } from '../../src/engine/registry.js'
+import { dockerCaps } from '../../src/engine/drivers/capabilities.js'
 import type { HardeningKey } from '../../src/domain/hardening.js'
 
 const caps = (engine: 'docker' | 'podman' | 'apple-container' | 'lima') => createDriver(engine).capabilities
 
-function flagsFor(keys: HardeningKey[], engine: 'docker' | 'podman' | 'apple-container' | 'lima') {
-  return translate(hardeningToEffects(keys), caps(engine), engine)
+// Docker's AppArmor stance depends on what the daemon reports, so pin it explicitly
+// — otherwise these assertions would pass against an AppArmor-capable daemon and
+// fail against the Linux VM Docker runs on macOS, or vice versa.
+function flagsFor(
+  keys: HardeningKey[],
+  engine: 'docker' | 'podman' | 'apple-container' | 'lima',
+  daemonHasApparmor = true,
+) {
+  const capabilities = engine === 'docker' ? dockerCaps(daemonHasApparmor) : caps(engine)
+  return translate(hardeningToEffects(keys), capabilities, engine)
 }
 
 describe('hardeningToEffects', () => {
@@ -63,10 +72,13 @@ describe('translate — Docker (full support)', () => {
 })
 
 describe('translate — Apple Containers (degrades)', () => {
-  it('drops caps / apparmor / no-new-privs with warnings', () => {
+  it('drops apparmor / no-new-privs but keeps cap-drop, which the CLI does enforce', () => {
+    // Verified against `container` CLI 1.0.0: --cap-drop ALL takes CapEff from
+    // 00000000a80425fb to 0000000000000000, so dropping it would discard real,
+    // enforced hardening. AppArmor and no-new-privileges genuinely are not exposed.
     const { flags, dropped, warnings } = flagsFor(['drop-caps', 'apparmor', 'no-new-privs'], 'apple-container')
-    expect(flags).toEqual([])
-    expect(dropped.map((e) => e.kind).sort()).toEqual(['apparmor', 'drop-cap', 'no-new-privs'])
+    expect(flags).toEqual(['--cap-drop=ALL'])
+    expect(dropped.map((e) => e.kind).sort()).toEqual(['apparmor', 'no-new-privs'])
     expect(warnings.every((w) => w.level === 'dropped')).toBe(true)
   })
 
@@ -98,10 +110,20 @@ describe('enforceStrict — no-op caveats (#8)', () => {
     expect(() => enforceStrict(result)).toThrow(StrictHardeningError)
   })
 
-  it('does not throw for advisory caveats on docker', () => {
-    const result = flagsFor(['apparmor'], 'docker')
+  it('does not throw for advisory caveats on docker (daemon has AppArmor)', () => {
+    const result = flagsFor(['apparmor'], 'docker', true)
     expect(result.unenforced).toEqual([])
     expect(() => enforceStrict(result)).not.toThrow()
+  })
+
+  it('throws when the daemon lacks AppArmor, where the flag is accepted but inert', () => {
+    // Verified on OrbStack 29.4.0 / macOS: `docker inspect` reports an empty
+    // AppArmorProfile and the container has no LSM, so --strict must fail closed
+    // rather than certify a control that is not enforced.
+    const result = flagsFor(['apparmor'], 'docker', false)
+    expect(result.flags).toContain('apparmor=docker-default')
+    expect(result.unenforced.map((e) => e.kind)).toContain('apparmor')
+    expect(() => enforceStrict(result)).toThrow(StrictHardeningError)
   })
 })
 
@@ -126,7 +148,16 @@ describe('translate — Podman (userns remap)', () => {
 
 describe('enforceStrict', () => {
   it('throws when hardening was dropped', () => {
-    const result = flagsFor(['drop-caps'], 'apple-container')
+    const result = flagsFor(['apparmor'], 'apple-container')
+    expect(() => enforceStrict(result)).toThrow(StrictHardeningError)
+  })
+
+  it('throws for a control the engine emits but cannot enforce', () => {
+    // macOS Docker accepts the AppArmor flag but has no LSM to apply it, so the
+    // control is emitted yet inert — --strict must not accept that silently.
+    const result = flagsFor(['apparmor'], 'docker', false)
+    expect(result.flags).toContain('apparmor=docker-default')
+    expect(result.unenforced.length).toBeGreaterThan(0)
     expect(() => enforceStrict(result)).toThrow(StrictHardeningError)
   })
 
