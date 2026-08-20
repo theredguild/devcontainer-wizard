@@ -21,5 +21,13 @@ const child = spawn(process.execPath, [entry, ...process.argv.slice(2)], {
   env: process.env
 });
 
+// Forward termination signals so the child isn't orphaned when something
+// (e.g. `kill`) signals the wrapper directly instead of the whole process
+// group. `child.on('exit')` below re-raises the signal on the wrapper once
+// the child actually dies from it, so this does not create a kill loop.
+for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+  process.on(sig, () => { try { child.kill(sig); } catch {} });
+}
+
 child.on('exit', (code, signal) => signal ? process.kill(process.pid, signal) : process.exit(code));
 child.on('error', (e) => { console.error('Failed to spawn CLI:', e.message); process.exit(1); });

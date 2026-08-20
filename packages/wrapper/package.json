@@ -12,7 +12,8 @@
     "@theredguild/devcontainer-wizard": "workspace:*"
   },
   "files": [
-    "bin.js"
+    "bin.js",
+    "LICENSE"
   ],
   "publishConfig": {
     "access": "public",

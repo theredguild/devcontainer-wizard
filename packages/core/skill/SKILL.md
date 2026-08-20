@@ -47,6 +47,7 @@ When driving dcw programmatically (not as an interactive human):
 | `dcw build [name]` | Build the container image | `--force`, `--platform <p>` |
 | `dcw up [name]` | Build (if needed) + start a hardened container | `--rebuild`, `--workspace <dir>` |
 | `dcw shell [name]` | Interactive zsh into the container (lands in `/workspace` as `vscode`) | — |
+| `dcw attach [name]` | Attach an SSH-remote editor (Zed, VS Code, Cursor, Antigravity, …) | `--editor <id>`, `--port <n>`, `--print`, `--folder <dir>` |
 | `dcw exec [name] -- <cmd>` | Run a command in the running container | trailing `-- <cmd>` |
 | `dcw agent <type> [name]` | Spawn an AI coding agent (claude/codex/opencode) in the container | `-e`/`--env`, `--install` |
 | `dcw ls` | List environments + live container status | — |
@@ -73,11 +74,33 @@ All selection flags are **repeatable** (pass the flag multiple times):
 - `--harden <key>` — manual hardening key, repeatable, **merged with** `--profile`
 - `--git-url <url>` — clone this git repo into the image
 - `--git-branch <ref>` — branch/tag to clone (requires `--git-url`)
+- `--[no-]ssh` — bake an SSH server into the image for editor attach (`dcw attach`); **on by default**, use `--no-ssh` to omit
 - `--build` — build the image after creating
 - `--up` — build **and** start the container after creating
+- `--force` — overwrite an existing environment that has the same name
 
 Note: tools pull their own dependencies (e.g. `foundry` pulls Rust, `slither` pulls
 Python), so you don't have to list a core language just to satisfy a tool.
+
+### `dcw attach` — SSH-remote editors
+
+Wires up SSH into the environment's container (starting it if needed) and launches an
+SSH-remote editor against it — the v2 replacement for the v1 VS Code Dev Containers
+workflow. Requires the image to have been created with `--ssh` (the default; `--no-ssh`
+environments must be recreated, or rebuilt with ssh enabled, before `dcw attach` works).
+
+```sh
+dcw attach                      # default env; auto-detects an installed editor
+dcw attach my-env --editor zed  # pick an editor: zed, vscode, cursor, antigravity, …
+dcw attach my-env --print       # just print connection details, don't launch an editor
+dcw attach my-env --port 2222   # publish a fixed TCP port instead of the default exec proxy
+```
+
+- Writes a managed `~/.ssh/config` block (host alias `dcw-<name>`) so any SSH-remote
+  editor, or plain `ssh dcw-<name>`, connects the same way.
+- Two connection modes: the default **exec proxy** (no published port) or **port** mode
+  (`--port <n>`, `--port 0` to auto-allocate) with a listening sshd in the container.
+- `--folder <dir>` sets the remote folder to open (default `/workspace`).
 
 ### `dcw exec`
 
@@ -154,6 +177,7 @@ dcw create                 # interactive wizard (engine chosen first)
 dcw build my-env           # build the image
 dcw up my-env              # start a hardened container
 dcw shell my-env           # zsh into it (lands in /workspace as the vscode user)
+dcw attach my-env          # attach an SSH-remote editor (VS Code, Cursor, Zed, …)
 dcw ls                     # list environments + live status
 dcw stop my-env
 dcw rm my-env --purge --yes

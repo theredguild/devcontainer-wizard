@@ -18,12 +18,19 @@ npm i -g @theredguild/devcontainer-wizard   # or: pnpm add -g @theredguild/devco
 This installs two binaries — `dcw` and `devcontainer-wizard` — pointing at the same CLI.
 Everything below uses `dcw`.
 
+> Already have v1 installed globally under the unscoped name? Either upgrade in place
+> with `npm i -g devcontainer-wizard@latest`, or run `npm uninstall -g devcontainer-wizard`
+> first — installing both packages globally fails with `EEXIST`, since they provide the
+> same two binaries.
+
 ## Upgrading from v1
 
 v1 generated a `devcontainer.json` for VS Code. v2 does not: it builds and runs
 hardened containers directly, and every command is new. There is no automatic
-migration — v1 configs are not read. Pin `@theredguild/devcontainer-wizard@1`
-if you still need the old wizard.
+migration — v1 configs are not read. Coming from a VS Code Dev Containers workflow?
+`dcw attach` is the v2 equivalent — it wires up SSH and launches your editor
+(VS Code, Cursor, Zed, Antigravity, …) against the running container. Pin
+`@theredguild/devcontainer-wizard@1` if you still need the old wizard.
 
 ## Supported engines
 
@@ -33,7 +40,7 @@ if you still need the old wizard.
 | OrbStack | macOS | Docker-compatible; auto-preferred on macOS |
 | Podman | all | Rootless; uid-mapped tmpfs auto-uses `--userns=keep-id` |
 | Lima (nerdctl) | macOS/Linux | AppArmor/sysctl depend on the guest VM |
-| Apple Containers | macOS 15+ (arm64) | VM-isolated; drops Linux cap/AppArmor/seccomp hardening |
+| Apple Containers | macOS 15+ (arm64) | VM-isolated; drops Linux cap/AppArmor/seccomp hardening; does **not** enforce network isolation (`--profile airgapped` stays networked unless you pass `--strict`) |
 
 `dcw engines` shows live availability + per-engine hardening trade-offs.
 
@@ -44,6 +51,7 @@ dcw create                 # interactive wizard (engine chosen first)
 dcw build my-env           # build the image
 dcw up my-env              # start a hardened container
 dcw shell my-env           # zsh into it (lands in /workspace as the vscode user)
+dcw attach my-env          # attach an SSH-remote editor (VS Code, Cursor, Zed, …)
 dcw agent claude my-env    # spawn an AI coding agent inside the container
 dcw ls                     # list environments + live status
 dcw stop my-env

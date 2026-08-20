@@ -9,6 +9,14 @@ npm i -g devcontainer-wizard
 dcw --help
 ```
 
+> [!IMPORTANT]
+> **v2 is a complete rewrite and is not backwards compatible with v1.** It no longer
+> generates a `devcontainer.json`, and shares no commands with the v1 wizard you may
+> already have installed under this name. If you still need the old behavior, pin
+> `npm i -g devcontainer-wizard@1`. See the
+> [repository README](https://github.com/theredguild/devcontainer-wizard) for the full
+> v2 command set and an upgrade guide.
+
 It exists so the unscoped name keeps working. If you have no existing
 dependency on it, install the scoped package directly:
 
