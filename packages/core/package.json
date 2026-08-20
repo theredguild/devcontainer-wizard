@@ -1,56 +1,74 @@
 {
   "name": "@theredguild/devcontainer-wizard",
-  "version": "1.2.1",
-  "description": "A comprehensive CLI tool to set up fully equipped Web3 development containers with advanced security hardening and git integration.",
+  "version": "2.0.0",
+  "description": "AI-native, multi-engine, shell-first container environment wizard for Web3 development and smart-contract auditing.",
   "license": "MIT",
-  "type": "commonjs",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./bin/run.js",
-    "./package.json": "./package.json",
-    "./bin/run.js": "./bin/run.js"
-  }, 
-  "dependencies": {
-    "@inquirer/core": "^10.1.15",
-    "@inquirer/prompts": "^7.8.1",
-    "@oclif/core": "^4.5.2",
-    "semver": "^7.6.3"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./bin/run.js": "./bin/run.js",
+    "./package.json": "./package.json"
   },
-  "oclif": {
-    "bin": "devcontainer-wizard",
-    "commands": { "strategy": "single", "target": "./dist/index.js" },
-    "tsconfig": "./tsconfig.json",
-    "dirname": "devcontainer-wizard",
-    "topicSeparator": " ",
-    "devCommands": "./src/commands"
+  "bin": {
+    "dcw": "./bin/run.js",
+    "devcontainer-wizard": "./bin/run.js"
   },
   "files": [
-    "bin/",
-    "dist/"
+    "bin",
+    "dist",
+    "skill",
+    "oclif.manifest.json",
+    "LICENSE"
   ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "oclif": {
+    "bin": "dcw",
+    "dirname": "dcw",
+    "commands": "./dist/commands",
+    "topicSeparator": " ",
+    "additionalHelpFlags": [
+      "-h"
+    ],
+    "additionalVersionFlags": [
+      "-v"
+    ]
+  },
   "scripts": {
-    "build": "tsc && tsc-alias",
-    "dev": "node ./bin/dev.js",
-    "prod": "pnpm run build && node ./bin/run.js",
-    "postpack": "rm -f oclif.manifest.json",
-    "prepack": "pnpm run build && oclif manifest && oclif readme"
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "node --import tsx bin/dev.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "pnpm build && DCW_E2E=1 vitest run test/e2e",
+    "clean": "rm -rf dist",
+    "prepack": "pnpm run build && oclif manifest",
+    "postpack": "rm -f oclif.manifest.json"
+  },
+  "dependencies": {
+    "@oclif/core": "^4.5.2",
+    "ink": "^5.1.0",
+    "react": "^18.3.1",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.5"
   },
   "devDependencies": {
-    "@oclif/prettier-config": "^0.2.1",
-    "@types/node": "^18.19.122",
-    "@types/semver": "^7.5.8",
+    "@types/node": "^18.19.0",
+    "@types/react": "^18.3.12",
+    "ink-testing-library": "^4.0.0",
     "oclif": "^4.5.0",
-    "ts-node": "^10.9.2",
-    "tsc-alias": "^1.8.10",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.9.2"
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.8"
   },
-  "publishConfig": { 
+  "publishConfig": {
     "access": "public",
     "provenance": true
   },
-  "engines": { "node": ">=18.17" },
   "repository": {
     "type": "git",
     "url": "https://github.com/theredguild/devcontainer-wizard.git",

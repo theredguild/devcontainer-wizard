@@ -2,6 +2,13 @@
   "name": "devcontainer-wizard-monorepo",
   "private": true,
   "packageManager": "pnpm@10.18.0",
+  "scripts": {
+    "build": "pnpm --filter @theredguild/devcontainer-wizard build",
+    "test": "pnpm --filter @theredguild/devcontainer-wizard test",
+    "test:watch": "pnpm --filter @theredguild/devcontainer-wizard test:watch",
+    "test:e2e": "pnpm --filter @theredguild/devcontainer-wizard test:e2e",
+    "clean": "pnpm --filter @theredguild/devcontainer-wizard clean"
+  },
   "dependencies": {
     "devcontainer-wizard": "workspace:*"
   }

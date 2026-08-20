@@ -3,13 +3,13 @@ const { spawn } = require('node:child_process');
 
 let entry;
 try {
-  // Prefer the package's default export which should point to the CLI entry
-  entry = require.resolve('@theredguild/devcontainer-wizard');
+  // The CLI entry is ESM; resolve it explicitly rather than via the package's
+  // "." export, which points at the library index (BaseCommand only).
+  entry = require.resolve('@theredguild/devcontainer-wizard/bin/run.js');
 } catch (e) {
-  // Detect a common failure mode: older core package missing subpath exports
   const hint = [
     'Failed to resolve @theredguild/devcontainer-wizard.',
-    'If you installed devcontainer-wizard before this fix, update to the latest:',
+    'If you installed devcontainer-wizard before v2, update to the latest:',
     '  pnpm add -g devcontainer-wizard@latest  # or npm/yarn equivalent',
   ].join('\n');
   console.error(hint + `\nOriginal error: ${e && e.message}`);
@@ -20,6 +20,14 @@ const child = spawn(process.execPath, [entry, ...process.argv.slice(2)], {
   stdio: 'inherit',
   env: process.env
 });
+
+// Forward termination signals so the child isn't orphaned when something
+// (e.g. `kill`) signals the wrapper directly instead of the whole process
+// group. `child.on('exit')` below re-raises the signal on the wrapper once
+// the child actually dies from it, so this does not create a kill loop.
+for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+  process.on(sig, () => { try { child.kill(sig); } catch {} });
+}
 
 child.on('exit', (code, signal) => signal ? process.kill(process.pid, signal) : process.exit(code));
 child.on('error', (e) => { console.error('Failed to spawn CLI:', e.message); process.exit(1); });

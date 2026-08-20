@@ -1,232 +1,159 @@
-# DevContainer Wizard
+# dcw — container environment wizard
 
-A comprehensive CLI tool to set up fully equipped Web3 development containers. Features an interactive wizard for creating custom environments with advanced security hardening, git integration, and pre-configured toolchains, or quickly launch pre-built containers for common workflows.
+An **editor-agnostic, shell-first** container environment wizard built on **oclif + ink**. It authors a Web3 dev environment (interactively or from flags), builds an image on whatever container engine you have, runs it **hardened**, and manages its lifecycle — for humans and agents alike.
+
+As of v2 this tool does **not** generate `devcontainer.json`. It builds a plain-Debian image and runs a hardened container you `shell` into. Security hardening is translated into engine-correct `run` flags, degrading gracefully when an engine can't honor an option.
 
 > [!IMPORTANT]
-> Dev Containers can improve your workflow, but they are **not a fully secure environment**.  
-> If you need to run untrusted or suspicious code, use GitHub Codespaces, GitPod, or a similar remote setup — **never run it directly on your machine**.
-
-
-> [!CAUTION]
-> **VS Code considerations:**
->
-> VS Code does a lot to improve user experience, but that doesn't come without security tradeoffs. VS Code might allow API calls that can lead to running arbitrary commands on the host machine, and by default, it shares sockets such as the gpg-agent’s, which means keys stored outside the container can be used for signing. This opens the door to blind-signing commits scenarios, where a process inside the container may trigger signatures without the user’s full awareness. If you want to deep dive into these "tricks", we're working on an article covering the most relevant of them — stay tuned.
-
-![DevContainer Wizard](/assets/main.gif)
-
-## Requirements
-
-1. **Node.js 18+** and a package manager (**pnpm**, **npm**, or **yarn**) for installing the CLI.
-
-2. For use with [VS Code](https://code.visualstudio.com/) you need to install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers). We recommend reading the [Dev Containers documentation](https://code.visualstudio.com/docs/devcontainers/containers) for more information.
-
-### Full requirements to run Dev Containers
-
-- **Operating system**: Linux, macOS, or Windows 10/11. On Windows, **WSL2** is recommended for best performance.
-- **Container runtime**: One of the following:
-  - **Docker Desktop** (macOS/Windows) or **Docker Engine** (Linux) with the `docker` CLI available
-  - Alternatively, **Podman 4+** with the `podman-docker` shim to provide a `docker`-compatible CLI
-- **Docker Compose v2**: Available as `docker compose` (bundled with Docker Desktop; on Linux install the Compose plugin).
-- **Git**: Version 2.x or later.
-- **Node.js 18+** and a package manager (**pnpm**, **npm**, or **yarn**) to install `@devcontainers/cli` globally.
-- **Editor**: **VS Code** with the **Dev Containers** extension, or use **GitHub Codespaces** as an alternative (no local runtime required).
-- **Permissions**: Ability to run containers (e.g., membership in the `docker` group on Linux, or run with `sudo`).
-- **Network access**: To pull base images and extensions on first run.
+> Containers improve your workflow, but they are **not a fully secure sandbox**.
+> If you need to run untrusted or suspicious code, use GitHub Codespaces, GitPod,
+> or a similar remote setup — **never run it directly on your machine**.
 
 ## Install
 
-To install our pre-realease clone this repo and run:
-
-```bash
-npm i -g devcontainer-wizard
-
-#or
-
-pnpm add -g devcontainer-wizard
+```sh
+npm i -g @theredguild/devcontainer-wizard   # or: pnpm add -g @theredguild/devcontainer-wizard
 ```
 
-## How to use
+This installs two binaries — `dcw` and `devcontainer-wizard` — pointing at the same CLI.
+Everything below uses `dcw`.
 
-### Quick start
+> Already have v1 installed globally under the unscoped name? Either upgrade in place
+> with `npm i -g devcontainer-wizard@latest`, or run `npm uninstall -g devcontainer-wizard`
+> first — installing both packages globally fails with `EEXIST`, since they provide the
+> same two binaries.
 
-```bash
-devcontainer-wizard
+## Upgrading from v1
+
+v1 generated a `devcontainer.json` for VS Code. v2 does not: it builds and runs
+hardened containers directly, and every command is new. There is no automatic
+migration — v1 configs are not read. Coming from a VS Code Dev Containers workflow?
+`dcw attach` is the v2 equivalent — it wires up SSH and launches your editor
+(VS Code, Cursor, Zed, Antigravity, …) against the running container. Pin
+`@theredguild/devcontainer-wizard@1` if you still need the old wizard.
+
+## Supported engines
+
+| Engine | Platform | Notes |
+| --- | --- | --- |
+| Docker | all | Full capability + resource control. Linux MAC (AppArmor) only on Linux hosts — not enforced in the macOS VM |
+| OrbStack | macOS | Docker-compatible; auto-preferred on macOS |
+| Podman | all | Rootless; uid-mapped tmpfs auto-uses `--userns=keep-id` |
+| Lima (nerdctl) | macOS/Linux | AppArmor/sysctl depend on the guest VM |
+| Apple Containers | macOS 15+ (arm64) | VM-isolated. Applies `--cap-drop`; **drops** read-only rootfs, tmpfs options, no-new-privileges, AppArmor and seccomp. Does **not** enforce network isolation (`--profile airgapped` stays networked unless you pass `--strict`) |
+
+`dcw engines` shows live availability + per-engine hardening trade-offs.
+
+## Quick start
+
+```sh
+dcw create                 # interactive wizard (engine chosen first)
+dcw build my-env           # build the image
+dcw up my-env              # start a hardened container
+dcw shell my-env           # zsh into it (lands in /workspace as the vscode user)
+dcw attach my-env          # attach an SSH-remote editor (VS Code, Cursor, Zed, …)
+dcw agent claude my-env    # spawn an AI coding agent inside the container
+dcw ls                     # list environments + live status
+dcw stop my-env
+dcw rm my-env --purge --yes
 ```
 
-### Create your own devcontainer
+## AI coding agents
 
-![DevContainer Wizard](./assets/create.gif)
+Bake an agent CLI into the image by selecting it in the wizard ("AI coding agents" step)
+or via `--ai-agent`, then launch it inside the running container with `dcw agent`:
 
-```bash
-devcontainer-wizard create --name <name>
+```sh
+dcw create --name audit --framework foundry --ai-agent claude --build --up
+dcw agent claude            # opens Claude Code in the container, in /workspace
+
+dcw agent codex my-env -- --version       # forward args after `--`
+dcw agent opencode --env GITHUB_TOKEN     # forward extra host env vars
+dcw agent claude --install                # install on-demand if not baked in
 ```
 
-The wizard will prompt you for:
+Supported: `claude` (Anthropic Claude Code), `codex` (OpenAI Codex), `opencode`
+(multi-provider). `dcw agent` forwards the matching provider key from your host —
+`ANTHROPIC_API_KEY` for claude, `OPENAI_API_KEY` for codex, both for opencode (each agent
+can also use its own login flow if no key is set). Agents need network: under `network-none`
+hardening `dcw agent` warns (and fails under `--strict`).
 
-- **Devcontainer name**: defaults to the current directory name.
-- **Languages**: Solidity, Vyper.
-- **Frameworks**: Foundry, Hardhat, Ape (ApeWorX).
-- **Fuzzing & testing**: Echidna, Medusa, Halmos, Ityfuzz, Aderyn.
-- **Security tooling**: Slither, Mythril, Crytic (crytic-compile), Panoramix, Semgrep, Heimdall.
-- **System hardening**: Choose between predefined security recipes or manual configuration:
-  - **Security Recipes**: Pre-configured security profiles for common use cases
-  - **Manual Configuration**: Fine-grained control over individual security options
-- **Git repository integration**: Automatically clone a repository during container build
-  - Repository URL validation
-  - Optional branch/tag specification
-- **VS Code extensions**: Choose from curated extension collections or select your own.
-- **Save path**: where `.devcontainer/<name>` will be created.
+One-shot, non-interactive (agent-friendly):
 
-When finished, the CLI writes `Dockerfile` and `devcontainer.json` to `.devcontainer/<name>` and offers to start it immediately. It also prints the exact `devcontainer up` command you can run later.
-
-#### Security Profiles
-
-The wizard includes predefined security profiles copied from prebuilt devcontainers, so you can build your own container with custom tools and a tested security profile:
-
-- **Development**: Balanced security for daily development work
-  - *Features*: Secure temp directories, no privilege escalation, AppArmor, secure DNS, VS Code security
-
-- **Hardened**: Ephemeral workspace without copying the host folder
-  - *Features*: Ephemeral workspace, maximum capability restrictions
-
-- **Air-gapped**: Hardened profile + no network
-  - *Features*: No network, ephemeral workspace, maximum capability restrictions
-
--
-Experimental profiles:
-
-- **Network Restricted Analysis**: API access and package installs without packet crafting
-- **CI-like Local Runner**: Mirrors CI behavior with an immutable file system
-- **Package Install Session**: Install packages while maintaining security guardrails
-- **Security Research (Controlled Net)**: API testing without packet crafting capabilities
-
-#### Manual Security Hardening Options
-
-When choosing manual configuration, you have fine-grained control over:
-
-**File System Security**:
-- Read-only file system
-- Secure temp directories (noexec, nosuid flags)
-
-**Workspace Isolation**:
-- Ephemeral workspace (tmpfs mount)
-
-**Container Security**:
-- Drop all capabilities
-- No new privileges (prevents SUID/SGID escalation)
-- AppArmor profile
-
-**Network Configuration**:
-- Enhanced DNS security (Cloudflare DNS)
-- Complete network isolation
-- Disable IPv6
-- Disable raw packets (prevents packet crafting)
-
-**Application Security**:
-- VS Code security (disables auto-tasks, workspace trust, telemetry)
-
-**Resource Limits**:
-- Light (512MB, 2 cores)
-- Standard (2GB, 4 cores)  
-- Heavy (4GB, 8 cores)
-
-#### Git Repository Integration
-
-The wizard can now automatically clone a git repository during container build:
-
-- **Repository URL**: Supports `https://`, `git@`, `ssh://`, and `git://` protocols
-- **Branch/Tag Selection**: Optionally specify a specific branch or tag to clone
-- **Validation**: Built-in URL validation ensures proper git repository format
-- **Build-time Integration**: Repository is cloned into `/home/vscode/repos` during the image build and copied into `/workspace` on first start
-
-This feature is particularly useful for:
-- Setting up development environments with existing codebases
-- Workshop environments with predefined project templates
-- Audit environments with specific contract repositories
-
-#### VS Code Extensions
-
-The wizard offers curated extension collections:
-
-- **Recommended** (default): Automatically installs Tintin's Ethereum Security Bundle
-- **Custom selection**: Choose from organized collections:
-  - **Tintin's Extensions**: Security-focused tools (Ethereum Security Bundle, EthOver, WeAudit, Inline Bookmarks, Solidity Language Tools, Graphviz Preview, Decompiler)
-  - **Nomic Foundation**: Hardhat + Solidity integration
-  - **Olympix**: AI-powered smart contract analysis
-
-### Start pre-built containers
-
-![DevContainer Wizard](./assets/prebuilt.gif)
-
-Prebuilt containers are stored in the [theredguild/devcontainer](https://github.com/theredguild/devcontainer) repository.
-
-- **Start a pre-built container**:
-
-```bash
-devcontainer-wizard prebuilt --name <name>
+```sh
+dcw create --no-input --name audit \
+  --core-lang rust --framework foundry --sec slither \
+  --profile hardened --build --up --json
 ```
 
-- **List available pre-built containers**:
+## AI-native surface
 
-```bash
-devcontainer-wizard prebuilt --list
+- Every wizard step has a flag equivalent; `dcw create --no-input ...` never prompts.
+- `--json` emits structured output and machine-readable errors (`{error:{code,message}}`) with deterministic exit codes. The streaming pass-through commands (`exec`, `shell`, `logs`, `agent`) have no JSON payload — they propagate the container's exit code and accept `--json` as a no-op.
+- `--engine`, `--strict` (fail if hardening is dropped), `--yes`/`--no-input` are global.
+- `dcw schema` dumps the JSON Schema of an environment spec plus the full option vocabulary (languages, frameworks, tools, profiles, hardening, engines) so agents can discover capabilities.
+- `dcw --skill` (alias `dcw skill`) prints the bundled agent skill (`skill/SKILL.md`) — a concise guide teaching coding agents how to drive dcw. Install it once and refresh after upgrades:
+
+  ```sh
+  mkdir -p ~/.claude/skills/dcw && dcw --skill > ~/.claude/skills/dcw/SKILL.md
+  ```
+
+## Hardening
+
+`dcw create` is **hardened by default**: with neither `--profile` nor `--harden`, it applies the `development` profile. Pass `--profile none` when you explicitly want no hardening.
+
+Pick a named profile (`--profile hardened`) or individual options (`--harden drop-caps --harden readonly-os`). Options map to engine-neutral effects, then to engine-correct flags.
+
+Engines degrade in two distinct ways, and both matter:
+
+- **dropped** — the engine can't express the option at all, so it is never applied.
+- **unenforced** — the flag is passed and accepted, but the engine can't actually enforce it.
+
+Either is a warning by default and a hard failure (exit 7) under `--strict`. `dcw up --json` reports `appliedFlags`, `warnings`, `dropped` and `unenforced`; `dcw create --up --json` and `dcw attach --json` return the same data as a `hardening` object. A result showing `"dropped": []` may still have unenforced controls — check both.
+
+`--strict` also covers commands that enter an *already-running* container (`exec`, `shell`, `agent`, `attach`): they refuse rather than drop you into an environment weaker than you asked for.
+
+> [!IMPORTANT]
+> **AppArmor is not enforced on macOS.** Docker Desktop and OrbStack run containers inside a Linux VM whose daemon reports no AppArmor support — dcw probes this directly (`docker info` → `SecurityOptions`) rather than assuming it. The flag is still passed, so `apparmor` is reported as **`unenforced`**, not `dropped`. All four built-in profiles request it, so `--strict` fails closed on macOS for every one of them.
+
+## State
+
+Environments live under XDG paths:
+
+- `~/.config/dcw/environments/<name>.json` — manifest (spec + resolved tools + image/container state)
+- `~/.local/state/dcw/<name>/Containerfile` — generated build file
+
+## Development
+
+```sh
+pnpm install
+pnpm --filter @theredguild/devcontainer-wizard dev --help   # run from source (tsx)
+pnpm --filter @theredguild/devcontainer-wizard build        # tsc → dist
+pnpm --filter @theredguild/devcontainer-wizard test         # unit + wizard tests (no daemon required)
+pnpm --filter @theredguild/devcontainer-wizard test:e2e     # gated: builds + drives a real engine
 ```
 
-- **Available pre-built containers**: `minimal`,  `auditor`, `Hardened`, `paranoid`, `eth-security-toolbox`, `legacy`.
-- You will be prompted how to open it (Terminal, VS Code, or Cursor).
-
-#### GitHub Codespaces
-
-You can also run prebuilt containers using GitHub Codespaces: 
-
-[![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&template_repository=theredguild/devcontainer)
-
-## Pre-built containers
-
-- **Minimal**: Use Hardhat and Foundry, doing zero config.
-- **Auditor**: Audit smart contracts.
-- **Hardened**: Use an Hardened workspace without copying your environment.
-- **Air-gapped**: Air-gapped environment.
-- **ETH Security Toolbox**: Auditor environment with Trail of Bits selected tools.
-- **Legacy**: The Red Guild's original devcontainer.
+ESM-only (`type: module`, NodeNext) — relative imports use explicit `.js` extensions. The ink wizard is loaded only on a real TTY; the JSON / non-interactive path never touches React.
 
 ## How to contribute
 
-### Wizard
+This repo is a pnpm workspace:
 
-This repo uses pnpm workspaces with the layout:
-
-- `packages/core` → `@theredguild/devcontainer-wizard` (the actual CLI)
-- `packages/wrapper` → `devcontainer-wizard` (thin wrapper that delegates to core)
+- `packages/core` → `@theredguild/devcontainer-wizard` — the CLI
+- `packages/wrapper` → `devcontainer-wizard` — thin alias that delegates to core
 
 Getting started:
 
-- Install all deps and link workspaces: `pnpm install` (run at repo root)
-- Run a script in a workspace:
-  - Core build: `pnpm --filter @theredguild/devcontainer-wizard build`
-  - Core dev (ts-node): `pnpm --filter @theredguild/devcontainer-wizard dev`
-- Run the CLI locally:
-  - Via wrapper bin: `node packages/wrapper/bin.js`
-  - Or after install: `pnpx devcontainer-wizard`
-
-Developing wrapper against local core:
-
-- For local development, set the wrapper’s dependency to the workspace protocol so it links your local core:
-  - In `packages/wrapper/package.json`: `"@theredguild/devcontainer-wizard": "workspace:*"`
-- Re-run `pnpm install` at the root to update links.
+- `pnpm install` at the repo root installs and links everything
+- `pnpm --filter @theredguild/devcontainer-wizard dev --help` runs the CLI from
+  source via tsx. Pass CLI args directly — **no** `--` separator, since pnpm
+  forwards a literal `--` to oclif and it errors.
+- `node packages/wrapper/bin.js --help` exercises the unscoped wrapper against
+  your local core
 
 Notes:
 
-- Root `package.json` declares `workspaces: ["packages/*"]` and `packageManager: "pnpm@8"`.
-- The project uses pnpm as the primary package manager for workspace management.
-- Package publishing is done securely using Github Actions and Trusted Publishers. Check [this article ↗](https://blog.theredguild.org/how-to-npm-and-avoid-getting-rekt/) for more information.
-
-### Pre-built containers
-
-We welcome contributions to the pre-built containers! To get started:
-
-1. **Fork the [theredguild/devcontainer](https://github.com/theredguild/devcontainer) repository** and clone it to your machine.
-2. **Make your changes** in a new branch.
-3. **Test your changes** locally.
-4. **Commit and push** your branch.
-5. **Open a pull request** with a clear description of your changes.
+- Packages are published from GitHub Actions using npm Trusted Publishers, on
+  `v*` tags. See [this article ↗](https://blog.theredguild.org/how-to-npm-and-avoid-getting-rekt/).
+- The wrapper depends on core via `workspace:*`, so it always links your local
+  build during development.
