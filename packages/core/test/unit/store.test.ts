@@ -95,3 +95,17 @@ describe('store', () => {
     expect(leftovers).toEqual([])
   })
 })
+
+describe('manifest filename/name consistency', () => {
+  it('rejects a manifest whose inner name does not match its filename', async () => {
+    // Commands key off the filename but then act on the manifest's inner name, so a
+    // mismatch lets `dcw build a` build, tag and persist state for environment `b`
+    // — silently clobbering another environment's namespace. listManifests() already
+    // skips these; loadManifest() must not hand one back.
+    await saveManifest(fixture('inner'))
+    await fs.writeFile(manifestPath('outer'), JSON.stringify(fixture('inner'), null, 2))
+    await expect(loadManifest('outer')).rejects.toThrow(ValidationError)
+    // The correctly-named one still loads.
+    expect((await loadManifest('inner'))?.name).toBe('inner')
+  })
+})

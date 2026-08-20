@@ -10,10 +10,24 @@ export function hashContainerfile(content: string): string {
   return createHash('sha256').update(content, 'utf8').digest('hex')
 }
 
+/** Owner-only modes for dcw state. Manifests record `appliedFlags`, which embed the
+ *  absolute workspace path, repo URL and tooling choices — not other local accounts'
+ *  business — so state is kept private rather than inheriting a 022 umask (0644/0755). */
+const DIR_MODE = 0o700
+const FILE_MODE = 0o600
+
 async function atomicWrite(filePath: string, content: string): Promise<void> {
-  await fs.mkdir(path.dirname(filePath), { recursive: true })
+  const dir = path.dirname(filePath)
+  await fs.mkdir(dir, { recursive: true, mode: DIR_MODE })
+  // `mode` on mkdir applies only to directories it CREATES (and is umask-masked), so
+  // a dcw dir left 0755 by an older version would stay world-readable forever.
+  await fs.chmod(dir, DIR_MODE).catch(() => undefined)
   const tmp = `${filePath}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`
-  await fs.writeFile(tmp, content)
+  await fs.writeFile(tmp, content, { mode: FILE_MODE })
+  // `mode` on writeFile is masked by the umask and ignored if the temp file were to
+  // pre-exist; chmod before the rename so the published file is always 0600 — and so
+  // rewriting an env whose manifest was previously world-readable tightens it.
+  await fs.chmod(tmp, FILE_MODE)
   await fs.rename(tmp, filePath)
 }
 
@@ -53,7 +67,18 @@ export async function loadManifest(name: string): Promise<EnvManifest | null> {
   }
 
   try {
-    return migrateManifest(json, ver.data.schemaVersion)
+    const parsed = migrateManifest(json, ver.data.schemaVersion)
+    // Commands resolve an environment by FILENAME but then act on the manifest's
+    // inner `name` (image tag, container name, state dir). A mismatch therefore
+    // lets `dcw build outer` build and persist state for `inner`, silently
+    // clobbering another environment's namespace. listManifests() already skips
+    // these; refuse to hand one back here too.
+    if (parsed.name !== name) {
+      throw new ValidationError(
+        `Manifest file '${name}.json' declares a different environment name ('${parsed.name}'); refusing to use it.`,
+      )
+    }
+    return parsed
   } catch (err) {
     if (err instanceof ValidationError) throw err
     const issue = (err as { issues?: { message?: string }[] }).issues?.[0]?.message

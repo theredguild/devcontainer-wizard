@@ -22,25 +22,42 @@ export default class Ls extends BaseCommand {
     const { flags } = await this.parse(Ls)
     const manifests = await listManifests()
 
-    // Best-effort live reconciliation; tolerate a missing/unavailable engine.
-    let containers: ContainerInfo[] = []
-    try {
-      const { driver } = await resolveEngineFor({ requested: flags.engine })
-      containers = await driver.ps({ all: true })
-    } catch {
-      containers = []
+    // Reconcile each environment against ITS OWN engine. Probing a single
+    // auto-detected engine reported every env created on a different one as
+    // 'absent' even while its container was running.
+    const byEngine = new Map<string | null, ContainerInfo[]>()
+    const unreachable = new Set<string | null>()
+    const targets = flags.engine
+      ? new Set<string | null>([flags.engine])
+      : new Set<string | null>(manifests.map((m) => m.engine ?? m.spec.engine ?? null))
+
+    for (const engine of targets) {
+      try {
+        const { driver } = await resolveEngineFor({
+          requested: flags.engine,
+          manifestEngine: engine ?? undefined,
+        })
+        byEngine.set(engine, await driver.ps({ all: true }))
+      } catch {
+        // Engine missing or its daemon is down: we genuinely do not know whether
+        // those containers exist, so record it rather than asserting 'absent'.
+        unreachable.add(engine)
+      }
     }
-    const byName = new Map(containers.map((c) => [c.name, c]))
 
     const environments: EnvRow[] = manifests.map((m) => {
-      const live = byName.get(containerName(m.name))
+      const key: string | null = flags.engine ?? m.engine ?? m.spec.engine ?? null
+      const live = (byEngine.get(key) ?? []).find((c) => c.name === containerName(m.name))
       const status = live
         ? /up|running/i.test(live.status)
           ? 'running'
           : 'stopped'
-        : m.container
-          ? 'absent'
-          : 'never-started'
+        : !m.container
+          ? 'never-started'
+          : unreachable.has(key)
+            ? // Distinguish "the engine could not tell us" from "it is gone".
+              'unknown'
+            : 'absent'
       return {
         name: m.name,
         engine: m.engine,

@@ -45,16 +45,29 @@ export default class Rm extends BaseCommand {
       this.warn(`${err.message} Purging the invalid record anyway.`)
     }
 
-    const { driver } = await resolveEngineFor({
-      requested: flags.engine,
-      manifestEngine: manifest?.engine ?? manifest?.spec.engine,
-    })
+    // Purging is mostly local-state work, so it must not be held hostage by the
+    // engine: if Docker was uninstalled or its daemon is down, `dcw rm --purge`
+    // would otherwise fail with E_NO_ENGINE and leave the environment permanently
+    // undeletable. Resolve best-effort under --purge and skip container removal.
+    let driver: Awaited<ReturnType<typeof resolveEngineFor>>['driver'] | undefined
+    try {
+      ;({ driver } = await resolveEngineFor({
+        requested: flags.engine,
+        manifestEngine: manifest?.engine ?? manifest?.spec.engine,
+      }))
+    } catch (err) {
+      if (!flags.purge) throw err
+      this.warn(
+        `${err instanceof Error ? err.message : String(err)} Purging local state anyway; ` +
+          'any leftover container must be removed with your engine directly.',
+      )
+    }
 
     // Remove the container only when one is actually present. A missing/already-
     // removed container is a benign no-op; a genuine engine failure surfaces as a
     // typed DcwError rather than being swallowed.
     let removedContainer = false
-    if (!manifest || manifest.container) {
+    if (driver && (!manifest || manifest.container)) {
       const target = manifest?.container?.id ?? containerName(name)
       const present = await driver.ps({ label: `${ENV_LABEL}=${name}`, all: true })
       if (present.length > 0) {
