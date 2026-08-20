@@ -54,9 +54,6 @@ importers:
 
   packages/wrapper:
     dependencies:
-      '@oclif/core':
-        specifier: ^4.5.2
-        version: 4.5.2
       '@theredguild/devcontainer-wizard':
         specifier: workspace:*
         version: link:../core
