@@ -1,0 +1,110 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generateContainerfile > is stable for a fixed selection (snapshot) 1`] = `
+"# syntax=docker/dockerfile:1.8
+# check=error=true
+
+# Base image: Debian 13 (trixie) — current Debian stable
+FROM debian:trixie
+
+# Base packages (git replaces the old devcontainer git feature)
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \\
+      bash-completion \\
+      build-essential \\
+      ca-certificates \\
+      curl \\
+      git \\
+      gnupg \\
+      jq \\
+      locales \\
+      pkg-config \\
+      sudo \\
+      unzip \\
+      vim \\
+      wget \\
+      zsh \\
+      && rm -rf /var/lib/apt/lists/*
+
+# Create the non-root 'vscode' user (uid 1000) with zsh + passwordless sudo
+RUN useradd --create-home --shell /usr/bin/zsh --uid 1000 vscode \\
+      && usermod -aG sudo vscode \\
+      && echo 'vscode ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/vscode \\
+      && chmod 0440 /etc/sudoers.d/vscode \\
+      && mkdir -p /workspace && chown vscode:vscode /workspace
+
+# Install Python build dependencies
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \\
+      python3-pip \\
+      libpython3-dev \\
+      python3-dev \\
+      python3-venv \\
+      && rm -rf /var/lib/apt/lists/*
+
+# Switch to vscode (drop privileges)
+USER vscode
+WORKDIR /home/vscode
+ENV HOME=/home/vscode
+# Update PATH
+ENV USR_LOCAL_BIN=/usr/local/bin
+ENV LOCAL_BIN=\${HOME}/.local/bin
+ENV PNPM_HOME=\${HOME}/.local/share/pnpm
+ENV PATH=\${PATH}:\${USR_LOCAL_BIN}:\${LOCAL_BIN}:\${PNPM_HOME}
+# Ensure ~/.local/bin, ~/.zshrc, and the dcw install-report dir exist
+RUN mkdir -p \${HOME}/.local/bin \${HOME}/.dcw && touch \${HOME}/.zshrc
+
+# OpenSSH server for editor attach over SSH (rootless \`sshd -i\`).
+RUN sudo apt-get update \\
+      && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \\
+           openssh-server \\
+      && sudo rm -rf /var/lib/apt/lists/* \\
+      && mkdir -p \${HOME}/.ssh && chmod 700 \${HOME}/.ssh \\
+      && ssh-keygen -q -t ed25519 -N "" -f \${HOME}/.ssh/ssh_host_ed25519_key \\
+      && touch \${HOME}/.ssh/authorized_keys && chmod 600 \${HOME}/.ssh/authorized_keys \\
+      && printf "%s\\n" \\
+           "HostKey /home/vscode/.ssh/ssh_host_ed25519_key" \\
+           "PidFile /home/vscode/.ssh/sshd.pid" \\
+           "UsePAM no" \\
+           "PasswordAuthentication no" \\
+           "PubkeyAuthentication yes" \\
+           "AuthorizedKeysFile /home/vscode/.ssh/authorized_keys" \\
+           "Subsystem sftp internal-sftp" \\
+           "AllowTcpForwarding yes" \\
+           "PermitUserEnvironment no" \\
+           "StrictModes no" \\
+           "LogLevel QUIET" \\
+         | sudo tee /etc/ssh/sshd_config.dcw > /dev/null
+
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV UV_LOCAL_BIN=$HOME/.cargo/bin
+ENV PATH=\${PATH}:\${USR_LOCAL_BIN}:\${LOCAL_BIN}:\${PNPM_HOME}:\${UV_LOCAL_BIN}
+# Install Python 3.12 with uv
+RUN uv python install 3.12
+
+# Use zsh for subsequent RUN commands
+ENV SHELL=/usr/bin/zsh
+SHELL ["/bin/zsh", "-ic"]
+
+# Install rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="$HOME/.cargo/bin:$PATH"
+
+# Install foundry (best-effort)
+# Install Foundry
+RUN ( curl -fsSL https://foundry.paradigm.xyz | zsh &&     echo 'export PATH="$HOME/.foundry/bin:$PATH"' >> ~/.zshrc &&     export PATH="$HOME/.foundry/bin:$PATH" &&     ~/.foundry/bin/foundryup ) && echo "foundry=ok" >> /home/vscode/.dcw/report || { echo "foundry=fail" >> /home/vscode/.dcw/report; echo "dcw: foundry install failed (continuing)" >&2; }
+
+# Install slither (best-effort)
+# Install Slither (via uv tool)
+RUN ( uv tool install slither-analyzer ) && echo "slither=ok" >> /home/vscode/.dcw/report || { echo "slither=fail" >> /home/vscode/.dcw/report; echo "dcw: slither install failed (continuing)" >&2; }
+
+# Final setup
+RUN echo 'Development environment ready!' && \\
+    echo 'Tools installed:' && \\
+    ls -la $HOME/.local/bin/ || true
+
+# Tool install report (best-effort installs)
+RUN echo '--- dcw tool install report ---' && cat /home/vscode/.dcw/report 2>/dev/null || true
+
+WORKDIR /workspace
+"
+`;
