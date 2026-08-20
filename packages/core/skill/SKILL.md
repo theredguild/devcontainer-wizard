@@ -2,7 +2,7 @@
 name: dcw
 description: >-
   Use when the user wants to create, build, run, shell into, or manage a Web3
-  dev/audit container environment with dcw (devcontainer-wizard / @theredguild/dcw).
+  dev/audit container environment with dcw (@theredguild/devcontainer-wizard).
   Triggers on mentions of "dcw", "devcontainer wizard", spinning up a hardened
   container for foundry/hardhat/slither/echidna/medusa etc., or driving dcw
   non-interactively from an agent. Covers the full command surface, flag
@@ -11,7 +11,7 @@ description: >-
 
 # dcw — container environment wizard
 
-`dcw` (`@theredguild/dcw`) is an **editor-agnostic, shell-first, AI-native** container
+`dcw` (`@theredguild/devcontainer-wizard`) is an **editor-agnostic, shell-first, AI-native** container
 environment wizard for Web3 development and smart-contract auditing. It authors a dev
 environment (interactively via an ink TUI, or fully from flags), builds a plain-Debian
 image on whatever container engine is available, runs it **hardened**, and manages its
@@ -197,17 +197,17 @@ Environments live under XDG paths:
 Global install:
 
 ```sh
-npm install -g @theredguild/dcw   # or: pnpm add -g @theredguild/dcw
+npm install -g @theredguild/devcontainer-wizard   # or: pnpm add -g @theredguild/devcontainer-wizard
 ```
 
 From the repo (runs source via tsx — pass CLI args directly, **no** `--`
 separator; pnpm forwards a literal `--` to oclif and it errors):
 
 ```sh
-pnpm --filter @theredguild/dcw dev --help
-pnpm --filter @theredguild/dcw dev schema
-pnpm --filter @theredguild/dcw dev engines
-pnpm --filter @theredguild/dcw build     # tsc → dist
-pnpm --filter @theredguild/dcw test      # unit + wizard tests (no daemon)
-pnpm --filter @theredguild/dcw test:e2e  # gated: drives a real container engine
+pnpm --filter @theredguild/devcontainer-wizard dev --help
+pnpm --filter @theredguild/devcontainer-wizard dev schema
+pnpm --filter @theredguild/devcontainer-wizard dev engines
+pnpm --filter @theredguild/devcontainer-wizard build     # tsc → dist
+pnpm --filter @theredguild/devcontainer-wizard test      # unit + wizard tests (no daemon)
+pnpm --filter @theredguild/devcontainer-wizard test:e2e  # gated: drives a real container engine
 ```

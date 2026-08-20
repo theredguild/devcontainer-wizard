@@ -1,8 +1,29 @@
-# dcw — container environment wizard (rehaul)
+# dcw — container environment wizard
 
-A complete rehaul of `devcontainer-wizard`: an **editor-agnostic, shell-first** container environment wizard built on **oclif + ink**. It authors a Web3 dev environment (interactively or from flags), builds an image on whatever container engine you have, runs it **hardened**, and manages its lifecycle — for humans and agents alike.
+An **editor-agnostic, shell-first** container environment wizard built on **oclif + ink**. It authors a Web3 dev environment (interactively or from flags), builds an image on whatever container engine you have, runs it **hardened**, and manages its lifecycle — for humans and agents alike.
 
-Unlike the original, this tool does **not** generate `devcontainer.json`. It builds a plain-Debian image and runs a hardened container you `shell` into. Security hardening is translated into engine-correct `run` flags, degrading gracefully when an engine can't honor an option.
+As of v2 this tool does **not** generate `devcontainer.json`. It builds a plain-Debian image and runs a hardened container you `shell` into. Security hardening is translated into engine-correct `run` flags, degrading gracefully when an engine can't honor an option.
+
+> [!IMPORTANT]
+> Containers improve your workflow, but they are **not a fully secure sandbox**.
+> If you need to run untrusted or suspicious code, use GitHub Codespaces, GitPod,
+> or a similar remote setup — **never run it directly on your machine**.
+
+## Install
+
+```sh
+npm i -g @theredguild/devcontainer-wizard   # or: pnpm add -g @theredguild/devcontainer-wizard
+```
+
+This installs two binaries — `dcw` and `devcontainer-wizard` — pointing at the same CLI.
+Everything below uses `dcw`.
+
+## Upgrading from v1
+
+v1 generated a `devcontainer.json` for VS Code. v2 does not: it builds and runs
+hardened containers directly, and every command is new. There is no automatic
+migration — v1 configs are not read. Pin `@theredguild/devcontainer-wizard@1`
+if you still need the old wizard.
 
 ## Supported engines
 
@@ -84,10 +105,10 @@ Environments live under XDG paths:
 
 ```sh
 pnpm install
-pnpm dev -- --help     # run from source (tsx)
-pnpm build             # tsc → dist
-pnpm test              # unit + wizard tests (no daemon required)
-pnpm test:e2e          # gated: builds + drives a real container engine
+pnpm --filter @theredguild/devcontainer-wizard dev --help   # run from source (tsx)
+pnpm --filter @theredguild/devcontainer-wizard build        # tsc → dist
+pnpm --filter @theredguild/devcontainer-wizard test         # unit + wizard tests (no daemon required)
+pnpm --filter @theredguild/devcontainer-wizard test:e2e     # gated: builds + drives a real engine
 ```
 
 ESM-only (`type: module`, NodeNext) — relative imports use explicit `.js` extensions. The ink wizard is loaded only on a real TTY; the JSON / non-interactive path never touches React.
