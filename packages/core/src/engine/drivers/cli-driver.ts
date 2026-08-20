@@ -121,7 +121,9 @@ export abstract class CliDriver implements EngineDriver {
 
     const res = await capture(this.bin, args)
     if (res.code !== 0) this.fail('run', res.stderr)
-    return { containerId: res.stdout.trim().split('\n').pop() ?? '' }
+    // `slice(-1).join('')` is the last line (or '' for empty output) with no
+    // `pop() ?? ''` arm that no input can reach.
+    return { containerId: res.stdout.trim().split('\n').slice(-1).join('') }
   }
 
   protected execArgv(spec: ExecSpec): string[] {

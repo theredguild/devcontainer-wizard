@@ -25,17 +25,19 @@ export default class Ls extends BaseCommand {
     // Reconcile each environment against ITS OWN engine. Probing a single
     // auto-detected engine reported every env created on a different one as
     // 'absent' even while its container was running.
-    const byEngine = new Map<string | null, ContainerInfo[]>()
-    const unreachable = new Set<string | null>()
+    // `spec.engine` carries a schema default of 'auto', so every manifest names an
+    // engine target even before one has been resolved — no null key is possible.
+    const byEngine = new Map<string, ContainerInfo[]>()
+    const unreachable = new Set<string>()
     const targets = flags.engine
-      ? new Set<string | null>([flags.engine])
-      : new Set<string | null>(manifests.map((m) => m.engine ?? m.spec.engine ?? null))
+      ? new Set<string>([flags.engine])
+      : new Set<string>(manifests.map((m) => m.engine ?? m.spec.engine))
 
     for (const engine of targets) {
       try {
         const { driver } = await resolveEngineFor({
           requested: flags.engine,
-          manifestEngine: engine ?? undefined,
+          manifestEngine: engine,
         })
         byEngine.set(engine, await driver.ps({ all: true }))
       } catch {
@@ -46,7 +48,7 @@ export default class Ls extends BaseCommand {
     }
 
     const environments: EnvRow[] = manifests.map((m) => {
-      const key: string | null = flags.engine ?? m.engine ?? m.spec.engine ?? null
+      const key: string = flags.engine ?? m.engine ?? m.spec.engine
       const live = (byEngine.get(key) ?? []).find((c) => c.name === containerName(m.name))
       const status = live
         ? /up|running/i.test(live.status)

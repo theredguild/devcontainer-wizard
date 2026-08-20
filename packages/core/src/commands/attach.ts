@@ -194,20 +194,18 @@ export default class Attach extends BaseCommand {
     }
 
     // Prefer the translation actually applied when we started the container; else
-    // the state recorded for the container we reused.
-    const hardening: HardeningReport = startedHardening ??
-      reusedHardening ?? {
-        appliedFlags: manifest.container?.appliedFlags ?? [],
-        warnings: [],
-        dropped: manifest.container?.droppedHardening ?? [],
-        unenforced: manifest.container?.unenforcedHardening ?? [],
-      }
+    // the state recorded for the container we reused. Neither is set only when a
+    // container is reported running but the manifest has no record of one — there
+    // is nothing to report about it, so the report is empty rather than invented.
+    const EMPTY_REPORT: HardeningReport = { appliedFlags: [], warnings: [], dropped: [], unenforced: [] }
+    const hardening: HardeningReport = startedHardening ?? reusedHardening ?? EMPTY_REPORT
 
     const sshCmd = `ssh ${alias}`
     if (!this.jsonEnabled()) {
       this.log(`Ready: ${alias} (${mode === 'port' ? `localhost:${port}` : 'exec proxy'}) on ${driver.displayName}.`)
+      // An explicitly requested editor that fails to launch has already thrown
+      // above, so there is no "could not launch" case left to report here.
       if (launched && editor) this.log(`Launched ${editorDisplayName(editor)} → ${flags.folder}.`)
-      else if (editor && flags.editor) this.log(`Could not launch ${editorDisplayName(editor)}.`)
       this.log(`\nConnect manually:  ${sshCmd}`)
       this.log(`VS Code / Cursor:  code --remote ssh-remote+${alias} ${flags.folder}`)
       this.log(`Zed:               zed ssh://${alias}${flags.folder}`)

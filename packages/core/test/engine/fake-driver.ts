@@ -8,6 +8,7 @@ import type {
   EngineDriver,
   EngineName,
   ExecSpec,
+  LogsOptions,
   PsFilter,
   RunSpec,
 } from '../../src/engine/types.js'
@@ -19,6 +20,10 @@ export interface FakeDriverOptions {
   capabilities?: EngineCapabilities
   /** Result the report probe (`runOnce`) returns; defaults to a clean read. */
   runOnceResult?: { stdout: string; code: number }
+  /** Exit code `exec` reports (the container's own status). Defaults to 0. */
+  execResult?: number
+  /** Exit code `logs` reports. Defaults to 0. */
+  logsResult?: number
 }
 
 /** In-memory EngineDriver that records the specs it receives — no real daemon. */
@@ -28,6 +33,8 @@ export class FakeDriver implements EngineDriver {
   readonly capabilities: EngineCapabilities
   private readonly detectResult: DetectResult
   private readonly runOnceResult: { stdout: string; code: number }
+  private readonly execResult: number
+  private readonly logsResult: number
 
   builds: BuildSpec[] = []
   runs: RunSpec[] = []
@@ -41,6 +48,8 @@ export class FakeDriver implements EngineDriver {
     this.capabilities = opts.capabilities ?? caps()
     this.detectResult = opts.detect ?? { available: true, version: 'fake-1.0' }
     this.runOnceResult = opts.runOnceResult ?? { stdout: '', code: 0 }
+    this.execResult = opts.execResult ?? 0
+    this.logsResult = opts.logsResult ?? 0
   }
 
   async detect(): Promise<DetectResult> {
@@ -59,7 +68,7 @@ export class FakeDriver implements EngineDriver {
 
   async exec(spec: ExecSpec): Promise<number> {
     this.execs.push(spec)
-    return 0
+    return this.execResult
   }
 
   async execCapture(spec: ExecSpec): Promise<CaptureResult> {
@@ -79,8 +88,11 @@ export class FakeDriver implements EngineDriver {
     return []
   }
 
-  async logs(): Promise<number> {
-    return 0
+  logsCalls: Array<{ id: string; opts?: LogsOptions }> = []
+
+  async logs(id: string, opts?: LogsOptions): Promise<number> {
+    this.logsCalls.push({ id, opts })
+    return this.logsResult
   }
 
   runOnces: Array<{ image: string; cmd: string[]; flags: string[] }> = []

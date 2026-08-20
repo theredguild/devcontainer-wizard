@@ -63,12 +63,18 @@ const READONLY_TMPFS: Array<{ target: string; opts: string }> = [
 ]
 
 /** Parse a tmpfs `size=` option into bytes for comparison (Infinity if absent). */
-function tmpfsSizeBytes(opts: string): number {
-  const m = /size=(\d+)([kmg]?)/i.exec(opts)
+export function tmpfsSizeBytes(opts: string): number {
+  // Match the whole `size=<n><unit>` token rather than capture groups: index 0 of
+  // a RegExpExecArray is typed `string`, so splitting the token by hand avoids an
+  // optional-group fallback that no input could ever take.
+  const m = /size=\d+[kmg]?/i.exec(opts)
   if (!m) return Number.POSITIVE_INFINITY
-  const unit = (m[2] ?? '').toLowerCase()
+  const token = m[0].slice('size='.length).toLowerCase()
+  const suffixed = /[kmg]$/.test(token)
+  const unit = suffixed ? token.slice(-1) : ''
+  const digits = suffixed ? token.slice(0, -1) : token
   const mult = unit === 'g' ? 1024 ** 3 : unit === 'm' ? 1024 ** 2 : unit === 'k' ? 1024 : 1
-  return Number(m[1]) * mult
+  return Number(digits) * mult
 }
 
 /**

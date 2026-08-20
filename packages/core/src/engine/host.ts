@@ -33,7 +33,7 @@ export async function detectHost(): Promise<HostInfo> {
   if (hostOS === 'macos') {
     const res = await capture('sw_vers', ['-productVersion'])
     if (!res.spawnError && res.code === 0) {
-      const major = Number.parseInt(res.stdout.trim().split('.')[0] ?? '', 10)
+      const major = Number.parseInt(res.stdout.trim().split('.', 1).join(''), 10)
       if (Number.isFinite(major)) info.macosMajor = major
     }
   }

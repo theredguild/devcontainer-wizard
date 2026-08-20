@@ -133,18 +133,24 @@ export function App({ initial, engines, onComplete, onCancel }: AppProps) {
             onBack={back}
           />
         )
+      // Every multi-select step renders the same component type at the same
+      // position, so without a distinct key React reuses one instance across all
+      // six: its `initial`-seeded state is read once and never again. That
+      // silently dropped every flag-seeded selection past the first category
+      // (`dcw create --lang solidity` reached the wizard and came back empty) and
+      // leaked the cursor row from one step into the next.
       case 2:
-        return <MultiSelect items={toItems(CORE_LANGUAGES)} initial={draft.coreLanguages} onSubmit={(v) => { patch({ coreLanguages: v }); next() }} onBack={back} />
+        return <MultiSelect key="coreLanguages" items={toItems(CORE_LANGUAGES)} initial={draft.coreLanguages} onSubmit={(v) => { patch({ coreLanguages: v }); next() }} onBack={back} />
       case 3:
-        return <MultiSelect items={toItems(LANGUAGES)} initial={draft.languages} onSubmit={(v) => { patch({ languages: v }); next() }} onBack={back} />
+        return <MultiSelect key="languages" items={toItems(LANGUAGES)} initial={draft.languages} onSubmit={(v) => { patch({ languages: v }); next() }} onBack={back} />
       case 4:
-        return <MultiSelect items={toItems(FRAMEWORKS)} initial={draft.frameworks} onSubmit={(v) => { patch({ frameworks: v }); next() }} onBack={back} />
+        return <MultiSelect key="frameworks" items={toItems(FRAMEWORKS)} initial={draft.frameworks} onSubmit={(v) => { patch({ frameworks: v }); next() }} onBack={back} />
       case 5:
-        return <MultiSelect items={toItems(FUZZING_AND_TESTING)} initial={draft.fuzzingAndTesting} onSubmit={(v) => { patch({ fuzzingAndTesting: v }); next() }} onBack={back} />
+        return <MultiSelect key="fuzzingAndTesting" items={toItems(FUZZING_AND_TESTING)} initial={draft.fuzzingAndTesting} onSubmit={(v) => { patch({ fuzzingAndTesting: v }); next() }} onBack={back} />
       case 6:
-        return <MultiSelect items={toItems(SECURITY_TOOLING)} initial={draft.securityTooling} onSubmit={(v) => { patch({ securityTooling: v }); next() }} onBack={back} />
+        return <MultiSelect key="securityTooling" items={toItems(SECURITY_TOOLING)} initial={draft.securityTooling} onSubmit={(v) => { patch({ securityTooling: v }); next() }} onBack={back} />
       case 7:
-        return <MultiSelect items={toItems(AI_AGENTS)} initial={draft.aiAgents} onSubmit={(v) => { patch({ aiAgents: v }); next() }} onBack={back} />
+        return <MultiSelect key="aiAgents" items={toItems(AI_AGENTS)} initial={draft.aiAgents} onSubmit={(v) => { patch({ aiAgents: v }); next() }} onBack={back} />
       case 8:
         return (
           <HardeningStep
@@ -164,14 +170,14 @@ export function App({ initial, engines, onComplete, onCancel }: AppProps) {
             onBack={back}
           />
         )
-      default:
-        return null
     }
+    // useStepNav clamps `index` to the declared steps, so there is no other case;
+    // an out-of-range index would simply render nothing.
   }
 
   return (
     <Box flexDirection="column">
-      <Banner step={index} total={STEP_TITLES.length} title={STEP_TITLES[index] ?? ''} />
+      <Banner step={index} total={STEP_TITLES.length} title={STEP_TITLES[index]} />
       {renderStep()}
     </Box>
   )

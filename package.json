@@ -7,6 +7,8 @@
     "test": "pnpm --filter @theredguild/devcontainer-wizard test",
     "test:watch": "pnpm --filter @theredguild/devcontainer-wizard test:watch",
     "test:e2e": "pnpm --filter @theredguild/devcontainer-wizard test:e2e",
+    "test:coverage": "pnpm --filter @theredguild/devcontainer-wizard test:coverage",
+    "typecheck": "pnpm --filter @theredguild/devcontainer-wizard typecheck",
     "clean": "pnpm --filter @theredguild/devcontainer-wizard clean"
   },
   "dependencies": {

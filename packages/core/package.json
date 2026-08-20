@@ -44,6 +44,8 @@
     "dev": "node --import tsx bin/dev.js",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc -p tsconfig.test.json",
     "test:e2e": "pnpm build && DCW_E2E=1 vitest run test/e2e",
     "clean": "rm -rf dist",
     "prepack": "pnpm run build && oclif manifest",
@@ -59,6 +61,7 @@
   "devDependencies": {
     "@types/node": "^18.19.0",
     "@types/react": "^18.3.12",
+    "@vitest/coverage-v8": "^2.1.9",
     "ink-testing-library": "^4.0.0",
     "oclif": "^4.5.0",
     "tsx": "^4.19.2",

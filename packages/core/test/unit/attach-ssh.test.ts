@@ -23,7 +23,7 @@ function builtManifest(s: EnvSpec): EnvManifest {
     spec: s,
     resolved: { requiredTools: [], hardeningKeys: s.hardening },
     engine: 'docker',
-    image: { tag: `dcw/${s.name}:latest`, id: 'sha256:x', containerfileHash: 'h', builtAt: NOW },
+    image: { tag: `dcw/${s.name}:latest`, imageId: 'sha256:x', containerfileHash: 'h', builtAt: NOW },
     container: null,
   }
 }

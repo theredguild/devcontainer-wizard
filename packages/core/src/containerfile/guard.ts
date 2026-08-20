@@ -20,7 +20,9 @@ const DIRECTIVES = ['RUN', 'ENV', 'WORKDIR', 'USER', 'COPY', 'ADD', 'ARG', 'LABE
 function startsInstruction(line: string): boolean {
   const trimmed = line.trim()
   if (trimmed === '' || trimmed.startsWith('#')) return false
-  const first = trimmed.split(/\s+/)[0] ?? ''
+  // `split(re, 1).join('')` yields the first token without an indexed access, so
+  // there is no unreachable `?? ''` arm to satisfy noUncheckedIndexedAccess with.
+  const first = trimmed.split(/\s+/, 1).join('')
   return DIRECTIVES.includes(first)
 }
 
