@@ -78,7 +78,8 @@ export const UV_INSTALL = [
   '# Install uv',
   'RUN curl -LsSf https://astral.sh/uv/install.sh | sh',
   'ENV UV_LOCAL_BIN=$HOME/.cargo/bin',
-  'ENV PATH=${PATH}:${USR_LOCAL_BIN}:${LOCAL_BIN}:${PNPM_HOME}:${UV_LOCAL_BIN}',
+  '# Only the new entry is appended — the rest are already on PATH from USER_ENV.',
+  'ENV PATH=${PATH}:${UV_LOCAL_BIN}',
   '# Install Python 3.12 with uv',
   'RUN uv python install 3.12',
 ]

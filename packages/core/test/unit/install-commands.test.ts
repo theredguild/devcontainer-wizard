@@ -30,9 +30,25 @@ describe('install snippets', () => {
     expect(INSTALL_COMMANDS.node).not.toMatch(/install\.sh\s*\|\s*bash/)
   })
 
-  it('node puts both $PNPM_HOME and $PNPM_HOME/bin on PATH', () => {
-    // pnpm links global bins into $PNPM_HOME itself, but refuses to run
-    // `pnpm install -g` unless $PNPM_HOME/bin is also on PATH.
-    expect(INSTALL_COMMANDS.node).toContain('ENV PATH=${PATH}:${PNPM_HOME}:${PNPM_HOME}/bin')
+  it("node bakes nvm's bin dir into the image PATH, not just a shell rc", () => {
+    // Upstream's install.sh puts node under $NVM_DIR (/usr/local/share/nvm) and
+    // only sources it from ~/.zshrc, so a non-interactive `dcw exec <env> -- node`
+    // — and every `#!/usr/bin/env node` shebang in an npm/pnpm global bin — fails
+    // with "node: not found". It exports NVM_SYMLINK_CURRENT=true, so
+    // $NVM_DIR/current is a stable symlink to the default version.
+    expect(INSTALL_COMMANDS.node).toContain('ENV NVM_DIR=/usr/local/share/nvm')
+    expect(INSTALL_COMMANDS.node).toContain('${NVM_DIR}/current/bin')
+    expect(INSTALL_COMMANDS.node).toMatch(/^ENV PATH=\$\{NVM_DIR\}\/current\/bin:/m)
+  })
+
+  it('node puts $PNPM_HOME/bin on PATH', () => {
+    // pnpm links global bins into $PNPM_HOME (already exported and on PATH by the
+    // base image), but refuses to run `pnpm install -g` unless $PNPM_HOME/bin is
+    // on PATH too.
+    expect(INSTALL_COMMANDS.node).toContain('${PNPM_HOME}/bin')
+    // …and does not re-export or re-append $PNPM_HOME itself: the base image
+    // already did, and chained `ENV PATH=${PATH}:…` lines duplicate entries.
+    expect(INSTALL_COMMANDS.node).not.toMatch(/^ENV PNPM_HOME=/m)
+    expect(INSTALL_COMMANDS.node).not.toMatch(/\$\{PNPM_HOME\}(?!\/bin)/)
   })
 })

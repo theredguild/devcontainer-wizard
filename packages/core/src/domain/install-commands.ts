@@ -45,11 +45,17 @@ USER root
 RUN curl -fsSL -o /tmp/node-install.sh https://raw.githubusercontent.com/devcontainers/features/main/src/node/install.sh && HOME=/root bash /tmp/node-install.sh && rm -f /tmp/node-install.sh
 RUN mkdir -p \${HOME}/.npm && chown -R vscode:vscode \${HOME}/.npm
 USER vscode
-ENV PNPM_HOME=\${HOME}/.local/share/pnpm
-# pnpm drops global bins straight into \$PNPM_HOME, but its own preflight check
-# refuses to run a global install unless \$PNPM_HOME/bin is on PATH too, so both
-# have to be listed or 'pnpm install -g' aborts with "not in PATH".
-ENV PATH=\${PATH}:\${PNPM_HOME}:\${PNPM_HOME}/bin
+# Upstream installs node under nvm at /usr/local/share/nvm and only exposes it
+# through a snippet appended to the shell rc files, so node/npm/npx/corepack/pnpm
+# are invisible to any non-interactive command ('dcw exec <env> -- node -v', an
+# npm bin's '#!/usr/bin/env node' shebang, sshd exec channels). The script sets
+# NVM_SYMLINK_CURRENT=true, so \$NVM_DIR/current is a stable symlink to the
+# default version's install dir — bake its bin dir into the image PATH.
+# \$PNPM_HOME is already exported and on PATH from the base image; pnpm links its
+# global bins straight into \$PNPM_HOME, but its own preflight check refuses to
+# run a global install unless \$PNPM_HOME/bin is on PATH too, so add that here.
+ENV NVM_DIR=/usr/local/share/nvm
+ENV PATH=\${NVM_DIR}/current/bin:\${PATH}:\${PNPM_HOME}/bin
   `,
   // Frameworks
   foundry: `
@@ -158,7 +164,8 @@ ENV PATH="/home/vscode/.cyfrin/bin:$PATH"
 RUN /bin/zsh -c "source ~/.zshrc && (~/.cyfrin/bin/cyfrinup || cyfrinup)"`,
 
   // AI coding agents (npm packages; installed globally with npm so the bin lands
-  // next to node on the nvm PATH — reachable from an interactive zsh at runtime).
+  // in $NVM_DIR/current/bin next to node — on the image's ENV PATH, so they are
+  // reachable from a non-interactive `dcw exec` too, not just a login shell).
   claude: `
 # Install Anthropic Claude Code CLI
 RUN npm install -g @anthropic-ai/claude-code
