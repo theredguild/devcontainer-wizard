@@ -52,7 +52,7 @@ When driving dcw programmatically (not as an interactive human):
 | `dcw agent <type> [name]` | Spawn an AI coding agent (claude/codex/opencode) in the container | `-e`/`--env`, `--install` |
 | `dcw ls` | List environments + live container status | — |
 | `dcw stop [name]` | Stop the running container | — |
-| `dcw rm [name]` | Remove the container (optionally the env) | `--purge` |
+| `dcw rm [name]` | Remove the container (optionally the env) | `--purge` (requires `--yes`) |
 | `dcw logs [name]` | Show container logs | `-f`/`--follow`, `--tail <n>` |
 | `dcw engines` | Engine availability + hardening trade-offs | — |
 | `dcw schema` | JSON schema + full option vocabulary (always JSON) | — |
@@ -101,6 +101,8 @@ dcw attach my-env --port 2222   # publish a fixed TCP port instead of the defaul
 - Two connection modes: the default **exec proxy** (no published port) or **port** mode
   (`--port <n>`, `--port 0` to auto-allocate) with a listening sshd in the container.
 - `--folder <dir>` sets the remote folder to open (default `/workspace`).
+- `--workspace <dir>` sets the **host** directory mounted at `/workspace`, used only
+  when `attach` has to start a stopped container (defaults to the current directory).
 
 ### `dcw exec`
 
@@ -131,7 +133,7 @@ dcw agent claude --install            # npm-install the agent on-demand if missi
   `dcw agent` warns, and fails under `--strict`.
 - Equivalent low-level form (no key auto-forwarding): `dcw exec <name> -- claude`.
 
-## Global flags (every command)
+## Global flags
 
 - `--yes`, `-y` — assume yes / accept defaults; do not prompt
 - `--no-input` — never prompt; non-zero exit if input is required
@@ -139,6 +141,14 @@ dcw agent claude --install            # npm-install the agent on-demand if missi
   `apple-container`, `lima`. Also settable via `DCW_ENGINE` env var.
 - `--strict` — fail if a requested hardening option can't be honored by the engine
 - `--json` — machine-readable output
+
+Two exceptions worth knowing before you script against these:
+
+- `dcw skill` takes **none** of them. It is a static print and accepts `--json` only
+  as an ignored no-op.
+- `exec`, `shell`, `logs` and `agent` accept the flags above, but `--json` produces
+  **no JSON payload** on them — they stream the container's output through and
+  propagate its exit code. Do not parse their stdout as JSON.
 
 ## Security profiles
 
@@ -180,7 +190,7 @@ dcw shell my-env           # zsh into it (lands in /workspace as the vscode user
 dcw attach my-env          # attach an SSH-remote editor (VS Code, Cursor, Zed, …)
 dcw ls                     # list environments + live status
 dcw stop my-env
-dcw rm my-env --purge --yes
+dcw rm my-env --purge --yes   # --purge without --yes is refused (E_CONFIRM, exit 2)
 ```
 
 One-shot, non-interactive (agent-friendly):
