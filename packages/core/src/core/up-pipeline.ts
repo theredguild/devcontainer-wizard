@@ -92,6 +92,7 @@ export async function upEnvironment(opts: UpOptions): Promise<UpOutcome> {
       startedAt: now,
       appliedFlags: flags,
       droppedHardening: translation.dropped.map((e) => e.kind),
+      unenforcedHardening: translation.unenforced.map((e) => e.kind),
       ssh: opts.sshPublishPort !== undefined ? { mode: 'port', port: opts.sshPublishPort } : undefined,
     },
     updatedAt: now,

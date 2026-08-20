@@ -4,7 +4,13 @@ import { nowIso, requireManifest, resolveEngineFor, resolveEnvName } from '../cl
 import { buildEnvironment } from '../core/build-pipeline.js'
 import { planEnvironment } from '../core/plan.js'
 import { containerName, upEnvironment } from '../core/up-pipeline.js'
-import type { HardeningWarning } from '../hardening/translator.js'
+import {
+  enforceStrict,
+  hardeningReport,
+  translate,
+  type HardeningReport,
+  type HardeningWarning,
+} from '../hardening/translator.js'
 import { saveManifest } from '../state/store.js'
 
 interface UpJson {
@@ -16,6 +22,9 @@ interface UpJson {
   dropped: string[]
   failedTools: string[]
   toolsVerified: boolean
+  /** Same data as the three fields above plus `unenforced`, in the shared shape
+   *  used by `create --json` and `attach --json`. */
+  hardening: HardeningReport
 }
 
 export default class Up extends BaseCommand {
@@ -40,6 +49,12 @@ export default class Up extends BaseCommand {
       requested: flags.engine,
       manifestEngine: manifest.spec.engine,
     })
+
+    // Check --strict BEFORE building. upEnvironment enforces it too, but only after
+    // the image is built — so a strict run that cannot succeed would spend minutes
+    // building and then fail. The verdict depends only on plan + engine capabilities,
+    // both known now.
+    if (flags.strict) enforceStrict(translate(plan.effects, capabilities, engineName))
 
     const now = nowIso()
     const built = await buildEnvironment({ manifest, plan, driver, engineName, force: flags.rebuild, now })
@@ -85,6 +100,7 @@ export default class Up extends BaseCommand {
       dropped: outcome.translation.dropped.map((e) => e.kind),
       failedTools,
       toolsVerified: built.toolsVerified,
+      hardening: hardeningReport(outcome.translation, outcome.runSpec.flags),
     }
   }
 }

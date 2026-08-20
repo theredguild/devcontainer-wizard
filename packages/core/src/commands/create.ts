@@ -6,6 +6,7 @@ import { buildEnvironment } from '../core/build-pipeline.js'
 import { planEnvironment } from '../core/plan.js'
 import { containerName, upEnvironment } from '../core/up-pipeline.js'
 import { CancelledError, ValidationError } from '../errors.js'
+import { enforceStrict, hardeningReport, translate, type HardeningReport } from '../hardening/translator.js'
 import { flagsToSpec, type FlagInput } from '../spec/flags-to-spec.js'
 import type { EnvSpec } from '../spec/env-spec.js'
 import { SCHEMA_VERSION, type EnvManifest } from '../state/manifest.js'
@@ -19,6 +20,8 @@ interface CreateJson {
   container?: string
   failedTools: string[]
   toolsVerified: boolean
+  /** Present when the container was started (`--up`); mirrors `dcw up --json`. */
+  hardening?: HardeningReport
 }
 
 export default class Create extends BaseCommand {
@@ -114,12 +117,16 @@ export default class Create extends BaseCommand {
     let containerId: string | undefined
     let failedTools: string[] = []
     let toolsVerified = true
+    let hardening: HardeningReport | undefined
 
     if (flags.build || flags.up) {
       const { driver, engineName, capabilities } = await resolveEngineFor({
         requested: flags.engine,
         manifestEngine: spec.engine,
       })
+      // Same as `dcw up`: fail a doomed --strict run before paying for the build.
+      if (flags.up && flags.strict) enforceStrict(translate(plan.effects, capabilities, engineName))
+
       const built = await buildEnvironment({ manifest, plan, driver, engineName, now })
       manifest = built.manifest
       await saveManifest(manifest)
@@ -147,6 +154,10 @@ export default class Create extends BaseCommand {
         await saveManifest(manifest)
         started = true
         containerId = up.containerId
+        // Surface dropped/unenforced hardening in JSON too: warnings below only
+        // reach humans, and a silently-dropped air-gap must not be invisible to
+        // the agents this flag exists for.
+        hardening = hardeningReport(up.translation, up.runSpec.flags)
         if (!this.jsonEnabled()) {
           this.log(`Started ${containerName(spec.name)}.`)
           for (const w of up.translation.warnings) {
@@ -168,6 +179,7 @@ export default class Create extends BaseCommand {
       container: containerId,
       failedTools,
       toolsVerified,
+      hardening,
     }
   }
 }

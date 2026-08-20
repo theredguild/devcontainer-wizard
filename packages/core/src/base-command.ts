@@ -53,9 +53,20 @@ export abstract class BaseCommand extends Command {
       }
       this.error(err.message, { exit: err.exitCode, code: err.code })
     }
+    // oclif's own parse/usage errors (unknown flag, bad --engine value, …) must
+    // honor the --json contract too. Left to oclif, `--json` serializes the whole
+    // CLIError — ~120 kB of internal state including the resolved config, home
+    // directory, shell and plugin list — to stdout with no `code`/`message` and
+    // exit 1. Emit the documented envelope with the parse error's own exit code.
+    // ExitError (a deliberate this.exit()) is not an error and must pass through.
+    if (this.jsonEnabled() && err instanceof Errors.CLIError && !(err instanceof Errors.ExitError)) {
+      const exit = typeof err.oclif?.exit === 'number' ? err.oclif.exit : ExitCode.UsageError
+      this.logJson({ error: { code: exit === ExitCode.UsageError ? 'E_USAGE' : 'E_CLI', message: err.message } })
+      this.exit(exit)
+    }
+
     // Untyped failures (fs errors, bugs) must still honor the --json contract:
     // a single {error:{code,message}} envelope, never a raw Node error object.
-    // oclif's own CLIError/ExitError keep their normal handling.
     if (this.jsonEnabled() && !(err instanceof Errors.CLIError)) {
       const sys = (err as NodeJS.ErrnoException).code
       this.logJson({

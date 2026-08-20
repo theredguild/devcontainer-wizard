@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
-import { NotFoundError, ValidationError } from '../errors.js'
+import { NotFoundError, StrictHardeningError, ValidationError } from '../errors.js'
 import { isValidEnvName } from '../util/slug.js'
 import { detectHost, type HostInfo } from '../engine/host.js'
 import { resolveEngine } from '../engine/resolver.js'
@@ -75,13 +75,43 @@ export function nowIso(): string {
 }
 
 /** Exec a command (default zsh) into an environment's running container. Returns the exit code. */
+/**
+ * Under `--strict`, refuse to enter a container whose hardening the engine could
+ * not deliver.
+ *
+ * `--strict` promises to "fail if a requested hardening option cannot be honored".
+ * `up`/`create` enforce that when they START a container, but `exec`, `shell` and
+ * `attach` reach an ALREADY-running one, where the check was skipped entirely — so
+ * `dcw shell --strict` would drop the user into a container that silently lost its
+ * air-gap or capability drops. The container's manifest records what was actually
+ * dropped at start time, so this needs no engine round-trip.
+ *
+ * Both dropped AND unenforced controls block, matching `enforceStrict`: a flag that
+ * was emitted but does nothing (AppArmor on a Docker VM with no LSM) is exactly the
+ * silent failure `--strict` exists to surface.
+ */
+export function assertStrictContainer(manifest: EnvManifest, strict?: boolean): void {
+  if (!strict) return
+  const dropped = manifest.container?.droppedHardening ?? []
+  const unenforced = manifest.container?.unenforcedHardening ?? []
+  const blocking = [...dropped, ...unenforced]
+  if (blocking.length === 0) return
+  throw new StrictHardeningError(
+    `--strict: container '${manifest.name}' is running without hardening the engine could not honor: ` +
+      `${blocking.join(', ')}. Recreate it on an engine that supports these, or drop --strict.`,
+  )
+}
+
 export async function execInto(opts: {
   name: string
   cmd: string[]
   requested?: string
   env?: Record<string, string>
+  /** Fail rather than enter a container with dropped hardening. */
+  strict?: boolean
 }): Promise<number> {
   const manifest = await requireManifest(opts.name)
+  assertStrictContainer(manifest, opts.strict)
   if (!manifest.container?.name) {
     throw new NotFoundError(`Environment '${opts.name}' has no container. Start it with \`dcw up ${opts.name}\`.`)
   }

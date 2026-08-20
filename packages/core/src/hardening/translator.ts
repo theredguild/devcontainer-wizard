@@ -95,6 +95,35 @@ export function translate(
   return { flags, warnings, dropped, unenforced }
 }
 
+/**
+ * Machine-readable summary of what hardening actually reached the engine.
+ *
+ * Human-facing output prints `warnings` via `this.warn`, but `--json` consumers
+ * (AI agents, CI) see only the return envelope — so every command that starts or
+ * attaches to a container must surface this, or a dropped control (e.g. an
+ * air-gap the engine cannot enforce) becomes invisible exactly where it matters
+ * most. Keep the shape identical across commands.
+ */
+export interface HardeningReport {
+  /** Run flags actually passed to the engine. */
+  appliedFlags: string[]
+  warnings: HardeningWarning[]
+  /** Effect kinds the engine cannot honor at all — these were NOT applied. */
+  dropped: string[]
+  /** Effect kinds emitted but possibly inert (engine reports them as unenforced). */
+  unenforced: string[]
+}
+
+/** Build the machine-readable hardening summary for a `--json` response. */
+export function hardeningReport(result: TranslateResult, appliedFlags: string[]): HardeningReport {
+  return {
+    appliedFlags,
+    warnings: result.warnings,
+    dropped: result.dropped.map((e) => e.kind),
+    unenforced: result.unenforced.map((e) => e.kind),
+  }
+}
+
 /** Throw under --strict if any hardening was dropped or may be silently inert. */
 export function enforceStrict(result: TranslateResult): void {
   const blocking = [...result.dropped, ...result.unenforced]

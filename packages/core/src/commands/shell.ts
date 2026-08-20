@@ -20,7 +20,7 @@ export default class Shell extends BaseCommand {
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Shell)
     const name = await resolveEnvName(args.name)
-    const code = await execInto({ name, cmd: ['zsh'], requested: flags.engine })
+    const code = await execInto({ name, cmd: ['zsh'], requested: flags.engine, strict: flags.strict })
     this.exit(code)
   }
 }

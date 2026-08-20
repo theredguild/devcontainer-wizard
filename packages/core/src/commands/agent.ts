@@ -1,8 +1,39 @@
 import { Args, Flags } from '@oclif/core'
 import { BaseCommand, ignoredJsonFlag } from '../base-command.js'
-import { execInto, requireManifest, resolveEngineFor, resolveEnvName } from '../cli/context.js'
+import { assertStrictContainer, execInto, requireManifest, resolveEngineFor, resolveEnvName } from '../cli/context.js'
 import { DcwError, NotFoundError, StrictHardeningError, ValidationError } from '../errors.js'
+import type { EnvManifest } from '../state/manifest.js'
 import { listManifests } from '../state/store.js'
+
+/** How an environment's requested air-gap actually turned out at run time. */
+export type AirgapState = 'none' | 'enforced' | 'dropped' | 'unknown'
+
+/**
+ * Decide whether the container this agent is about to run in is really air-gapped.
+ *
+ * `spec.hardening` records what was *requested*; the container record says what the
+ * engine actually delivered. Reasoning from the request alone inverts the truth on
+ * engines that cannot enforce `--network=none` (e.g. Apple Containers): dcw would
+ * tell the user the agent has no network — and then forward their provider API key
+ * into a container that is, in fact, online.
+ *
+ * Absence of evidence is NOT evidence of enforcement: a container with no recorded
+ * flags returns 'unknown', which callers must treat as unsafe. Only a positive
+ * `--network=none` in the flags the container was actually launched with counts.
+ */
+export function assessAirgap(manifest: EnvManifest): AirgapState {
+  if (!manifest.spec.hardening.includes('network-none')) return 'none'
+
+  const container = manifest.container
+  if (!container) return 'unknown' // never started — nothing was applied to anything
+  if ((container.droppedHardening ?? []).includes('network-none')) return 'dropped'
+
+  const flags = container.appliedFlags
+  if (!flags || flags.length === 0) return 'unknown' // no record of what was applied
+  return flags.some((f) => f === '--network=none' || f.startsWith('--network=none'))
+    ? 'enforced'
+    : 'dropped'
+}
 
 /** AI coding agents that can be baked in (see catalog `aiAgents`) and spawned. */
 const AGENTS = {
@@ -103,9 +134,28 @@ export default class Agent extends BaseCommand {
     const manifest = await requireManifest(name)
 
     // Agents need to reach their provider API. Warn (or fail under --strict) when
-    // the environment is air-gapped.
-    if (manifest.spec.hardening.includes('network-none')) {
+    // the environment is air-gapped — and distinguish an air-gap that actually
+    // holds from one the engine silently dropped, because we are about to forward
+    // provider credentials into this container.
+    // Refuse a weakened container up front: everything below (installing the agent
+    // CLI, forwarding credentials) mutates or exposes it, so --strict must be
+    // decided before any of that happens.
+    assertStrictContainer(manifest, flags.strict)
+
+    const airgap = assessAirgap(manifest)
+    if (airgap === 'enforced') {
       const msg = `Environment '${name}' is hardened with network-none; ${agent.bin} cannot reach its API.`
+      if (flags.strict) throw new StrictHardeningError(msg)
+      this.warn(msg)
+    } else if (airgap === 'dropped' || airgap === 'unknown') {
+      const detail =
+        airgap === 'dropped'
+          ? 'but the engine could not enforce it — this container HAS network access'
+          : 'but dcw has no record that it was applied — assume this container HAS network access'
+      const msg =
+        `Environment '${name}' requested network-none, ${detail}. Credentials forwarded to ` +
+        `${agent.bin} are reachable by anything running inside it. Re-create on an engine that ` +
+        'supports network-none, or re-run with --strict to refuse.'
       if (flags.strict) throw new StrictHardeningError(msg)
       this.warn(msg)
     }
@@ -164,7 +214,7 @@ export default class Agent extends BaseCommand {
     // `zsh -ic 'exec bin "$@"' bin <args>`: load the login PATH, then hand the
     // TTY to the agent. Args are passed as positionals so they aren't re-split.
     const cmd = ['zsh', '-ic', `exec ${agent.bin} "$@"`, agent.bin, ...trailing]
-    const code = await execInto({ name, cmd, requested: flags.engine, env })
+    const code = await execInto({ name, cmd, requested: flags.engine, env, strict: flags.strict })
     this.exit(code)
   }
 }

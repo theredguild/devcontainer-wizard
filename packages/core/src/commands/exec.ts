@@ -35,7 +35,7 @@ export default class Exec extends BaseCommand {
     const namesEnv = first !== undefined && !first.startsWith('-') && (await listManifests()).some((m) => m.name === first)
     const name = await resolveEnvName(namesEnv ? first : undefined)
     const cmd = namesEnv ? tokens.slice(1) : tokens
-    const code = await execInto({ name, cmd, requested: flags.engine })
+    const code = await execInto({ name, cmd, requested: flags.engine, strict: flags.strict })
     this.exit(code)
   }
 }

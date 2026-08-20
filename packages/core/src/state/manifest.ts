@@ -31,8 +31,12 @@ export const ContainerStateSchema = z.object({
   startedAt: z.string().optional(),
   /** Exact run flags used (reproducibility/debug). */
   appliedFlags: z.array(z.string()).optional(),
-  /** Hardening that degraded on the chosen engine. */
+  /** Hardening that degraded on the chosen engine (requested but NOT applied). */
   droppedHardening: z.array(z.string()).optional(),
+  /** Hardening that was emitted but the engine may not actually enforce (e.g.
+   *  AppArmor on a Docker VM with no LSM). Distinct from dropped: the flag IS on
+   *  the command line, it just may do nothing — `--strict` must reject both. */
+  unenforcedHardening: z.array(z.string()).optional(),
   /** Editor-attach wiring, set by `dcw attach`. */
   ssh: SshStateSchema.optional(),
 })
