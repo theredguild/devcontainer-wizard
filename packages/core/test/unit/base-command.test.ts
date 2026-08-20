@@ -107,9 +107,15 @@ describe('BaseCommand.catch', () => {
     // ExitError is not an error: turning it into an envelope would corrupt the
     // exit code of every streaming command.
     const res = await catchWith(new Errors.ExitError(0), true)
-    // It is handed to oclif untouched rather than rewritten into a dcw envelope.
-    expect(res.jsonLogs).toEqual([{ error: expect.any(Errors.ExitError) }])
+
+    // What matters is that dcw does NOT claim it: no E_* envelope of ours, and no
+    // second exit on top of the one already in flight. How oclif's own fallback
+    // handler then serializes the ExitError is its business — 4.5 logged the raw
+    // error object, 4.14 logs a structured form — so assert our contract, not theirs.
     expect(res.exitCode).toBeUndefined()
+    expect(res.jsonLogs).toHaveLength(1)
+    const envelope = (res.jsonLogs[0] as { error: { code?: string } }).error
+    expect(envelope.code).not.toMatch(/^E_/)
   })
 
   it('wraps an untyped failure in the same envelope, never a raw Node error object', async () => {
