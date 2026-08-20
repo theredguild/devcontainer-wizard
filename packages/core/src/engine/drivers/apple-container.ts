@@ -1,5 +1,8 @@
+import { EngineDnsError } from '../../errors.js'
+import { appleBuildDnsMessage, probeAppleBuildDns } from '../dns-preflight.js'
 import { capture } from '../exec.js'
 import type {
+  BuildSpec,
   ContainerInfo,
   DetectResult,
   EngineCapabilities,
@@ -46,7 +49,15 @@ export class AppleContainerDriver extends CliDriver {
       note: 'The container CLI does not honor Docker --network=none; air-gap is not enforced.',
     },
     sysctl: { support: 'unsupported', note: 'sysctl tuning is not exposed.' },
-    dns: { support: 'caveated', note: 'DNS configuration support is limited.' },
+    // `--dns` IS honored by `container run` (verified: a run with --dns 1.1.1.1
+    // resolves where the default gateway resolver does not), so `secure-dns` is a
+    // real control here and must not be dropped. The caveat is the BUILD path:
+    // `container build --dns` parses and then does nothing, because build steps
+    // execute inside the shared `buildkit` container and inherit ITS resolvers.
+    dns: {
+      support: 'caveated',
+      note: '`--dns` is honored by `container run`, but NOT by `container build`: build steps execute inside the shared `buildkit` container and inherit its resolvers, which are fixed by `container builder start --dns <ip>`.',
+    },
     memoryLimit: { support: 'caveated', note: 'Memory limits use a different syntax and granularity.' },
     cpuLimit: { support: 'caveated', note: 'CPU limits use a different syntax and granularity.' },
     userNamespaces: { support: 'unsupported', note: 'User-namespace remapping is not applicable (VM-isolated).' },
@@ -57,6 +68,25 @@ export class AppleContainerDriver extends CliDriver {
       bin: 'container',
       verbs: { rm: 'delete', ps: 'list' },
     })
+  }
+
+  /**
+   * Build, and translate the one failure users cannot debug on their own.
+   *
+   * A builder with no DNS turns every `RUN apt-get update` into a wall of apt
+   * output ending in `Temporary failure resolving 'deb.debian.org'` — which looks
+   * like a broken Containerfile and is actually a host port-53 conflict. The probe
+   * runs only after the build has already failed, so healthy builds pay nothing,
+   * and it fails open: no confident diagnosis means the original error survives.
+   */
+  override async build(spec: BuildSpec): Promise<{ imageId: string }> {
+    try {
+      return await super.build(spec)
+    } catch (err) {
+      const diag = await probeAppleBuildDns(this.bin).catch(() => null)
+      if (diag?.blocked) throw new EngineDnsError(appleBuildDnsMessage(diag))
+      throw err
+    }
   }
 
   override async detect(): Promise<DetectResult> {

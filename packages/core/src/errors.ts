@@ -10,6 +10,7 @@ export enum ExitCode {
   StrictHardening = 7,
   NotFound = 8,
   ValidationError = 9,
+  EngineDns = 10,
 }
 
 /** Base error carrying a deterministic exit code and a stable machine `code`. */
@@ -43,6 +44,19 @@ export class EngineUnavailableError extends DcwError {
   constructor(message: string) {
     super(message, ExitCode.EngineUnavailable, 'E_ENGINE_UNAVAILABLE')
     this.name = 'EngineUnavailableError'
+  }
+}
+
+/**
+ * The engine is installed and running, but its DNS plumbing is broken, so
+ * network-dependent work inside it cannot resolve names. Distinct from
+ * EngineUnavailableError (engine not running at all): the remediation is a host
+ * network/daemon fix, not "install or start the engine".
+ */
+export class EngineDnsError extends DcwError {
+  constructor(message: string) {
+    super(message, ExitCode.EngineDns, 'E_ENGINE_DNS')
+    this.name = 'EngineDnsError'
   }
 }
 

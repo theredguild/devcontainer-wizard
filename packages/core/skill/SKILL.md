@@ -53,6 +53,7 @@ Exit codes are a stable contract — branch on them rather than parsing message 
 | 7 | `--strict`: hardening dropped or unenforced | `E_STRICT_HARDENING` |
 | 8 | Environment / container not found | `E_NOT_FOUND` |
 | 9 | Invalid input (bad name, profile, git URL, …) | `E_VALIDATION` |
+| 10 | Engine is running but its DNS is broken (e.g. the Apple Containers builder cannot resolve) | `E_ENGINE_DNS` |
 
 Under `--json`, **every** failure — including usage errors — prints a single envelope on
 stdout and nothing else, so stdout is always parseable:

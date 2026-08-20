@@ -40,7 +40,7 @@ migration — v1 configs are not read. Coming from a VS Code Dev Containers work
 | OrbStack | macOS | Docker-compatible; auto-preferred on macOS |
 | Podman | all | Rootless; uid-mapped tmpfs auto-uses `--userns=keep-id` |
 | Lima (nerdctl) | macOS/Linux | AppArmor/sysctl depend on the guest VM |
-| Apple Containers | macOS 15+ (arm64) | VM-isolated. Applies `--cap-drop`; **drops** read-only rootfs, tmpfs options, no-new-privileges, AppArmor and seccomp. Does **not** enforce network isolation (`--profile airgapped` stays networked unless you pass `--strict`) |
+| Apple Containers | macOS 15+ (arm64) | VM-isolated. Applies `--cap-drop`; **drops** read-only rootfs, tmpfs options, no-new-privileges, AppArmor and seccomp. Does **not** enforce network isolation (`--profile airgapped` stays networked unless you pass `--strict`). `--dns` works for `run` but not for `build` — build steps inherit the shared `buildkit` builder's resolvers (`container builder start --dns <ip>`); dcw reports a builder with no DNS as `E_ENGINE_DNS` (exit 10) instead of a raw apt error |
 
 `dcw engines` shows live availability + per-engine hardening trade-offs.
 
