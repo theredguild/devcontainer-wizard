@@ -28,6 +28,9 @@ export function planHasNetworkNone(plan: ResolvedPlan): boolean {
 /** Container port the in-image sshd listens on in published-port (`--port`) mode. */
 export const SSH_CONTAINER_PORT = 2222
 
+/** Host interface `dcw attach --port` publishes sshd on. Loopback only, never 0.0.0.0. */
+export const SSH_PUBLISH_HOST = '127.0.0.1'
+
 export interface UpOutcome {
   manifest: EnvManifest
   containerId: string
@@ -66,7 +69,11 @@ export async function upEnvironment(opts: UpOptions): Promise<UpOutcome> {
           'Attach over the default (no-port) exec proxy instead — run `dcw attach` without --port.',
       )
     }
-    flags.push('-p', `${opts.sshPublishPort}:${SSH_CONTAINER_PORT}`)
+    // Bind to loopback explicitly: a bare `-p <host>:<ctr>` makes Docker/Podman
+    // listen on 0.0.0.0, publishing an SSH server on an untrusted-code container
+    // to every interface (LAN/VPN). `dcw attach` is a local-editor workflow, and
+    // findFreePort() already probes 127.0.0.1, so loopback is the intended scope.
+    flags.push('-p', `${SSH_PUBLISH_HOST}:${opts.sshPublishPort}:${SSH_CONTAINER_PORT}`)
   }
 
   const runSpec: RunSpec = {

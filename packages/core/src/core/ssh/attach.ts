@@ -1,6 +1,6 @@
 import { createServer } from 'node:net'
-import { capture } from '../../engine/exec.js'
 import type { EngineDriver } from '../../engine/types.js'
+import { isOnPath } from '../../util/which.js'
 import { ENV_LABEL } from '../up-pipeline.js'
 
 /** Whether the env's container is currently running on the given engine. */
@@ -33,8 +33,7 @@ export function findFreePort(): Promise<number> {
  * works for local/dev installs that aren't on PATH.
  */
 export async function resolveDcwInvocation(name: string): Promise<string> {
-  const onPath = await capture('command', ['-v', 'dcw'])
-  if (onPath.code === 0 && onPath.stdout.trim()) {
+  if (await isOnPath('dcw')) {
     return `dcw ssh-proxy ${name}`
   }
   const entry = process.argv[1]

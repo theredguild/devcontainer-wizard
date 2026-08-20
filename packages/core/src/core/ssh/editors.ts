@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process'
-import { capture } from '../../engine/exec.js'
+import { isOnPath } from '../../util/which.js'
 
 export type EditorId = 'zed' | 'vscode' | 'cursor' | 'antigravity'
 
@@ -49,11 +49,7 @@ export const EDITOR_IDS = Object.keys(EDITORS) as EditorId[]
 
 async function resolveBin(bins: string[]): Promise<string | undefined> {
   for (const bin of bins) {
-    const res = await capture('command', ['-v', bin])
-    if (res.code === 0 && res.stdout.trim()) return bin
-    // `command -v` may not be a standalone binary on all PATHs; fall back to `which`.
-    const which = await capture('which', [bin])
-    if (which.code === 0 && which.stdout.trim()) return bin
+    if (await isOnPath(bin)) return bin
   }
   return undefined
 }

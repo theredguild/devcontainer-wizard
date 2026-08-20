@@ -1,6 +1,6 @@
 import { Args, Flags } from '@oclif/core'
 import { BaseCommand } from '../base-command.js'
-import { nowIso, requireManifest, resolveEngineFor, resolveEnvName } from '../cli/context.js'
+import { assertStrictContainer, nowIso, requireManifest, resolveEngineFor, resolveEnvName } from '../cli/context.js'
 import { buildEnvironment } from '../core/build-pipeline.js'
 import { planEnvironment } from '../core/plan.js'
 import { findFreePort, isContainerRunning, resolveDcwInvocation } from '../core/ssh/attach.js'
@@ -8,8 +8,9 @@ import { detectEditor, EDITOR_IDS, editorDisplayName, launchEditor, type EditorI
 import { ensureKeypair, knownHostsPath } from '../core/ssh/keys.js'
 import { provisionContainerSsh, startSshDaemon } from '../core/ssh/provision.js'
 import { hostAlias, writeSshConfig } from '../core/ssh/ssh-config.js'
-import { containerName, upEnvironment } from '../core/up-pipeline.js'
+import { containerName, planHasNetworkNone, upEnvironment } from '../core/up-pipeline.js'
 import { DcwError, ValidationError } from '../errors.js'
+import { enforceStrict, hardeningReport, translate, type HardeningReport } from '../hardening/translator.js'
 import type { EnvManifest, SshState } from '../state/manifest.js'
 import { saveManifest } from '../state/store.js'
 
@@ -26,6 +27,9 @@ interface AttachJson {
   ssh: string
   editor?: EditorId
   launched: boolean
+  /** How the container is actually hardened — see `HardeningReport`. Reported whether
+   *  this invocation started the container or reused a running one. */
+  hardening: HardeningReport
 }
 
 export default class Attach extends BaseCommand {
@@ -57,6 +61,16 @@ export default class Attach extends BaseCommand {
 
   async run(): Promise<AttachJson> {
     const { args, flags } = await this.parse(Attach)
+
+    // Pure flag validation first — it needs no environment. Zed's remote form is a
+    // URL (`ssh://<alias><folder>`), so a relative folder silently yields a
+    // malformed target (`ssh://dcw-demowork`). Fail fast instead.
+    if (!flags.folder.startsWith('/')) {
+      throw new ValidationError(
+        `--folder must be an absolute path inside the container (got '${flags.folder}'). Try --folder /workspace.`,
+      )
+    }
+
     const name = await resolveEnvName(args.name)
     let manifest = await requireManifest(name)
 
@@ -70,6 +84,17 @@ export default class Attach extends BaseCommand {
     const usePort = flags.port !== undefined
     const mode: SshState['mode'] = usePort ? 'port' : 'exec'
 
+    // Reject an impossible port attach BEFORE touching the container. upEnvironment
+    // raises the same error, but startContainer force-removes the running container
+    // first — so `dcw attach --port` on an air-gapped env used to destroy a live
+    // container (losing an ephemeral tmpfs /workspace) and only then refuse.
+    if (usePort && planHasNetworkNone(planEnvironment(manifest.spec))) {
+      throw new ValidationError(
+        `Cannot publish an SSH port: '${name}' is hardened with network-none. ` +
+          'Attach over the default (no-port) exec proxy instead — run `dcw attach` without --port.',
+      )
+    }
+
     const { driver, engineName, capabilities } = await resolveEngineFor({
       requested: flags.engine,
       manifestEngine: manifest.engine ?? manifest.spec.engine,
@@ -78,17 +103,53 @@ export default class Attach extends BaseCommand {
     // Ensure a running container wired the way this mode needs it.
     let port: number | undefined
     const running = await isContainerRunning(driver, name)
+
+    // `--strict` must fail closed on the reuse path too, not only when attach starts
+    // the container — otherwise `dcw attach --strict` hands an editor a container
+    // whose hardening the engine silently dropped. Evaluate it BEFORE provisioning
+    // keys, writing ~/.ssh/config or launching an editor, so a refusal leaves no
+    // trace. Judge a container we are REUSING by what was recorded when it actually
+    // started, not by re-running translate() against today's capability map: a
+    // container started before a capability-map change would otherwise be certified
+    // by rules it was never launched under.
+    let reusedHardening: HardeningReport | undefined
+    let startedHardening: HardeningReport | undefined
+    if (running && manifest.container) {
+      assertStrictContainer(manifest, flags.strict)
+      reusedHardening = {
+        appliedFlags: manifest.container.appliedFlags ?? [],
+        warnings: [],
+        dropped: manifest.container.droppedHardening ?? [],
+        unenforced: manifest.container.unenforcedHardening ?? [],
+      }
+    }
+
+    const existingSsh = manifest.container?.ssh
+    const reusable =
+      usePort && running && existingSsh?.mode === 'port' && (flags.port === 0 || existingSsh.port === flags.port)
+    const willStart = usePort ? !reusable : !running
+
+    // When this invocation will (re)start the container, the FRESH translation is
+    // what governs it — enforce --strict now, because startContainer force-removes
+    // the existing container before upEnvironment would reach the same verdict.
+    if (willStart && flags.strict) {
+      enforceStrict(translate(planEnvironment(manifest.spec).effects, capabilities, engineName))
+    }
+
     if (usePort) {
-      const existing = manifest.container?.ssh
-      const reusable = running && existing?.mode === 'port' && (flags.port === 0 || existing.port === flags.port)
+      const existing = existingSsh
       if (reusable) {
         port = existing!.port
       } else {
         port = flags.port && flags.port > 0 ? flags.port : await findFreePort()
-        manifest = await this.startContainer({ manifest, driver, engineName, capabilities, flags, sshPublishPort: port })
+        const out = await this.startContainer({ manifest, driver, engineName, capabilities, flags, sshPublishPort: port })
+        manifest = out.manifest
+        startedHardening = out.hardening
       }
     } else if (!running) {
-      manifest = await this.startContainer({ manifest, driver, engineName, capabilities, flags })
+      const out = await this.startContainer({ manifest, driver, engineName, capabilities, flags })
+      manifest = out.manifest
+      startedHardening = out.hardening
     }
 
     const container = manifest.container?.id ?? manifest.container?.name ?? containerName(name)
@@ -132,6 +193,16 @@ export default class Attach extends BaseCommand {
       }
     }
 
+    // Prefer the translation actually applied when we started the container; else
+    // the state recorded for the container we reused.
+    const hardening: HardeningReport = startedHardening ??
+      reusedHardening ?? {
+        appliedFlags: manifest.container?.appliedFlags ?? [],
+        warnings: [],
+        dropped: manifest.container?.droppedHardening ?? [],
+        unenforced: manifest.container?.unenforcedHardening ?? [],
+      }
+
     const sshCmd = `ssh ${alias}`
     if (!this.jsonEnabled()) {
       this.log(`Ready: ${alias} (${mode === 'port' ? `localhost:${port}` : 'exec proxy'}) on ${driver.displayName}.`)
@@ -154,6 +225,7 @@ export default class Attach extends BaseCommand {
       ssh: sshCmd,
       editor,
       launched,
+      hardening,
     }
   }
 
@@ -165,7 +237,7 @@ export default class Attach extends BaseCommand {
     capabilities: Awaited<ReturnType<typeof resolveEngineFor>>['capabilities']
     flags: { strict?: boolean; workspace?: string }
     sshPublishPort?: number
-  }): Promise<EnvManifest> {
+  }): Promise<{ manifest: EnvManifest; hardening: HardeningReport }> {
     const { driver, engineName, capabilities, flags } = opts
     const name = opts.manifest.name
     const plan = planEnvironment(opts.manifest.spec)
@@ -194,6 +266,6 @@ export default class Attach extends BaseCommand {
         this.warn(`${w.level === 'dropped' ? 'dropped' : 'note'} [${w.effect}]: ${w.message}`)
       }
     }
-    return up.manifest
+    return { manifest: up.manifest, hardening: hardeningReport(up.translation, up.runSpec.flags) }
   }
 }
