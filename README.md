@@ -141,7 +141,6 @@ This repo is a pnpm workspace:
 
 - `packages/core` → `@theredguild/devcontainer-wizard` — the CLI
 - `packages/wrapper` → `devcontainer-wizard` — thin alias that delegates to core
-- `packages/desktop` → a Native SDK desktop shell (not published to npm)
 
 Getting started:
 
