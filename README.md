@@ -40,7 +40,7 @@ migration — v1 configs are not read. Coming from a VS Code Dev Containers work
 | OrbStack | macOS | Docker-compatible; auto-preferred on macOS |
 | Podman | all | Rootless; uid-mapped tmpfs auto-uses `--userns=keep-id` |
 | Lima (nerdctl) | macOS/Linux | AppArmor/sysctl depend on the guest VM |
-| Apple Containers | macOS 15+ (arm64) | VM-isolated; drops Linux cap/AppArmor/seccomp hardening; does **not** enforce network isolation (`--profile airgapped` stays networked unless you pass `--strict`) |
+| Apple Containers | macOS 15+ (arm64) | VM-isolated. Applies `--cap-drop`; **drops** read-only rootfs, tmpfs options, no-new-privileges, AppArmor and seccomp. Does **not** enforce network isolation (`--profile airgapped` stays networked unless you pass `--strict`) |
 
 `dcw engines` shows live availability + per-engine hardening trade-offs.
 
@@ -102,10 +102,19 @@ dcw create --no-input --name audit \
 
 `dcw create` is **hardened by default**: with neither `--profile` nor `--harden`, it applies the `development` profile. Pass `--profile none` when you explicitly want no hardening.
 
-Pick a named profile (`--profile hardened`) or individual options (`--harden drop-caps --harden readonly-os`). Options map to engine-neutral effects, then to engine-correct flags. If the chosen engine can't honor an option it is **dropped with a warning** (or, under `--strict`, the command fails). `dcw up --json` reports `appliedFlags`, `warnings`, and `dropped`.
+Pick a named profile (`--profile hardened`) or individual options (`--harden drop-caps --harden readonly-os`). Options map to engine-neutral effects, then to engine-correct flags.
+
+Engines degrade in two distinct ways, and both matter:
+
+- **dropped** — the engine can't express the option at all, so it is never applied.
+- **unenforced** — the flag is passed and accepted, but the engine can't actually enforce it.
+
+Either is a warning by default and a hard failure (exit 7) under `--strict`. `dcw up --json` reports `appliedFlags`, `warnings`, `dropped` and `unenforced`; `dcw create --up --json` and `dcw attach --json` return the same data as a `hardening` object. A result showing `"dropped": []` may still have unenforced controls — check both.
+
+`--strict` also covers commands that enter an *already-running* container (`exec`, `shell`, `agent`, `attach`): they refuse rather than drop you into an environment weaker than you asked for.
 
 > [!IMPORTANT]
-> **AppArmor is not enforced on macOS.** Docker Desktop and OrbStack run containers inside a Linux VM whose daemon reports no AppArmor support — dcw probes this directly rather than assuming it. On macOS the `apparmor` key is dropped with a warning, and `--strict` fails closed for every built-in profile that requests it.
+> **AppArmor is not enforced on macOS.** Docker Desktop and OrbStack run containers inside a Linux VM whose daemon reports no AppArmor support — dcw probes this directly (`docker info` → `SecurityOptions`) rather than assuming it. The flag is still passed, so `apparmor` is reported as **`unenforced`**, not `dropped`. All four built-in profiles request it, so `--strict` fails closed on macOS for every one of them.
 
 ## State
 

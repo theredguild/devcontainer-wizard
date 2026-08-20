@@ -24,8 +24,16 @@ dependency on it, install the scoped package directly:
 npm i -g @theredguild/devcontainer-wizard
 ```
 
-Both packages provide the same two binaries — `dcw` and `devcontainer-wizard` —
-so installing both globally leaves them competing for the same symlinks. Install
-one.
+Both packages provide the same two binaries — `dcw` and `devcontainer-wizard` — so
+installing both globally does not merely conflict, it **fails**: npm aborts with
+`EEXIST` and installs nothing. Install one.
+
+Already have v1 under this name? `npm i -g devcontainer-wizard@latest` upgrades cleanly
+in place. To switch to the scoped package instead, uninstall this one first:
+
+```sh
+npm uninstall -g devcontainer-wizard
+npm i -g @theredguild/devcontainer-wizard
+```
 
 Documentation lives in the [repository README](https://github.com/theredguild/devcontainer-wizard).

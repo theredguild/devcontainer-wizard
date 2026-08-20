@@ -37,6 +37,32 @@ When driving dcw programmatically (not as an interactive human):
 - The interactive ink wizard only mounts on a real TTY when none of `--json`,
   `--no-input`, or `--yes` are set — so the JSON path never touches the TUI.
 
+## Exit codes and the `--json` error envelope
+
+Exit codes are a stable contract — branch on them rather than parsing message text:
+
+| Code | Meaning | Machine `code` |
+| --- | --- | --- |
+| 0 | Success | — |
+| 1 | Generic failure | `E_GENERIC` / `E_INTERNAL` |
+| 2 | Usage error: unknown command/flag, bad flag value, missing confirmation | `E_USAGE` / `E_CONFIRM` |
+| 3 | No container engine available at all | `E_NO_ENGINE` |
+| 4 | Requested engine unsupported on this host | `E_ENGINE_UNSUPPORTED` |
+| 5 | Requested engine supported but not running/installed | `E_ENGINE_UNAVAILABLE` |
+| 6 | Cancelled by the user | `E_CANCELLED` |
+| 7 | `--strict`: hardening dropped or unenforced | `E_STRICT_HARDENING` |
+| 8 | Environment / container not found | `E_NOT_FOUND` |
+| 9 | Invalid input (bad name, profile, git URL, …) | `E_VALIDATION` |
+
+Under `--json`, **every** failure — including usage errors — prints a single envelope on
+stdout and nothing else, so stdout is always parseable:
+
+```json
+{ "error": { "code": "E_NOT_FOUND", "message": "Environment 'nope' not found." } }
+```
+
+Human-readable warnings go to **stderr**, never stdout. Parse stdout, log stderr.
+
 ## Command reference
 
 `[name]` is optional on lifecycle commands and defaults to the sole / `.dcw` environment.
@@ -74,7 +100,13 @@ All selection flags are **repeatable** (pass the flag multiple times):
   when neither `--profile` nor `--harden` is given; pass `--profile none` to opt out of
   hardening entirely.
 - `--harden <key>` — manual hardening key, repeatable, **merged with** `--profile`
-- `--git-url <url>` — clone this git repo into the image
+- `--git-url <url>` — clone this git repo into the image. Accepts `https://`, `git://`,
+  `ssh://` and scp-style `git@host:org/repo.git`. A bare SSH login (`ssh://git@host/o/r`)
+  is fine, but **embedded credentials are rejected** (`https://user:token@host`,
+  `ssh://user:pass@host`, and any `https://user@host`), as is percent-encoding and
+  anything with whitespace or shell metacharacters — the URL is persisted to the manifest
+  and the image's git remote, so a token there would leak. Use SSH keys or a credential
+  helper for private repos. Rejection is `E_VALIDATION` (exit 9).
 - `--git-branch <ref>` — branch/tag to clone (requires `--git-url`)
 - `--[no-]ssh` — bake an SSH server into the image for editor attach (`dcw attach`); **on by default**, use `--no-ssh` to omit
 - `--build` — build the image after creating
@@ -102,9 +134,30 @@ dcw attach my-env --port 2222   # publish a fixed TCP port instead of the defaul
   editor, or plain `ssh dcw-<name>`, connects the same way.
 - Two connection modes: the default **exec proxy** (no published port) or **port** mode
   (`--port <n>`, `--port 0` to auto-allocate) with a listening sshd in the container.
+  Published ports bind **`127.0.0.1` only** — the container's sshd is never exposed to
+  the LAN. `--port` is refused outright on a `network-none` environment.
 - `--folder <dir>` sets the remote folder to open (default `/workspace`).
 - `--workspace <dir>` sets the **host** directory mounted at `/workspace`, used only
   when `attach` has to start a stopped container (defaults to the current directory).
+
+### `dcw ls` — status vocabulary
+
+Each environment is reconciled against **its own** engine (the one it was built on), so a
+mixed-engine setup reports each correctly. `status` is one of:
+
+| Status | Meaning |
+| --- | --- |
+| `running` | Container exists and is up |
+| `stopped` | Container exists but is not running |
+| `never-started` | Environment created, no container ever started |
+| `absent` | The environment had a container and the engine says it is gone |
+| `unknown` | The engine could not be reached, so its state is genuinely unknown |
+
+`unknown` is **not** `absent`: don't treat it as "safe to recreate".
+
+`dcw ls` is deliberately non-fatal — if an engine can't be reached it still exits 0 and
+reports `unknown` for that engine's environments, rather than failing with
+`E_ENGINE_UNAVAILABLE` the way commands that actually need the engine do.
 
 ### `dcw exec`
 
@@ -131,8 +184,18 @@ dcw agent claude --install            # npm-install the agent on-demand if missi
 - **API keys** are forwarded from the host automatically: `ANTHROPIC_API_KEY` for claude,
   `OPENAI_API_KEY` for codex, both for opencode. If none is set the agent falls back to its
   own login flow (a warning is printed).
-- **Network:** agents need to reach their provider. On a `network-none`-hardened env
-  `dcw agent` warns, and fails under `--strict`.
+- **Network:** agents need to reach their provider. `dcw agent` decides whether the
+  air-gap is real from the flags the container was **actually launched with**, not from
+  what was requested, and warns differently in each case (fails under `--strict` in all
+  three):
+  - *enforced* — the container really is offline; the agent cannot reach its API.
+  - *dropped* — `network-none` was requested but the engine could not apply it, so the
+    container **is online**. Credentials you forward are reachable by anything running
+    inside it.
+  - *unknown* — dcw has no record of what was applied; treated as online.
+
+  If you are forwarding provider keys into an environment the user believes is
+  air-gapped, confirm `hardening.dropped` does not contain `network-none` first.
 - Equivalent low-level form (no key auto-forwarding): `dcw exec <name> -- claude`.
 
 ## Global flags
@@ -180,17 +243,42 @@ Individual hardening keys can also be set directly, e.g.
 for the authoritative list.
 
 **AppArmor is not enforced on macOS.** Docker Desktop and OrbStack run containers in a
-Linux VM whose daemon reports no AppArmor support, and dcw now probes this directly
-(`docker info` → `SecurityOptions`) rather than assuming it. On macOS the `apparmor`
-key is therefore dropped with a warning, and `--strict` **fails closed** for every
-built-in profile that requests it. Do not tell a user an environment is AppArmor-
-protected on macOS.
+Linux VM whose daemon reports no AppArmor support, and dcw probes this directly
+(`docker info` → `SecurityOptions`) rather than assuming it.
+
+Note *where* this shows up in JSON: the flag is still passed to the engine, it simply
+does nothing — so `apparmor` appears in **`unenforced`**, not in `dropped`. A run that
+reports `"dropped": []` can still have unenforced controls. Check both arrays.
+`--strict` **fails closed** on either, so on macOS it fails for every built-in profile
+(all four request `apparmor`). Never tell a user an environment is AppArmor-protected
+on macOS.
 
 ### Hardening behavior
 
-If the chosen engine can't honor an option it is **dropped with a warning** — or, under
-`--strict`, the command fails. `dcw up --json` reports `appliedFlags`, `warnings`, and
-`dropped` so you can confirm what was actually applied.
+An option the engine can't honor is **dropped with a warning**; one it accepts but can't
+actually enforce is reported as **unenforced**. Under `--strict` either is a hard failure
+(exit 7).
+
+Never assume a requested control was applied — verify it from the JSON:
+
+- `dcw up --json` → `appliedFlags`, `warnings`, `dropped`, `unenforced`, plus the same
+  data grouped under `hardening`.
+- `dcw create --up --json` → a `hardening` object (absent when `--up` was not passed).
+- `dcw attach --json` → a `hardening` object describing the container you attached to.
+
+```jsonc
+"hardening": {
+  "appliedFlags": ["--cap-drop=ALL", "--security-opt", "apparmor=docker-default"],
+  "warnings":     [{ "level": "caveat", "effect": "apparmor", "message": "…" }],
+  "dropped":      [],           // requested, NOT applied
+  "unenforced":   ["apparmor"]  // applied, but the engine may not enforce it
+}
+```
+
+`--strict` also applies to commands that enter an **already-running** container
+(`exec`, `shell`, `agent`, `attach`): if that container was started with dropped or
+unenforced hardening, they refuse with exit 7 rather than handing you a weaker
+environment than you asked for.
 
 ## Canonical workflows
 
